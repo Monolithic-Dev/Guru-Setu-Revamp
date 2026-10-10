@@ -5,7 +5,7 @@ from typing import Any, Protocol
 from app.core.clock import utc_now_iso
 from app.repos import status_history_repo
 
-ENTITY_TYPES = {"evidence", "application", "mentorship", "action_item", "issue", "session"}
+ENTITY_TYPES = {"evidence", "application", "mentorship", "action_item", "issue", "session", "opening"}
 MAX_NOTE = 300
 
 
