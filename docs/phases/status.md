@@ -94,14 +94,14 @@ Edit this file only in its own small commit on your own feature branch (CONTRIBU
 | Item | Backend | Frontend | Status | Note |
 |---|---|---|---|---|
 | A1 Click-to-source | P2 | P4 | ◐ | backend API-034 done (tests green); frontend P4 |
-| A2 Why graph | P1 | P3 | ☐ | |
-| A3 Reminders | P2 | P3 | ◐ | backend API-039 done; frontend P3 |
-| A4 Issue lifecycle + confidential | P2 | P3 | ◐ | backend done (TEST-31 extended); frontend P3 |
+| A2 Why graph | P1 | P3 | ◐ | frontend P3 done + whyGraph flag on (verified on mocked API-020); waiting on P1 API-020 and the SCR-03 host |
+| A3 Reminders | P2 | P3 | ☑ | backend API-039 done; frontend P3 done: RemindersPanel + SCR-06 'N reminders' link, reminders flag on |
+| A4 Issue lifecycle + confidential | P2 | P3 | ☑ | backend done (TEST-31 extended); frontend P3 done: SCR-07 acknowledge/in progress/escalate/confidential + SCR-08 checkbox |
 | A5 Skill gap | P1 | P1 | ☐ | |
 | A6 Eval table | P1 | P4 (slide) | ☐ | |
 | A7 Mentee request / raise issue | P2 | P4 | ◐ | backend done (API-031 student path, API-045); frontend P4 |
 | A8 Tamper signals | P1 | — | ☐ | |
-| A9 Create opening | P2 | P3 | ◐ | backend API-014 done (embedding via P1 hook); frontend P3 |
+| A9 Create opening | P2 | P3 | ☑ | backend API-014 done (embedding via P1 hook); frontend P3 done: /faculty/openings/new, verified live against API-014; createOpening flag on |
 
 ## 6. Phase 5: Add-on B (stretch; start before 11:30 only)
 | Item | Owner | Status | Note |
