@@ -200,6 +200,8 @@ If any step fails, the transaction rolls back and nothing is saved (FM-06).
 
 ## 9. Project structure
 
+The tree below is the summary. The deep tree, with an owner and a creating task for every file, is in [project-structure.md §2](../project-structure.md).
+
 ```
 /                         repo root
   AGENTS.md               agent entry file
@@ -210,6 +212,8 @@ If any step fails, the transaction rolls back and nothing is saved (FM-06).
   backend/
     Dockerfile            CMD uvicorn app.main:app (fixes audit H6)
     requirements.txt      pinned
+    .dockerignore         keeps tests, caches and .env out of the image
+    pyproject.toml        ruff and pytest settings (no packaging)
     app/
       main.py             app factory, CORS, routers, error handlers, startup (schema, stale-job sweep)
       core/               config.py, database.py (CMP-12), security.py (hash, JWT), errors.py

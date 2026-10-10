@@ -43,11 +43,11 @@ File ownership follows [parallel-work.md](parallel-work.md). Every task below to
   2. Create the frontend with the official generator: `npx create-next-app@14 frontend --typescript --tailwind --eslint --app --src-dir --import-alias "@/*"` [VERIFY: current flags], then clear the sample page.
   3. Confirm the root `.gitignore` covers `.env`, `uploads/`, `node_modules/`, `.next/`, `__pycache__/` and exports.
   4. Commit `chore: scaffold backend and frontend` and push.
-- **Done when:** the commit is on `main`. **Everyone else pulls before creating a branch.** This is the only sequential step of the build.
+- **Done when:** the commit is on `main`. This is the **one allowed direct push to `main`** (checkpoint C0, CONTRIBUTING §4). **Everyone else creates their feature branch from it** (`feature/p1-ml-fit`, `feature/p3-frontend-mentor`, `feature/p4-seed-coordinator`; P2 uses `feature/p2-backend-core`). This is the only sequential step of the build.
 
 ### T0.P2.1 Compose, config, app entry, schema, generated models (45 min)
 - **Spec:** ADR-13, architecture §9, environments §2, backend §8, parallel-work §3
-- **Files (P2):** `docker-compose.yml`, `docs/10-devops/env.example` (only if a variable is missing), `backend/app/main.py`, `backend/app/core/config.py`, `backend/schema/schema.cypher`, `backend/app/api/v1/health.py`, `backend/app/services/jobs.py`, `backend/app/schemas/generated.py` (GEN, first run)
+- **Files (P2):** `docker-compose.yml`, `docs/10-devops/env.example` (only if a variable is missing), `backend/app/main.py`, `backend/app/core/config.py`, `backend/schema/schema.cypher`, `backend/pyproject.toml` (ruff and pytest settings), `backend/app/api/v1/health.py`, `backend/app/services/jobs.py`, `backend/app/schemas/generated.py` (GEN, first run)
 - **Steps:**
   1. Rewrite `config.py` with pydantic-settings fields for **every** variable in backend §8, so nobody adds settings later. Remove `CLOUDINARY_*` and `OPENAI_API_KEY`. At startup, check `len(JWT_SECRET_KEY) >= 32` and `len(NEO4J_PASSWORD) >= 12`, and raise with a clear message otherwise (SEC-10).
   2. Write `main.py` once, in final form:
@@ -63,7 +63,7 @@ File ownership follows [parallel-work.md](parallel-work.md). Every task below to
 
 ### T0.P3.1 Frontend clean-up, dependencies, shared frontend files (45 min)
 - **Spec:** architecture §9, ux-flows §2, §8, parallel-work §3
-- **Files (P3):** `frontend/**` (except P1/P4 folders and GEN), `frontend/package.json` + lockfile, `frontend/Dockerfile`, `src/lib/nav.ts`, `src/lib/features.ts`, `src/lib/types.ts` (GEN, first run)
+- **Files (P3):** `frontend/**` (except P1/P4 folders and GEN), `frontend/package.json` + lockfile, `frontend/Dockerfile`, `frontend/.dockerignore`, `src/lib/nav.ts`, `src/lib/features.ts`, `src/lib/types.ts` (GEN, first run)
 - **Steps:**
   1. After pulling the scaffold commit: `npm ci && npx tsc --noEmit && npm run build` to confirm the generated app builds.
   2. Add **every** frontend dependency for all phases now, so the lockfile never changes again: `recharts`, `react-force-graph-2d`, dev `openapi-typescript`, dev `@playwright/test`. Add the scripts `gen:types` and `e2e`.
@@ -76,7 +76,7 @@ File ownership follows [parallel-work.md](parallel-work.md). Every task below to
 
 ### T0.P1.1 Backend dependencies, Dockerfile, model bake, ML startup stub (45 min)
 - **Spec:** architecture §4, ai-system §2.1 and §5, environments §2, parallel-work §3
-- **Files (P1):** `backend/requirements.txt`, `backend/Dockerfile`, `backend/app/ml/__init__.py`
+- **Files (P1):** `backend/requirements.txt`, `backend/Dockerfile`, `backend/.dockerignore`, `backend/app/ml/__init__.py`
 - **Steps:**
   1. Pin **every** backend dependency for all phases now: `fastapi`, `uvicorn`, `neo4j`, `pydantic-settings`, `python-multipart`, `bcrypt`, `PyJWT`, `sentence-transformers`, `anthropic` (latest at hour 0), `Pillow`, `imagehash`, `pypdfium2`, `rapidfuzz`, `openpyxl`, and dev tools `pytest`, `httpx`, `ruff`, `datamodel-code-generator`, `pip-audit`. Do not add `cloudinary`, `openai` or `passlib`.
   2. Dockerfile:
