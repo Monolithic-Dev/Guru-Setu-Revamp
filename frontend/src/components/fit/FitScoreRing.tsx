@@ -11,9 +11,9 @@
 import type { FitVerdict } from "./types";
 
 const VERDICT_STYLES: Record<FitVerdict, { ring: string; text: string }> = {
-  ready: { ring: "stroke-emerald-500", text: "text-emerald-700 dark:text-emerald-400" },
-  close: { ring: "stroke-amber-500", text: "text-amber-700 dark:text-amber-400" },
-  not_yet: { ring: "stroke-slate-400", text: "text-slate-600 dark:text-slate-400" },
+  ready: { ring: "stroke-emerald-500", text: "text-emerald-700" },
+  close: { ring: "stroke-amber-500", text: "text-amber-700" },
+  not_yet: { ring: "stroke-slate-400", text: "text-slate-600" },
 };
 
 export interface FitScoreRingProps {
@@ -54,7 +54,7 @@ export function FitScoreRing({
             r={radius}
             fill="none"
             strokeWidth={stroke}
-            className="stroke-slate-200 dark:stroke-slate-700"
+            className="stroke-slate-200"
           />
           <circle
             cx={size / 2}
@@ -85,7 +85,7 @@ export function FitScoreRing({
           {verdictText}
         </p>
         {!compact && (
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+          <p className="mt-1 text-sm text-slate-500">
             Out of 100
           </p>
         )}
