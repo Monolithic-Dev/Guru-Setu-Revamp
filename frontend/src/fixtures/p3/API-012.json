@@ -1,0 +1,83 @@
+[
+  {
+    "id": "op-edge-ai",
+    "title": "Edge AI for Agriculture",
+    "faculty": {
+      "user_id": "u-meera",
+      "name": "Dr. Meera Raman"
+    },
+    "required_skills": [
+      "python",
+      "pytorch",
+      "deep learning",
+      "computer vision"
+    ],
+    "status": "open",
+    "my_fit": null,
+    "my_application_status": null
+  },
+  {
+    "id": "op-crop-yield",
+    "title": "Crop Yield Forecasting",
+    "faculty": {
+      "user_id": "u-meera",
+      "name": "Dr. Meera Raman"
+    },
+    "required_skills": [
+      "python",
+      "time series",
+      "statistics"
+    ],
+    "status": "open",
+    "my_fit": null,
+    "my_application_status": null
+  },
+  {
+    "id": "op-soil-iot",
+    "title": "Soil Sensor Network",
+    "faculty": {
+      "user_id": "u-meera",
+      "name": "Dr. Meera Raman"
+    },
+    "required_skills": [
+      "embedded c",
+      "iot",
+      "electronics"
+    ],
+    "status": "open",
+    "my_fit": null,
+    "my_application_status": null
+  },
+  {
+    "id": "op-agri-drone",
+    "title": "Drone Imagery for Farms",
+    "faculty": {
+      "user_id": "u-meera",
+      "name": "Dr. Meera Raman"
+    },
+    "required_skills": [
+      "computer vision",
+      "opencv",
+      "python"
+    ],
+    "status": "open",
+    "my_fit": null,
+    "my_application_status": null
+  },
+  {
+    "id": "op-nlp-ocr",
+    "title": "NLP for Malayalam OCR",
+    "faculty": {
+      "user_id": "u-arjun",
+      "name": "Dr. Arjun Menon"
+    },
+    "required_skills": [
+      "nlp",
+      "python",
+      "transformers"
+    ],
+    "status": "open",
+    "my_fit": null,
+    "my_application_status": null
+  }
+]

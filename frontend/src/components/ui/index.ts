@@ -5,6 +5,7 @@ export { Dialog, type DialogProps } from "./Dialog";
 export { ExportButton } from "./ExportButton";
 export { KpiTile } from "./KpiTile";
 export { PageHeader } from "./PageHeader";
+export { Segmented } from "./Segmented";
 export { SkillChip, type SkillChipKind } from "./SkillChip";
 export { EmptyState, ErrorState, LoadingRegion, Skeleton } from "./States";
 export { StatusPill, statusLabel } from "./StatusPill";

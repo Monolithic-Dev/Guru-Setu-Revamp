@@ -1,32 +1,68 @@
 "use client";
-// SCR-08 Log a session: route stub on fixtures (T1.P3.5). The form lands in T2.P3.3 (FLOW-07).
+// SCR-08 Log a session (FLOW-07). Attendees come from API-024; `?student=<id>` pre-fills an individual session.
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useMemo, useState } from "react";
+import { SessionForm } from "@/components/mentor/SessionForm";
+import { ErrorState, LoadingRegion, PageHeader, Skeleton, useToast } from "@/components/ui";
 import { fixtures } from "@/fixtures/p3";
 import { useApi } from "@/hooks/useApi";
-import { ErrorState, LoadingRegion, PageHeader, Skeleton } from "@/components/ui";
+import { getSession } from "@/lib/session";
 import type { components } from "@/lib/types";
 
 type MenteeRow = components["schemas"]["MenteeRow"];
+type OpeningSummary = components["schemas"]["OpeningSummary"];
 
-export default function NewSessionPage() {
-  const { data, error, loading, reload } = useApi<MenteeRow[]>("/me/mentees", { fixture: fixtures.mentees });
+function NewSession() {
+  const router = useRouter();
+  const params = useSearchParams();
+  const toast = useToast();
+  const student = params.get("student");
+  const back = student ? `/faculty/mentees/${student}` : "/faculty";
+
+  const [me, setMe] = useState<string | null>(null);
+  useEffect(() => setMe(getSession()?.userId ?? null), []);
+
+  const mentees = useApi<MenteeRow[]>("/me/mentees", { fixture: fixtures.mentees });
+  const openings = useApi<OpeningSummary[]>("/openings", { fixture: fixtures.openings });
+  const ownOpenings = useMemo(() => (openings.data ?? []).filter((o) => o.faculty.user_id === me), [openings.data, me]);
 
   return (
     <>
-      <PageHeader title="Log a session" backHref="/faculty" backLabel="My mentees" />
-      {loading ? (
-        <LoadingRegion>
-          <Skeleton block />
+      <PageHeader
+        title="Log a session"
+        subtitle="Attendance, topics, private notes, action items and issues in one save."
+        backHref={back}
+        backLabel={student ? "Back to mentee" : "My mentees"}
+      />
+      {mentees.loading ? (
+        <LoadingRegion label="Loading mentees">
+          <div className="space-y-3">
+            <Skeleton block />
+            <Skeleton block />
+          </div>
         </LoadingRegion>
-      ) : error ? (
-        <ErrorState error={error} onRetry={reload} />
+      ) : mentees.error ? (
+        <ErrorState error={mentees.error} onRetry={mentees.reload} homeHref="/faculty" />
       ) : (
-        <div className="card">
-          <p className="section-title mb-2">Attendees</p>
-          <p className="text-sm text-gray-700">
-            {data?.filter((r) => r.mentorship_type === "assigned").length ?? 0} assigned mentees available.
-          </p>
-        </div>
+        <SessionForm
+          rows={mentees.data ?? []}
+          openings={ownOpenings}
+          prefillStudentId={student}
+          onCancel={() => router.push(back)}
+          onSaved={(_session, present) => {
+            toast.success(`Session saved for ${present} student${present === 1 ? "" : "s"}`);
+            router.push(back);
+          }}
+        />
       )}
     </>
+  );
+}
+
+export default function NewSessionPage() {
+  return (
+    <Suspense>
+      <NewSession />
+    </Suspense>
   );
 }
