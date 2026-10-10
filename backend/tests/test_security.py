@@ -95,6 +95,9 @@ def test_token_rejects_alg_none_wrong_key_and_missing_claims():
 # ---- API: TEST-01 .. TEST-03 ------------------------------------------------------------------------------------
 
 
+NOT_FOUND_BY_DESIGN = {"/me/resume"}
+
+
 def test_01_no_secret_fields_in_any_get_response(client, aarav, meera, arjun, suresh, kavya):
     found: list[str] = []
     scanned = 0
@@ -103,6 +106,8 @@ def test_01_no_secret_fields_in_any_get_response(client, aarav, meera, arjun, su
             if method != "get" or "{" in path:
                 continue
             response = client.get(_concrete(path), headers=headers)
+            if path in NOT_FOUND_BY_DESIGN:  # answers 404 "you have no resume" until one is uploaded
+                continue
             assert response.status_code != 404, path  # the route must be reached, not just missed
             if response.headers.get("content-type", "").startswith("application/json"):
                 _scan(response.json(), found)
