@@ -60,6 +60,8 @@ def new_student(uid: str, name: str, roll: str, mentor_id: str | None) -> None:
 def world(fresh_seed):
     for key in ("Session", "ActionItem", "Issue", "StatusEvent", "Notification", "IdempotencyKey"):
         cypher(f"MATCH (n:{key}) DETACH DELETE n")
+    cypher("MATCH ()-[m:MENTORS {type: 'guide'}]->() DELETE m")
+    cypher("MATCH (f:Faculty {user_id: 'u-meera'}) SET f.designation = 'Professor'")
     cypher("MATCH (t:Term) DETACH DELETE t")
     cypher(
         """
@@ -450,12 +452,99 @@ def test_31_resolve_needs_a_note_and_sets_resolved_at(client, meera):
     assert client.patch(url, json={"status": "resolved", "resolution": "again"}, headers=meera).status_code == 409
 
 
-def test_31_not_available_yet_actions_return_409(client, meera):
+def _patch(client, headers, issue_id, **body):
+    return client.patch(f"/api/v1/issues/{issue_id}", json=body, headers=headers)
+
+
+def test_a4_lifecycle_moves_forward_only(client, meera):
     issue = _issue_in_session(client, meera)
-    url = f"/api/v1/issues/{issue['id']}"
-    for body in ({"status": "acknowledged"}, {"status": "in_progress"}, {"escalated": True}, {"confidential": True}):
-        response = client.patch(url, json=body, headers=meera)
-        assert response.status_code == 409 and response.json()["code"] == "INVALID_TRANSITION", body
+    iid = issue["id"]
+    assert _patch(client, meera, iid, status="in_progress").status_code == 409  # cannot skip acknowledged
+    assert _patch(client, meera, iid, status="acknowledged").json()["status"] == "acknowledged"
+    assert _patch(client, meera, iid, status="acknowledged").status_code == 409
+    assert _patch(client, meera, iid, status="in_progress").json()["status"] == "in_progress"
+    assert _patch(client, meera, iid, status="resolved").status_code == 422  # a resolution note is required
+    done = _patch(client, meera, iid, status="resolved", resolution="Sorted out with the warden.")
+    assert done.status_code == 200 and done.json()["resolved_at"]
+    assert [e["to_status"] for e in done.json()["history"]] == ["raised", "acknowledged", "in_progress", "resolved"]
+    assert _patch(client, meera, iid, status="acknowledged").status_code == 409  # never backwards
+    assert _patch(client, meera, iid).status_code == 422  # nothing to update
+
+
+def test_a4_escalation_notifies_the_hod_and_unlocks_the_text(client, meera, suresh, kavya):
+    issue = _issue_in_session(client, meera)
+    iid, text = issue["id"], issue["text"]
+    assert _patch(client, suresh, iid, status="resolved", resolution="x").status_code == 404  # not escalated yet
+    before = counts()
+    r = _patch(client, meera, iid, escalated=True)
+    assert r.status_code == 200 and r.json()["escalated"] is True
+    hod_notes = cypher(
+        "MATCH (n:Notification {type: 'issue_escalated'})-[:NOTIFIES]->(u:User) RETURN u.user_id AS u, n.title AS t, "
+        "n.body AS b"
+    )
+    assert [(n["u"], n["t"]) for n in hod_notes] == [("u-suresh", "Issue escalated by Meera")]
+    assert text not in str(hod_notes)  # notifications never carry issue text (SEC-15)
+    again = _patch(client, meera, iid, escalated=True)  # irreversible and idempotent: no second notification
+    assert again.status_code == 200 and counts()["notes"] == before["notes"] + 1
+    assert _patch(client, meera, iid, escalated=False).status_code == 422  # schema only allows true
+
+    # the HOD can now read the text on the dashboard and resolve, but not acknowledge or escalate
+    d = client.get("/api/v1/dept/dashboard", headers=suresh).json()
+    assert [e["issue_id"] for e in d["escalated_issues"]] == [iid] and d["escalated_issues"][0]["text"] == text
+    assert "escalated_issues" not in client.get("/api/v1/dept/dashboard", headers=kavya).json()
+    assert _patch(client, suresh, iid, status="acknowledged").status_code == 409
+    assert _patch(client, suresh, iid, escalated=True).status_code == 200  # already escalated: no-op
+    done = _patch(client, suresh, iid, status="resolved", resolution="HOD spoke to the faculty.")
+    assert done.status_code == 200 and done.json()["text"] == text
+    assert client.get("/api/v1/dept/dashboard", headers=suresh).json()["escalated_issues"] == []
+    assert _patch(client, meera, iid, escalated=True).status_code == 200  # still a no-op, not an error
+
+
+def test_a4_confidential_rules(client, meera, arjun, suresh, aarav):
+    issue = _issue_in_session(client, meera)
+    iid = issue["id"]
+    made = _patch(client, meera, iid, confidential=True)
+    assert made.status_code == 200 and made.json()["confidential"] is True
+    blocked = _patch(client, meera, iid, escalated=True)
+    assert blocked.status_code == 409 and blocked.json()["detail"] == "Confidential issues cannot be escalated"
+    assert _patch(client, suresh, iid, status="resolved", resolution="x").status_code == 404
+    assert _patch(client, meera, iid, confidential=False).json()["confidential"] is False
+    # an escalated issue cannot be hidden afterwards
+    _patch(client, meera, iid, escalated=True)
+    assert _patch(client, meera, iid, confidential=True).status_code == 409
+    assert _patch(client, arjun, iid, confidential=True).status_code == 404  # not this student's mentor
+
+
+def test_a4_only_the_author_changes_confidentiality(client, meera, arjun):
+    cypher("MATCH (f:Faculty {user_id: 'u-arjun'}), (s:Student {user_id: 'u-aarav'}) "
+           "CREATE (f)-[:MENTORS {id: 'g-a4', type: 'guide', status: 'active', since: '2026-06-01'}]->(s)")
+    issue = _issue_in_session(client, meera, student="u-aarav")
+    assert _patch(client, arjun, issue["id"], confidential=True).status_code == 403  # a guide, not the author
+    assert _patch(client, arjun, issue["id"], status="acknowledged").status_code == 200  # but may progress it
+
+
+def test_a7_student_raises_an_issue_and_the_mentor_is_notified(client, aarav, meera, diya):
+    body = {"student_id": "u-aarav", "category": "attendance", "text": "I missed two weeks because of illness"}
+    r = client.post("/api/v1/issues", json=body, headers=aarav)
+    assert r.status_code == 201
+    out = r.json()
+    assert out["raised_by_role"] == "student" and out["status"] == "raised" and out["text"] == body["text"]
+    notes = cypher(
+        "MATCH (n:Notification {type: 'issue_raised_by_mentee'})-[:NOTIFIES]->(u:User) "
+        "RETURN u.user_id AS u, n.title AS t, n.link AS l"
+    )
+    assert notes == [{"u": "u-meera", "t": "Aarav raised an issue", "l": "/faculty/mentees/u-aarav"}]
+    assert body["text"] not in str(notes)
+    # the mentor can read and work it; the student can read it back on their own page
+    mine = client.get("/api/v1/me/mentorship", headers=aarav).json()["issues"]
+    assert mine[0]["text"] == body["text"]
+    assert _patch(client, meera, out["id"], status="acknowledged").status_code == 200
+    # a student may only raise it about themselves, with no session and no confidential flag
+    assert client.post("/api/v1/issues", json={**body, "student_id": "u-diya"}, headers=aarav).status_code == 422
+    assert client.post("/api/v1/issues", json={**body, "confidential": True}, headers=aarav).status_code == 422
+    assert client.post("/api/v1/issues", json={**body, "session_id": "s"}, headers=aarav).status_code == 422
+    # an unrelated student cannot see or touch it
+    assert _patch(client, diya, out["id"], status="acknowledged").status_code == 403
 
 
 def test_31_raise_issue_scope_roles_and_literal_text(client, meera, arjun, aarav, suresh):
@@ -467,7 +556,7 @@ def test_31_raise_issue_scope_roles_and_literal_text(client, meera, arjun, aarav
     assert cypher("MATCH (u:User {user_id: 'u-aarav'}) RETURN count(u) AS c")[0]["c"] == 1  # nothing was deleted
     body = {"student_id": "u-aarav", "category": "academic", "text": "x"}
     assert client.post("/api/v1/issues", json=body, headers=arjun).status_code == 404  # not Aarav's mentor
-    assert client.post("/api/v1/issues", json=body, headers=aarav).status_code == 403  # student path arrives with A7
+    assert client.post("/api/v1/issues", json={**body, "student_id": "u-diya"}, headers=aarav).status_code == 422
     assert client.post("/api/v1/issues", json=body, headers=suresh).status_code == 403
     other_session = post_session(client, meera).json()["id"]
     assert client.post("/api/v1/issues", json={**body, "session_id": other_session}, headers=meera).status_code == 201

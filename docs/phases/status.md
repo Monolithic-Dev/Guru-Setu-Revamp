@@ -96,10 +96,10 @@ Edit this file only in its own small commit on your own feature branch (CONTRIBU
 | A1 Click-to-source | P2 | P4 | ◐ | backend API-034 done (tests green); frontend P4 |
 | A2 Why graph | P1 | P3 | ☐ | |
 | A3 Reminders | P2 | P3 | ☐ | |
-| A4 Issue lifecycle + confidential | P2 | P3 | ☐ | |
+| A4 Issue lifecycle + confidential | P2 | P3 | ◐ | backend done (TEST-31 extended); frontend P3 |
 | A5 Skill gap | P1 | P1 | ☐ | |
 | A6 Eval table | P1 | P4 (slide) | ☐ | |
-| A7 Mentee request / raise issue | P2 | P4 | ☐ | |
+| A7 Mentee request / raise issue | P2 | P4 | ◐ | student issue path done; API-045 meeting request next |
 | A8 Tamper signals | P1 | — | ☐ | |
 | A9 Create opening | P2 | P3 | ☐ | |
 
