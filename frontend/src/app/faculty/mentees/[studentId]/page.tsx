@@ -7,6 +7,8 @@ import { useEffect, useMemo, useState } from "react";
 import { Lock, Plus } from "lucide-react";
 import { ActionItemList } from "@/components/mentor/ActionItemList";
 import { IssueList } from "@/components/mentor/IssueList";
+import { LEVEL_LABEL, LearnerCard } from "@/components/mentor/LearnerCard";
+import { TermSummary } from "@/components/mentor/TermSummary";
 import {
   AttentionBadge,
   Avatar,
@@ -25,7 +27,8 @@ import type { Role } from "@/lib/nav";
 import { getSession } from "@/lib/session";
 import type { components } from "@/lib/types";
 
-type Overview = components["schemas"]["MenteeOverview"];
+// attention_details is sent on the overview too (same shape as MenteeRow), for the assigned mentor's own row.
+type Overview = components["schemas"]["MenteeOverview"] & { attention_details?: Record<string, string> };
 type SessionSummary = components["schemas"]["SessionSummary"];
 
 const TOPIC: Record<string, string> = {
@@ -130,7 +133,7 @@ export default function MenteeOverviewPage() {
   const { studentId } = useParams<{ studentId: string }>();
   const [role, setRole] = useState<Role | null>(null);
   useEffect(() => setRole(getSession()?.role ?? null), []);
-  const { data, error, loading, reload } = useApi<Overview>(`/mentees/${studentId}/overview`);
+  const { data, error, loading, reload, setData } = useApi<Overview>(`/mentees/${studentId}/overview`);
   const events = useMemo(() => (data ? buildTimeline(data) : []), [data]);
   const isMentor = role === "faculty";
   const backHref = role === "hod" ? "/coordinator" : "/faculty";
@@ -162,7 +165,7 @@ export default function MenteeOverviewPage() {
           <span className="flex flex-wrap items-center gap-2">
             {s.roll_no} · Year {s.year} · {s.dept_code}
             {(data.attention_reasons ?? []).map((r) => (
-              <AttentionBadge key={r} reason={r} />
+              <AttentionBadge key={r} reason={r} detail={data.attention_details?.[r]} />
             ))}
           </span>
         }
@@ -194,6 +197,23 @@ export default function MenteeOverviewPage() {
         </div>
 
         <div className="space-y-5">
+          {/* REQ-029/033: the card exists only when the server sends the mentor-only fields. */}
+          {isMentor && "learner_note" in data ? (
+            <Section title="Learner">
+              <LearnerCard studentId={s.user_id} level={data.learner_level} note={data.learner_note} atRisk={data.marked_at_risk} onSaved={setData} />
+            </Section>
+          ) : data.learner_level ? (
+            <Section title="Learner">
+              <p className="text-sm font-bold text-gray-900">{LEVEL_LABEL[data.learner_level]}</p>
+            </Section>
+          ) : null}
+
+          {data.term_summary ? (
+            <Section title="This term">
+              <TermSummary summary={data.term_summary} />
+            </Section>
+          ) : null}
+
           <Section title="Mentors">
             {mentors.length === 0 ? (
               <p className="text-sm text-gray-600">No active mentor.</p>
