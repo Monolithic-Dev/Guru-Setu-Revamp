@@ -9,7 +9,7 @@ You are building a 15-hour hackathon product. Students prove skills with verifie
 4. [docs/04-backend/backend.md](docs/04-backend/backend.md) + [openapi.yaml](docs/04-backend/openapi.yaml) + [schema.cypher](docs/04-backend/schema.cypher): data, API, business rules, config
 5. Then the document for your area: [ai-system.md](docs/06-ai/ai-system.md), [ux-flows.md](docs/05-frontend/ux-flows.md), [security-and-privacy.md](docs/08-security/security-and-privacy.md), [environments-and-deployment.md](docs/10-devops/environments-and-deployment.md), [test-strategy.md](docs/11-quality/test-strategy.md)
 
-The team's build order and hours are in [docs/plan/prd-v2-and-15h-plan.md](docs/plan/prd-v2-and-15h-plan.md) §13. Where it conflicts with the spec pack, the spec pack wins.
+**What to build now:** [docs/phases/README.md](docs/phases/README.md) lists the phases, gates and task IDs. Open the current phase doc, take a task (`T<phase>.<person>.<n>`) and follow its steps and *Done when*. Update [docs/phases/status.md](docs/phases/status.md). Where a phase doc and the spec pack disagree on a fact, the spec pack wins; fix the phase doc.
 
 ## Hard rules
 - **Contracts are the source of truth.** Field names and types come from `openapi.yaml`, and labels and keys from `schema.cypher`. Change the contract file first, then the code, in the same commit.

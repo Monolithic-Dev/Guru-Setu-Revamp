@@ -67,7 +67,8 @@ The specification pack is the source of truth for the build:
 | [Frontend & UX](docs/05-frontend/ux-flows.md) | Screens, flows, components |
 | [Security & privacy](docs/08-security/security-and-privacy.md) | Access rules, privacy matrix, threat model |
 | [Test strategy](docs/11-quality/test-strategy.md) | Tests, failure modes, QA checklist |
-| [Team plan](docs/plan/prd-v2-and-15h-plan.md) | 15-hour build plan and demo story |
+| [Phase plan](docs/phases/README.md) · [Status](docs/phases/status.md) | Hour-by-hour tasks per person, gates, add-ons, freeze |
+| [Team plan](docs/plan/prd-v2-and-15h-plan.md) | Demo story, disclosure, pitch material |
 
 ## Principles
 

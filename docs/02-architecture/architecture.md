@@ -222,7 +222,8 @@ If any step fails, the transaction rolls back and nothing is saved (FM-06).
       services/           certificates.py, applications.py, mentorship.py, tracking.py,
                           metrics.py, evidence_export.py, notify.py, status_history.py
       ml/                 embedding.py (MDL-02), concepts.py, scorer.py, extraction.py (MDL-01 adapter),
-                          verification.py (checks + confidence), prompts/extract_certificate_v1.md
+                          verification.py (checks + confidence), trust.py (PROVES + trust recompute, backend §6.2),
+                          prompts/extract_certificate_v1.md, schemas/certificate_extraction.schema.json
       repos/              Cypher per area: certificates_repo.py, mentorship_repo.py, ... (CMP-12 users)
     schema/schema.cypher  copy of docs/04-backend/schema.cypher, applied on startup
     scripts/              seed.py, eval_match.py, build_extraction_cache.py

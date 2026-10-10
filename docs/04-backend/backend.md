@@ -297,7 +297,7 @@ Response 201: `SessionDetail` with `id`, the same fields, `attendees[].confirmed
 **API-024** row:
 ```json
 {"student_id":"u-karthik","name":"Karthik S","roll_no":"CB.EN.U4CSE24017","mentorship_type":"assigned",
- "meetings_this_term":1,"meetings_required":2,"last_session_date":"2026-08-11","open_actions":2,"overdue_actions":1,
+ "meetings_this_term":2,"meetings_required":2,"last_session_date":"2026-08-11","open_actions":2,"overdue_actions":1,
  "open_issues":1,"unconfirmed_sessions":0,"needs_attention":true,
  "attention_reasons":["no_recent_session","overdue_action"]}
 ```
@@ -392,7 +392,7 @@ Computed per active MENTORS link for the mentor's home (API-024) and for the HOD
 ### 6.7 Issue rules
 - **P0:** `raised → resolved` with a resolution of 1–1000 characters. **P1** adds `raised → acknowledged → in_progress → resolved`, and `escalated: true` from any unresolved state.
 - Escalation notifies the department's HOD (`issue_escalated`). From then on the HOD may read the text and resolve it.
-- `confidential` (P1) may be set by the mentor at creation or later. Visibility is in security §4.
+- `confidential` (P1) may be set by the mentor at creation or later. Visibility is in security §4. A confidential issue cannot be escalated (409 `INVALID_TRANSITION`, detail "Confidential issues cannot be escalated").
 - A student-raised issue (P1) notifies the assigned mentor (`issue_raised_by_mentee`).
 
 ### 6.8 Allotment rules
@@ -415,7 +415,7 @@ Computed per active MENTORS link for the mentor's home (API-024) and for the HOD
 | action_assigned | Student | API-026 (mentee-owned item) | "New action item due {due_date}" | /student/mentorship |
 | issue_escalated (P1) | HOD | API-032 escalated | "Issue escalated by {mentor}" | /coordinator |
 | issue_raised_by_mentee (P1) | Assigned mentor | API-031 by student | "{student} raised an issue" | /faculty/mentees/{id} |
-| meeting_request (P1) | Assigned mentor | API-045 | "{student} requested a meeting" | /faculty/mentees/{id} |
+| meeting_request (P1) | Assigned mentor | API-045 | "{student} requested a meeting" (body = the student's own message) | /faculty/mentees/{id} |
 
 Notification bodies never contain session notes or issue text.
 

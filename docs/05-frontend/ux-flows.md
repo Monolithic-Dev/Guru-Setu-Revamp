@@ -259,7 +259,7 @@ SCR-04 /student/certificates                   SCR-05 /student/mentorship
 SCR-06 /faculty                                 SCR-07 /faculty/mentees/[id]
 ┌──────────────────────────────────────────────┐ ┌──────────────────────────────────────────────┐
 │ My mentees (13)        [ Log session ]        │ │ Karthik S · CB.EN.U4CSE24017 · Year 2        │
-│ ⚠ Karthik S  1/2  last 11 Aug  ⏰1 overdue  [Open]│ │ ⚠ Not met in 45+ days · Overdue action      │
+│ ⚠ Karthik S  2/2  last 11 Aug  ⏰1 overdue  [Open]│ │ ⚠ Not met in 45+ days · Overdue action      │
 │   Not met in 45+ days · Overdue action        │ │ Skills [..trust chips..]   Academics (Sample)│
 │ ⚠ Diya R     2/2  issue open 16 days     [Open]│ │ Timeline: sessions / actions / issues        │
 │ ⚠ Rahul P    2/2  ⏰1 overdue             [Open]│ │ Action items: To verify [Verify][Reopen]     │

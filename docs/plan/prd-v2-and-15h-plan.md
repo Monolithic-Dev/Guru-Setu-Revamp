@@ -1,4 +1,4 @@
-> **Requirements authority moved.** Requirements, IDs and numbers now live in the spec pack: start at [docs/00-index.md](../00-index.md). This file is kept for the team's **15-hour build plan (§13), demo story (§14), disclosure (§17), judging map (§18) and roadmap slide (§19)**. Where it disagrees with the spec pack, the spec pack wins. FR-n here = REQ-0nn in [prd.md](../01-product/prd.md) (FR-22 and FR-28 were split; see the PRD's traceability note).
+> **Requirements authority moved.** Requirements, IDs and numbers now live in the spec pack: start at [docs/00-index.md](../00-index.md). The detailed, task-level build plan is in [docs/phases/](../phases/README.md), which refines §13 below. This file is kept for the team's **15-hour build plan overview (§13), demo story (§14), disclosure (§17), judging map (§18) and roadmap slide (§19)**. Where it disagrees with the spec pack, the spec pack wins. FR-n here = REQ-0nn in [prd.md](../01-product/prd.md) (FR-22 and FR-28 were split; see the PRD's traceability note).
 
 # PRD v2: GuruSetu Verified Mentorship Graph
 **Genesis Hackathon, Campus Problems track. Product requirements and 15-hour build plan.**

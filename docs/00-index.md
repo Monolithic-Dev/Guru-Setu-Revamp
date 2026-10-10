@@ -34,9 +34,10 @@ Status:       Draft v1 | assumptions log: §5
 | 7 | [10-devops/environments-and-deployment.md](10-devops/environments-and-deployment.md) + [env.example](10-devops/env.example) | Environments, compose, commands, demo runbook | ENV |
 | 8 | [11-quality/test-strategy.md](11-quality/test-strategy.md) | Test cases, failure modes, manual QA checklist | TEST, FM |
 | 9 | [../AGENTS.md](../AGENTS.md) (+ `CLAUDE.md` → `@AGENTS.md`) | Agent entry: read order, hard rules, commands, definition of done | — |
-| — | [plan/prd-v2-and-15h-plan.md](plan/prd-v2-and-15h-plan.md) | The team's build plan, demo story, pitch material (not part of the spec pack) | — |
+| — | [plan/prd-v2-and-15h-plan.md](plan/prd-v2-and-15h-plan.md) | Demo story, disclosure, pitch material (not part of the spec pack) | — |
+| — | [phases/](phases/README.md) | Phase-wise build plan: tasks `T<phase>.<person>.<n>`, gates G0–G3, add-ons, freeze | Task IDs |
 
-The spec pack does not include phase plans or schedules. The team's 15-hour plan stays in `docs/plan/`. The empty `docs/phases/` folder was created outside this pack and is left untouched.
+The spec pack itself holds no schedules. The hour-by-hour build plan lives in [phases/README.md](phases/README.md), with phase docs 0–6 and a live [status board](phases/status.md). It refines the team plan in `docs/plan/` §13.
 
 ## 3. Document plan (domains 1–15)
 

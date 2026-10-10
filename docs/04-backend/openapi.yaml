@@ -1464,6 +1464,10 @@ components:
         attention_reasons:
           type: array
           items: {$ref: '#/components/schemas/AttentionReason'}
+        attention_details:
+          type: object
+          description: Optional human detail per reason, e.g. {"suggested_at_risk":"attendance 68%"} (P2 REQ-029)
+          additionalProperties: {type: string}
     AcademicRecord:
       type: object
       required: [term_id, cgpa, attendance_pct, backlogs]
