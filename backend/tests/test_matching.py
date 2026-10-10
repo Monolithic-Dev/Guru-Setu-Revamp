@@ -368,6 +368,26 @@ def test_skill_gaps_returns_at_most_five(world):
     assert len(fit_service.skill_gaps(TX, "u-aarav")) == 5
 
 
+def test_skill_gaps_when_nothing_crosses_ready_rank_by_summed_gain(world):
+    """TEST-25 on the seed shape: one certificate rarely lifts an opening past
+    FIT_READY_MIN, so openings_unlocked is 0 and the order comes from the gain
+    summed over every opening that requires the skill (SkillGapCard shows it)."""
+    many = [f"s{i}" for i in range(6)]
+    world.openings = [
+        {"opening_id": "op-1", "title": "A", "embedding": OPENING_VEC, "required": ["shared", *many]},
+        {"opening_id": "op-2", "title": "B", "embedding": OPENING_VEC, "required": ["shared", "solo", *many]},
+    ]
+    world.idf = {c: 1.0 for c in ["shared", "solo", *many]}
+    world.skills = {}
+
+    gaps = fit_service.skill_gaps(TX, "u-aarav")
+
+    assert gaps and all(g["openings_unlocked"] == 0 for g in gaps)
+    gains = [g["total_gain"] for g in gaps]
+    assert gains == sorted(gains, reverse=True)
+    assert gaps[0]["concept"] != "solo"  # a skill two openings need beats one only op-2 needs
+
+
 def test_skill_gaps_with_no_openings_is_empty(world):
     world.openings = []
     assert fit_service.skill_gaps(TX, "u-aarav") == []
