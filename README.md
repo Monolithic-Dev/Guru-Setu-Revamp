@@ -4,7 +4,7 @@
 
 Built for the **Genesis Hackathon, Campus Problems track**. The concept builds on GuruSetu, an earlier prototype by members of our team; all code here is new (see [Disclosure](#disclosure)).
 
-> **Status:** specification complete, implementation starting. The `backend/` and `frontend/` folders are scaffolded from scratch at hour 0 of the build. All data is synthetic.
+> **Status:** the backend, the ML pipeline and all 16 screens are implemented and run together in Docker Compose (`docker compose up -d --build`, then `docker compose exec backend python -m scripts.seed --reset`). 249 backend tests pass inside the container, and the index section 7 demo scenario runs end to end. Open items are listed in [docs/phases/status.md](docs/phases/status.md). All data is synthetic.
 
 ---
 
