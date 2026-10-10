@@ -198,6 +198,7 @@ Every error is RFC 9457 `application/problem+json`:
 | INVALID_CREDENTIALS | 401 | Wrong email/password | Show "Email or password is incorrect." |
 | FORBIDDEN | 403 | Role not allowed on this route | Show "You don't have access to this." |
 | NOT_FOUND | 404 | Missing, or outside the caller's scope (no existence leak) | Show not-found state |
+| METHOD_NOT_ALLOWED | 405 | The route exists but not for this HTTP method | Treat as a client bug |
 | VALIDATION_FAILED | 422 | Field errors | Show `errors[]` beside fields |
 | NOT_YOUR_MENTEE | 422 | Attendee or student is not linked to this mentor | Show detail |
 | ALREADY_APPLIED | 409 | Duplicate application | Show "You have already applied." |
