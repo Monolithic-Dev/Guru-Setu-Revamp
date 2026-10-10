@@ -181,6 +181,10 @@ def build(anchor: dt.date, assignments: list[tuple[str, str]], names: dict[str, 
             academics.append({"id": f"ar-{student}-{term}", "student_id": student, "term_id": term, "cgpa": cgpa,
                               "attendance_pct": float(att), "backlogs": 0 if cgpa > 6.5 else 1})
 
+    for record in academics:  # the demo student's CGPA is fixed, not random (see seed_profiles.py)
+        if record["student_id"] == "u-aarav":
+            record["cgpa"], record["attendance_pct"] = 8.2, 90.0
+
     # ---- certificates: ~24 more beside Aarav's, with the full range of statuses ---------------------------------
     evidence: list[dict] = []
     everyone = [s for _, s in assignments]

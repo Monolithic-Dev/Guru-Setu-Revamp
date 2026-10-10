@@ -30,7 +30,7 @@ from app.core.security import hash_password
 from app.ml import concepts as concepts_mod
 from app.ml import seed_hooks
 from app.ml.verification import compute_phash
-from scripts import seed_mentoring
+from scripts import seed_mentoring, seed_profiles
 
 SEED_DIR = pathlib.Path(__file__).resolve().parents[1] / "seed"
 SCHEMA_PATH = pathlib.Path(__file__).resolve().parents[1] / "schema" / "schema.cypher"
@@ -391,6 +391,7 @@ def seed(reset: bool, anchor: dt.date) -> dict[str, int]:
     # Sessions, action items, issues, academics and the other certificates (backend section 10, P2's data).
     names = {u[0]: u[1] for u in FACULTY} | {st["user_id"]: st["name"] for st in students}
     mentoring_stats = seed_mentoring.load(driver, anchor, assignments, names)
+    profile_stats = seed_profiles.load(driver, anchor, students, assignments, DEPT)
     uploads = pathlib.Path(get_settings().upload_dir)
     if uploads.is_dir():  # so the review screen can preview Aarav's seeded certificate
         shutil.copyfile(SEED_DIR / "demo_uploads" / "aarav_python_basics.png", uploads / "seeded-aarav-python.png")
@@ -410,6 +411,7 @@ def seed(reset: bool, anchor: dt.date) -> dict[str, int]:
         "similar_edges": sim_stats["model_edges"] + sim_stats["override_edges"],
         "embeddings": emb_stats["students"] + emb_stats["openings"],
         **{f"mentoring_{k}": v for k, v in mentoring_stats.items()},
+        **{f"profiles_{k}": v for k, v in profile_stats.items()},
     }
 
 
