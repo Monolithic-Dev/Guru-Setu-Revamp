@@ -16,16 +16,20 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
+import hashlib
 import json
 import pathlib
 import random
+import shutil
 import sys
 import uuid
 
+from app.core.config import get_settings
 from app.core.database import apply_schema, get_driver, init_driver
 from app.core.security import hash_password
 from app.ml import concepts as concepts_mod
 from app.ml import seed_hooks
+from app.ml.verification import compute_phash
 from scripts import seed_mentoring
 
 SEED_DIR = pathlib.Path(__file__).resolve().parents[1] / "seed"
@@ -353,6 +357,12 @@ def seed(reset: bool, anchor: dt.date) -> dict[str, int]:
                 at=offset(anchor, -9) + "T04:00:00Z",
             )
 
+        # The real demo file: its true SHA-256 and pHash make the re-photographed copy (`aarav_python_copy.jpg`) a
+        # `duplicate` when it is uploaded during the demo, instead of a fake hash that nothing can ever match.
+        python_png = (SEED_DIR / "demo_uploads" / "aarav_python_basics.png").read_bytes()
+        python_sha = hashlib.sha256(python_png).hexdigest()
+        python_phash = compute_phash(python_png, "image/png")
+
         # Aarav's one seeded certificate: it is what makes python `matched` and
         # everything else `claimed_only` at the start of the demo.
         session.run(
@@ -362,7 +372,7 @@ def seed(reset: bool, anchor: dt.date) -> dict[str, int]:
             SET e.kind = 'certificate', e.status = 'certified',
                 e.file_path = '/data/uploads/seeded-aarav-python.png',
                 e.media_type = 'image/png', e.size_bytes = 148000,
-                e.sha256 = $sha, e.phash = null,
+                e.sha256 = $sha, e.phash = $phash,
                 e.holder_name = 'Aarav Menon', e.title = 'Python for Everybody',
                 e.issuer = 'Coursera', e.issue_date = $issued,
                 e.level = 'online', e.type = 'course',
@@ -375,12 +385,15 @@ def seed(reset: bool, anchor: dt.date) -> dict[str, int]:
             SET r.trust_level = 1, r.evidence_ids = ['ev-aarav-python'],
                 r.updated_at = $now
             """,
-            sha="a" * 64, issued=offset(anchor, -178), now=now_iso(),
+            sha=python_sha, phash=python_phash, issued=offset(anchor, -178), now=now_iso(),
         )
 
     # Sessions, action items, issues, academics and the other certificates (backend section 10, P2's data).
     names = {u[0]: u[1] for u in FACULTY} | {st["user_id"]: st["name"] for st in students}
     mentoring_stats = seed_mentoring.load(driver, anchor, assignments, names)
+    uploads = pathlib.Path(get_settings().upload_dir)
+    if uploads.is_dir():  # so the review screen can preview Aarav's seeded certificate
+        shutil.copyfile(SEED_DIR / "demo_uploads" / "aarav_python_basics.png", uploads / "seeded-aarav-python.png")
 
     # Embeddings and SIMILAR_TO last: they read the rows written above.
     concepts_mod.reload_files()

@@ -210,6 +210,27 @@ def build(anchor: dt.date, assignments: list[tuple[str, str]], names: dict[str, 
             "student_index": [{"id": s, "i": i} for s, i in index.items()]}
 
 
+def write_placeholder_files(items: list[tuple[str, str]], directory: str) -> int:
+    """A small synthetic image per seeded certificate, so the review screen's file preview works. [MOCK]
+    Skipped quietly where the uploads folder does not exist or cannot be written (a bare local run)."""
+    from pathlib import Path
+
+    from PIL import Image, ImageDraw
+
+    root = Path(directory)
+    if not root.is_dir():
+        return 0
+    for name, title in items:
+        image = Image.new("RGB", (640, 440), "#fbf7ef")
+        draw = ImageDraw.Draw(image)
+        draw.rectangle((12, 12, 628, 428), outline="#8c1515", width=4)
+        draw.text((40, 60), "SAMPLE CERTIFICATE [MOCK]", fill="#8c1515")
+        draw.text((40, 140), title[:60], fill="#1f2937")
+        draw.text((40, 380), "Synthetic data for the GuruSetu demo", fill="#6b7280")
+        image.save(root / f"seeded-{name}.png")
+    return len(items)
+
+
 def load(driver, anchor: dt.date, assignments: list[tuple[str, str]], names: dict[str, str]) -> dict[str, int]:
     data = build(anchor, assignments, names)
     with driver.session() as db:
@@ -289,4 +310,7 @@ def load(driver, anchor: dt.date, assignments: list[tuple[str, str]], names: dic
                    from_status: r.from_status, to_status: r.to_status, actor_id: r.actor_id,
                    actor_name: r.actor_name, at: r.at})
             """, rows=data["events"]).consume()
+    from app.core.config import get_settings
+
+    write_placeholder_files([(e["id"], e["title"]) for e in data["evidence"]], get_settings().upload_dir)
     return {k: len(data[k]) for k in ("sessions", "attendance", "items", "issues", "academics", "evidence", "events")}

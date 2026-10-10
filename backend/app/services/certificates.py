@@ -5,7 +5,6 @@ Extraction, verification and trust belong to P1 (`app.ml.*`). This module only o
 lazily through `_pipeline()`; tests replace them with `set_pipeline_for_tests`. Each status change commits the
 fields, the StatusEvent and the notifications in ONE write transaction (rule 5).
 """
-import hashlib
 import importlib
 import logging
 import os
@@ -151,7 +150,7 @@ def intake(user: CurrentUser, upload: BinaryIO, background: BackgroundTasks) -> 
 
     evidence_id = str(uuid.uuid4())
     temp, final = directory / f".tmp-{evidence_id}", directory / f"{evidence_id}.{ext}"
-    digest, size = hashlib.sha256(), 0
+    size = 0
     try:
         with temp.open("wb") as out:
             chunk = head
@@ -159,7 +158,6 @@ def intake(user: CurrentUser, upload: BinaryIO, background: BackgroundTasks) -> 
                 size += len(chunk)
                 if size > cfg.max_upload_bytes:
                     raise ApiError("FILE_TOO_LARGE", 413, f"The file is larger than {cfg.max_upload_mb} MB.")
-                digest.update(chunk)
                 out.write(chunk)
                 chunk = upload.read(1024 * 1024)
         if media_type == "application/pdf" and _pdf_pages(temp) > MAX_PDF_PAGES:
@@ -172,10 +170,12 @@ def intake(user: CurrentUser, upload: BinaryIO, background: BackgroundTasks) -> 
         temp.unlink(missing_ok=True)
         raise
 
+    # The hash is stored by JOB-01 with the verification result, NOT here: verification asks "does any Evidence already
+    # carry this SHA-256?", and a `processing` row that already carried it would be reported as its own duplicate.
     now = utc_now_iso()
     props = {
         "id": evidence_id, "kind": "certificate", "status": "processing", "file_path": str(final),
-        "media_type": media_type, "size_bytes": size, "sha256": digest.hexdigest(), "skills": [],
+        "media_type": media_type, "size_bytes": size, "skills": [],
         "contains_instructions": False, "reasons": [], "created_at": now, "updated_at": now,
     }
 
