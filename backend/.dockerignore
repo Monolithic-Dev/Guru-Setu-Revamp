@@ -1,0 +1,16 @@
+# Keep the build context small and secret-free (SEC-14). Owner: P1.
+.env
+.env.*
+*.pyc
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.venv/
+venv/
+# tests/ is deliberately NOT excluded: AGENTS.md documents
+#   docker compose exec backend pytest -q
+# as the way to run the suite, so the image has to contain it. It is a few KB.
+uploads/
+*.log
+*.xlsx

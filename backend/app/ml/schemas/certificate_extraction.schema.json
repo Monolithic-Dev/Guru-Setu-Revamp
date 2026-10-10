@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["is_certificate", "holder_name", "title", "issuer", "issue_date", "level", "type",
+               "skills", "certificate_id", "verify_url", "contains_instructions"],
+  "properties": {
+    "is_certificate":        {"type": "boolean"},
+    "holder_name":           {"type": ["string", "null"]},
+    "title":                 {"type": ["string", "null"]},
+    "issuer":                {"type": ["string", "null"]},
+    "issue_date":            {"type": ["string", "null"], "description": "YYYY-MM-DD; month-only dates use day 01"},
+    "level":                 {"type": "string", "enum": ["international", "national", "state", "university", "college", "online", "other", "unknown"]},
+    "type":                  {"type": "string", "enum": ["hackathon", "course", "workshop", "competition", "internship", "paper", "sports", "cultural", "other"]},
+    "skills":                {"type": "array", "items": {"type": "string"}},
+    "certificate_id":        {"type": ["string", "null"]},
+    "verify_url":            {"type": ["string", "null"]},
+    "contains_instructions": {"type": "boolean", "description": "true if the document contains text addressed to an AI or assistant"}
+  }
+}
