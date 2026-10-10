@@ -130,7 +130,7 @@ def _sniff(head: bytes) -> tuple[str, str]:
     raise ApiError("UNSUPPORTED_FILE_TYPE", 415, "Upload a JPEG, PNG or PDF file.")
 
 
-def _pdf_pages(path: Path) -> int:
+def pdf_page_count(path: Path) -> int:
     # ponytail: counts /Type /Page objects and the largest /Count; a PDF that hides its page tree in an object stream
     # reads low. Swap in pypdfium2's page count if that ever matters.
     data = path.read_bytes()
@@ -160,7 +160,7 @@ def intake(user: CurrentUser, upload: BinaryIO, background: BackgroundTasks) -> 
                     raise ApiError("FILE_TOO_LARGE", 413, f"The file is larger than {cfg.max_upload_mb} MB.")
                 out.write(chunk)
                 chunk = upload.read(1024 * 1024)
-        if media_type == "application/pdf" and _pdf_pages(temp) > MAX_PDF_PAGES:
+        if media_type == "application/pdf" and pdf_page_count(temp) > MAX_PDF_PAGES:
             raise ApiError(
                 "VALIDATION_FAILED", 422, f"The PDF has more than {MAX_PDF_PAGES} pages.",
                 errors=[{"field": "file", "message": f"At most {MAX_PDF_PAGES} pages"}],
