@@ -112,22 +112,42 @@ def _sentence(value: Any) -> str:
 def student_text(profile: dict[str, Any]) -> str:
     """"{dept} student. Skills: {names}. Interests: {interests}. Certificates:
     {certified titles}. {bio}" """
-    return (
+    text = (
         f"{profile.get('dept_code') or ''} student. "
         f"Skills: {_sentence(_join(profile.get('skills')))}. "
         f"Interests: {_sentence(_join(profile.get('interests')))}. "
         f"Certificates: {_sentence(_join(profile.get('certificate_titles')))}. "
         f"{str(profile.get('bio') or '').strip()}"
     ).strip()
+    # Richer-profile extras (plan section 4.3), appended only when present so an old profile reads exactly as before.
+    extras = []
+    if profile.get("programme"):
+        extras.append(f"Programme: {profile['programme']}.")
+    if profile.get("year"):
+        extras.append(f"Year {profile['year']}.")
+    if profile.get("headline"):
+        extras.append(f"{_sentence(profile['headline'])}.")
+    if profile.get("project_titles"):
+        extras.append(f"Projects: {_sentence(_join(profile['project_titles']))}.")
+    return " ".join([text, *extras]).strip()
 
 
 def opening_text(opening: dict[str, Any]) -> str:
     """"{title}. {description}. Requires: {concept names}." """
-    return (
+    text = (
         f"{_sentence(opening.get('title'))}. "
         f"{_sentence(opening.get('description'))}. "
         f"Requires: {_sentence(_join(opening.get('required_concepts')))}."
     ).strip()
+    # The faculty member's domain and the nice-to-have skills (plan section 4.3), only when present.
+    extras = []
+    if opening.get("preferred_concepts"):
+        extras.append(f"Preferred: {_sentence(_join(opening['preferred_concepts']))}.")
+    if opening.get("faculty_research"):
+        extras.append(f"Faculty research: {_sentence(_join(opening['faculty_research']))}.")
+    if opening.get("faculty_subjects"):
+        extras.append(f"Faculty teaches: {_sentence(_join(opening['faculty_subjects']))}.")
+    return " ".join([text, *extras]).strip()
 
 
 # ── Recompute hooks (called by P2's services and P4's seed) ───────────────────
