@@ -157,7 +157,7 @@ verdict:  ≥ 65 Ready · 40–64 Close · < 40 Not yet
 ```
 **The three displayed parts always sum exactly to the displayed total**, so any score can be explained in one sentence. The same function also produces: the **"what if I certify this?"** gains, the **Why path** for the graph, the **top-5 skill gaps** across all openings, and the **ranked applicant list** for the faculty member (with ties broken by number of verified skills, then application time).
 
-**The demo number:** Aarav's fit for "Edge AI for Agriculture" goes from **42.7 (Close)** to **70.0 (Ready)** after he certifies two skills. This is measured on the real seed with the real embedding model.
+**The demo number:** Aarav's fit for "Edge AI for Agriculture" goes from **43.5 (Close)** to **70.9 (Ready)** after he certifies two skills. This is measured on the real seed with the real embedding model.
 
 ## C4. Where AI is deliberately *not* used
 
@@ -202,7 +202,7 @@ verdict:  ≥ 65 Ready · 40–64 Close · < 40 Not yet
 | **EVAL-02** verification routing, 6 planted cases | 6/6 | **6/6** | Includes a real JPEG re-encode for the visual-duplicate case. |
 | **EVAL-04** prompt-injection containment | 3/3 | **1/1** run, passed | Only one adversarial file exists so far. |
 | **Fit reproducibility** | spec's worked example | **43.4 → 68.5** reproduced exactly, with the exact component split | Deterministic, any machine. |
-| **Aarav demo fit** | 38–50 then ≥ 65 | **42.7 Close → 70.0 Ready** | Real seed, real embeddings. |
+| **Aarav demo fit** | 38–50 then ≥ 65 | **43.5 Close → 70.9 Ready** | Real seed, real embeddings. |
 | **Demo offline** | every demo file a cache hit | **6/6 hits** | Network can be off during the demo. |
 | **EVAL-03** hybrid vs keyword baseline | hybrid > baseline | **Tie (1.000 vs 1.000)** | **Not a valid test:** the label set is too easy for both scorers. We report it as a tie rather than tune against the labels. |
 
@@ -236,7 +236,7 @@ verdict:  ≥ 65 Ready · 40–64 Close · < 40 Not yet
 
 1. **`docker compose up`**: neo4j, backend and frontend come up with health checks. Show `/api/v1/health` returning the Neo4j status and the active LLM provider.
 2. **Seed**: `python -m scripts.seed --reset` builds 56 users, 12 openings, concepts, embeddings and similarity edges (it prints counts).
-3. **Aarav's fit** for "Edge AI for Agriculture": **42.7 Close**, with the three components. Open **Why**: the graph path student → skill → similar concept → required skill.
+3. **Aarav's fit** for "Edge AI for Agriculture": **43.5 Close**, with the three components. Open **Why**: the graph path student → skill → similar concept → required skill.
 4. **Upload certificates:** one becomes **Certified** (AI read → rules decided), one is caught as a **duplicate** (pHash), one with a **name mismatch** goes to **needs_review**. Show the **review queue** on the mentor side and the **reason**.
 5. **Fit rises to 70.0 Ready**; he applies; the faculty sees applicants **ranked by verified fit**.
 6. **Prompt-injection file:** shows `injection_text`, nothing adopted.
@@ -276,6 +276,6 @@ verdict:  ≥ 65 Ready · 40–64 Close · < 40 Not yet
 3. **Tech stack and why:** B2 table, trimmed to six rows (FastAPI, Neo4j, Next.js, Groq, MiniLM, contract-first).
 4. **Where AI is used:** C1 table; C4 "where it is not".
 5. **ProofOnce pipeline:** the C2 flow, highlighting that the model has no field for trust.
-6. **Explained fit:** the formula and Aarav's 42.7 → 70.0.
+6. **Explained fit:** the formula and Aarav's 43.5 → 70.9.
 7. **Safety and measured results:** C5 and D1 (including the honest tie and small sample).
 8. **Quality and demo:** 248 tests, contract-first, then the live demo.

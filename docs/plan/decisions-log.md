@@ -25,6 +25,8 @@ plan. One row per decision, with the date and the evidence behind it.
 | L-7 | Tamper check (A8) runs on the EXIF Software tag only; `ELA_THRESHOLD=0` turns ELA off | Tuned on the 25-file seed set, the six demo uploads and one planted edit (a name pasted over a JPEG and re-saved with a Photoshop Software tag). The planted file's whole-image ELA mean was 0.185, inside the range of the 31 genuine files (0.045 to 1.088, the highest a fee receipt), so no threshold separates them: the edit is small against a mostly white page. The EXIF signal is false on all 31 genuine files and true on the planted one, so `TAMPER_CHECK_ENABLED=true` is safe with ELA off. A real deployment needs a regional ELA (per block, not a whole-image mean) before ELA can be trusted. | 2026-10-11 |
 | L-8 | The test suite wipes the database it runs against | By design (A-23, `tests/conftest.py`): pytest reseeds and then edits the compose Neo4j. Running `pytest`, even one file, leaves its own small graph behind (9 users, 1 opening). Always run `python -m scripts.seed --reset` after tests and before a demo or a rehearsal. | 2026-10-11 |
 
+| L-9 | Richer profile text moves the demo fit slightly: Aarav's Edge AI score is now 43.5 close to 70.9 ready (was 42.7 to 70.0) | The embedding text gains programme, year, headline and project titles on the student side, and the faculty member's research areas, subjects and preferred skills on the opening side (plan section 4.3). Only the 25 percent meaning part moves; the formula, weights and cut-offs are untouched, and the numbers stay inside A-16 (38 to 50, then 65 or more). | 2026-10-11 |
+
 ## Contract changes
 
 | Change | Why | Regenerated |

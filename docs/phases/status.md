@@ -134,3 +134,14 @@ Edit this file only in its own small commit on your own feature branch (CONTRIBU
 | B-1 | P1 integration, 2026-10-10 | `tests/test_mentorship.py` is intermittently red: about one failure per four full-suite runs, a different test each time (`test_30_mentor_can_reopen_and_drop`, `test_a4_escalation_notifies_the_hod_and_unlocks_the_text`). Each passes in isolation and when run with just one other file, so this is shared seed state and ordering rather than logic - most likely a `collect()` without `ORDER BY`. Not caused by P1's tests: running them first leaves the suite clean. | `pytest -q` repeatedly | P2 | P1 - a flaky suite hides real regressions | open |
 | B-2 | P1 integration, 2026-10-10 | `main` could not build the backend: `docker-compose.yml` declares `build: ./backend` but there was no `backend/Dockerfile` and no `backend/requirements.txt`. Both are P1-owned and land with the P1 PR. | `docker compose build backend` on main | P1 | P0 | fixed |
 | B-3 | P1 integration, 2026-10-10 | The seed covers only the match-and-trust slice: no sessions, action items or issues, so the mentor screens, the coordinator dashboard and the exports have no data and the full 10-step index 7 run cannot be completed. | `python -m scripts.seed --reset` then SCR-06 | P4 | P0 for the demo | open |
+
+## 9. Profiles and matching v2 (plan: docs/plan/profiles-and-matching-plan.md)
+| Phase | Owner | Status | Note |
+|---|---|---|---|
+| A Student profile (API-046/047/048, SCR-17) | P2 | ☑ | editor with trust labels and completeness; TEST-60..63 |
+| B Opening v2, eligibility, grouped recommendations (API-049/050/051) | P2 | ☑ | strict and advisory modes, capacity closes the opening; TEST-64..68 |
+| C Faculty profile (API-052/053, SCR-18, SCR-16) | P2 | ☑ | faculty certificates through ProofOnce are NOT built yet |
+| D Resume (API-055/056/057) | P2 | ☑ | PDF only, scoped download, no-AI suggestions that need confirmation; TEST-69/70 |
+| E Guide directory and HOD mentor suggestion (API-058, SCR-19) | P2 | ☑ | shared-topic chips, no scores; TEST-72/73 |
+| F Opt-in discovery and invitations | - | ✂ | not built; contradicts REQ-005 unless the lead accepts the consent trade-off (decision X-2) |
+
