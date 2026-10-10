@@ -15,6 +15,5 @@ ignore = ["B008"]  # FastAPI Depends() in argument defaults
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-q"
 pythonpath = ["."]
 # Tests need TODAY_OVERRIDE=2026-10-10 (docs/phases/README.md rule 7); conftest.py sets it for the session.
