@@ -1,0 +1,208 @@
+{
+  "student": {
+    "user_id": "u-karthik",
+    "name": "Karthik S",
+    "roll_no": "CB.EN.U4CSE24008",
+    "year": 2,
+    "dept_code": "CSE",
+    "bio": null,
+    "interests": [
+      "web development"
+    ],
+    "skills": [
+      {
+        "concept": "javascript",
+        "trust_level": 1,
+        "claimed": true,
+        "sources": [
+          {
+            "evidence_id": "ev-k-js",
+            "title": "JavaScript Essentials"
+          }
+        ]
+      },
+      {
+        "concept": "react",
+        "trust_level": 0,
+        "claimed": true,
+        "sources": []
+      }
+    ]
+  },
+  "mentorships": [
+    {
+      "id": "m-karthik",
+      "type": "assigned",
+      "status": "active",
+      "since": "2026-06-12",
+      "until": null,
+      "end_reason": null,
+      "mentor": {
+        "user_id": "u-meera",
+        "name": "Dr. Meera Raman"
+      },
+      "opening_id": null,
+      "opening_title": null
+    }
+  ],
+  "academics": [
+    {
+      "term_id": "2026-EVEN",
+      "cgpa": 7.9,
+      "attendance_pct": 88.0,
+      "backlogs": 0
+    },
+    {
+      "term_id": "2026-ODD",
+      "cgpa": 7.6,
+      "attendance_pct": 81.5,
+      "backlogs": 0
+    }
+  ],
+  "sessions": [
+    {
+      "id": "s-k-1",
+      "date": "2026-08-11",
+      "mode": "in_person",
+      "kind": "group",
+      "context": "assigned",
+      "topics": [
+        "academic",
+        "career"
+      ],
+      "logged_by": {
+        "user_id": "u-meera",
+        "name": "Dr. Meera Raman"
+      },
+      "present": true,
+      "confirmed_at": "2026-08-12T10:00:00Z",
+      "notes": "Discussed internship plans; follow up on resume.",
+      "confidential": false
+    },
+    {
+      "id": "s-k-0",
+      "date": "2026-07-28",
+      "mode": "online",
+      "kind": "individual",
+      "context": "assigned",
+      "topics": [
+        "academic"
+      ],
+      "logged_by": {
+        "user_id": "u-meera",
+        "name": "Dr. Meera Raman"
+      },
+      "present": true,
+      "confirmed_at": null,
+      "confidential": false
+    }
+  ],
+  "action_items": [
+    {
+      "id": "a-k-1",
+      "student_id": "u-karthik",
+      "text": "Share updated resume",
+      "owner": "mentee",
+      "due_date": "2026-10-07",
+      "status": "open",
+      "overdue": true,
+      "session_id": "s-k-1",
+      "created_at": "2026-08-11T10:00:00Z",
+      "updated_at": "2026-08-11T10:00:00Z",
+      "history": [
+        {
+          "from_status": null,
+          "to_status": "open",
+          "actor_name": "Dr. Meera Raman",
+          "note": null,
+          "at": "2026-08-11T10:00:00Z"
+        }
+      ]
+    },
+    {
+      "id": "a-k-2",
+      "student_id": "u-karthik",
+      "text": "Register for the web dev elective",
+      "owner": "mentee",
+      "due_date": "2026-09-01",
+      "status": "done",
+      "overdue": false,
+      "session_id": "s-k-1",
+      "created_at": "2026-08-11T10:00:00Z",
+      "updated_at": "2026-08-30T10:00:00Z",
+      "history": [
+        {
+          "from_status": null,
+          "to_status": "open",
+          "actor_name": "Dr. Meera Raman",
+          "note": null,
+          "at": "2026-08-11T10:00:00Z"
+        },
+        {
+          "from_status": "open",
+          "to_status": "done",
+          "actor_name": "Karthik S",
+          "note": null,
+          "at": "2026-08-30T10:00:00Z"
+        }
+      ]
+    }
+  ],
+  "issues": [
+    {
+      "id": "i-k-1",
+      "student_id": "u-karthik",
+      "category": "attendance",
+      "text": "Missed two lab sessions in September.",
+      "status": "raised",
+      "escalated": false,
+      "confidential": false,
+      "raised_by_role": "faculty",
+      "raised_at": "2026-09-20T09:00:00Z",
+      "resolved_at": null,
+      "resolution": null,
+      "history": [
+        {
+          "from_status": null,
+          "to_status": "raised",
+          "actor_name": "Dr. Meera Raman",
+          "note": null,
+          "at": "2026-09-20T09:00:00Z"
+        }
+      ]
+    }
+  ],
+  "applications": [],
+  "certificates": [
+    {
+      "id": "ev-k-js",
+      "status": "certified",
+      "media_type": "image/png",
+      "holder_name": "Karthik S",
+      "title": "JavaScript Essentials",
+      "issuer": "Coursera",
+      "issue_date": "2026-03-10",
+      "level": "online",
+      "type": "course",
+      "skills": [
+        "javascript"
+      ],
+      "certificate_id": null,
+      "verify_url": null,
+      "confidence": 1.0,
+      "reasons": [],
+      "source": "cache",
+      "review_reason": null,
+      "created_at": "2026-10-10T09:00:00Z",
+      "updated_at": "2026-10-10T09:00:00Z"
+    }
+  ],
+  "attention_reasons": [
+    "no_recent_session",
+    "overdue_action"
+  ],
+  "term_summary": null,
+  "learner_level": null,
+  "learner_note": null,
+  "marked_at_risk": null
+}
