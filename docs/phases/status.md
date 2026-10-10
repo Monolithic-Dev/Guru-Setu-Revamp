@@ -58,9 +58,9 @@ Edit this file only in its own small commit on your own feature branch (CONTRIBU
 | T2.P2.2 Allotment | P2 | ☑ | TEST-27 |
 | T2.P2.3 Sessions | P2 | ☑ | TEST-20, 28, 29 |
 | T2.P2.4 Action items + issues | P2 | ☑ | TEST-30, 31 |
-| T2.P3.1 SCR-04 | P3 | ☐ | |
-| T2.P3.2 SCR-10 | P3 | ☐ | |
-| T2.P3.3 SCR-08 | P3 | ☐ | |
+| T2.P3.1 SCR-04 | P3 | ☑ | TEST-13 statuses + copy verified with mocked API; manual entry (API-008) done |
+| T2.P3.2 SCR-10 | P3 | ☑ | approve/reject/409 verified with mocked API; preview via API-011 blob |
+| T2.P3.3 SCR-08 | P3 | ☑ | 12-present group session + 2 actions + issue; 422 mapping; Retry reuses Idempotency-Key (mocked API) |
 | T2.P4.1 Finish certificates | P4 | ☐ | |
 | T2.P4.2 Seed certificates via pipeline | P4 | ☐ | |
 | T2.P4.3 SCR-12 | P4 | ☐ | |
