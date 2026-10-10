@@ -42,6 +42,9 @@ class Settings(BaseSettings):
     upload_dir: str = "/data/uploads"
     max_upload_mb: int = 10
     upload_rate_limit_per_hour: int = 20
+    max_resume_mb: int = 5
+    max_resume_pages: int = 4
+    resume_rate_limit_per_hour: int = 5
 
     # --- AI ---
     # D-2 (2026-10-10): the only key the team has is a Groq key, so MDL-01 runs
@@ -112,6 +115,10 @@ class Settings(BaseSettings):
     @property
     def cors_origins_list(self) -> list[str]:
         return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]
+
+    @property
+    def max_resume_bytes(self) -> int:
+        return self.max_resume_mb * 1024 * 1024
 
     @property
     def max_upload_bytes(self) -> int:
