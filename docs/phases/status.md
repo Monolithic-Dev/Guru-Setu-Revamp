@@ -78,7 +78,7 @@ Edit this file only in its own small commit on your own feature branch (CONTRIBU
 | T3.P2.2 API-025 + API-029 | P2 | ☑ | TEST-42, 43 |
 | T3.P2.3 Metrics + API-033 | P2 | ☑ | TEST-32 on a hand-built graph; P4's check_seed still to compare |
 | T3.P2.4 Exports | P2 | ☑ | TEST-08, 21 (needs `openpyxl` in requirements.txt, P1) |
-| T3.P2.5 Audit pass | P2 | ☐ | |
+| T3.P2.5 Audit pass | P2 | ☑ | every P0/P1 P2-owned route in openapi.yaml exists; notifications and StatusEvents asserted per type in tests |
 | T3.P3.1 SCR-06 | P3 | ☐ | |
 | T3.P3.2 SCR-07 | P3 | ☐ | |
 | T3.P3.3 SCR-09 | P3 | ☐ | |
