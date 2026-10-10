@@ -37,11 +37,11 @@ Edit this file only in its own small commit on your own feature branch (CONTRIBU
 | T1.P1.2 Concepts + SIMILAR_TO | P1 | ☐ | |
 | T1.P1.3 Extraction contract + adapter | P1 | ☐ | |
 | T1.P1.4 Seed hooks + IDF | P1 | ☐ | |
-| T1.P3.1 API client | P3 | ☐ | |
-| T1.P3.2 Shell + guard + cleanup | P3 | ☐ | |
-| T1.P3.3 SCR-01 Login | P3 | ☐ | |
-| T1.P3.4 Shared components | P3 | ☐ | |
-| T1.P3.5 Route stubs + fixtures | P3 | ☐ | |
+| T1.P3.1 API client | P3 | ☑ | 401 → /login?expired=1 verified in browser (API mocked) |
+| T1.P3.2 Shell + guard + cleanup | P3 | ☑ | nav per role + guard redirects verified; /coordinator & /notifications pages are P4's |
+| T1.P3.3 SCR-01 Login | P3 | ☑ | AC-031.1–.3 verified with mocked API-001; re-check live when API-001 lands |
+| T1.P3.4 Shared components | P3 | ☑ | UI kit + WhyGraph/RemindersPanel stubs pushed (seam 2:30); /dev/components |
+| T1.P3.5 Route stubs + fixtures | P3 | ☑ | SCR-04/06/07/08/09/10 on fixtures/p3 |
 | T1.P4.1 Seed content | P4 | ☐ | |
 | T1.P4.2 Seed loader | P4 | ☐ | |
 | T1.P4.3 Certificate images + labels | P4 | ☐ | |
