@@ -1,0 +1,11 @@
+{
+  "_comment": "API-013 opening detail for SCR-03. applicant_count is omitted for a student (owner only). Owner: P1.",
+  "id": "op-edge-ai",
+  "title": "Edge AI for Agriculture",
+  "description": "Deploy deep learning models on low-power devices for crop disease detection in the field. Looking for a student comfortable with Python and PyTorch who wants to work on real field data.",
+  "faculty": { "user_id": "u-meera", "name": "Dr. Meera Raman" },
+  "required_skills": ["python", "pytorch", "deep learning", "computer vision"],
+  "status": "open",
+  "created_at": "2026-09-01T06:30:00Z",
+  "applicant_count": null
+}
