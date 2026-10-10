@@ -22,6 +22,8 @@ from app.core.database import run_write
 from app.core.errors import ApiError
 from app.ml import concepts, trust
 from app.repos import ml_repo
+from app.schemas.generated import StudentProfile
+from app.services import students
 
 router = APIRouter(tags=["endorsements"])
 
@@ -54,24 +56,20 @@ def _endorse(
     return name
 
 
-@router.post("/students/{student_id}/endorsements", status_code=201)
+@router.post(
+    "/students/{student_id}/endorsements", status_code=201, response_model=StudentProfile, operation_id="endorseSkill"
+)
 def create_endorsement(
     student_id: str,
     body: EndorsementCreate,
     user: Annotated[deps.CurrentUser, Depends(deps.require_role("faculty"))],
 ) -> dict:
-    """API-041. Returns the student's profile, which P2's students route owns,
-    so only the concept and its new trust level are returned here."""
+    """API-041. Writes the endorsement, then returns the student's profile (the contract's 201 body); an endorsed
+    skill reads "Faculty-verified" with the endorsing faculty's name."""
 
     def work(tx):
         deps.assert_mentor_of(tx, user.user_id, student_id)
-        name = _endorse(tx, user.user_id, user.name, student_id, body.concept)
-        level = ml_repo.get_has_skill(tx, student_id, name) or {}
-        return {
-            "student_id": student_id,
-            "concept": name,
-            "trust_level": int(level.get("trust_level") or 0),
-            "endorsed_by": list(level.get("endorsed_by") or []),
-        }
+        _endorse(tx, user.user_id, user.name, student_id, body.concept)
 
-    return run_write(work)
+    run_write(work)
+    return students.get_profile(user, student_id)

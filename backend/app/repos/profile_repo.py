@@ -5,6 +5,8 @@ Every function takes a transaction. Nothing here returns `password_hash` or `emb
 """
 from typing import Any
 
+from app.repos.students_repo import endorser_names
+
 
 def _rows(result) -> list[dict[str, Any]]:
     return [record.data() for record in result]
@@ -55,6 +57,7 @@ def skill_rows(tx, student_id: str) -> list[dict[str, Any]]:
             sid=student_id,
         )
     )
+    endorser_names(tx, rows)
     ids = sorted({eid for row in rows for eid in row["evidence_ids"]})
     titles = (
         {
