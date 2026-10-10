@@ -5,17 +5,51 @@ Depends on:   docs/02-architecture/architecture.md, docs/04-backend/backend.md
 Inputs used:  NFR-04, NFR-08, NFR-10, ADR-04, ADR-13, audit H6 (broken Dockerfile and env), RISK-08
 Status:       Draft v1 | assumptions in this document: A-05, A-06, A-22
 
----
+## 0. Local quickstart (clone to running in under 15 minutes)
+
+**Prerequisites:**
+
+| Tool | Version | Needed for |
+|---|---|---|
+| Git | any 2.x | clone |
+| Docker Desktop with Compose v2 | 4.x (Compose ≥ 2.20) [VERIFY: docs.docker.com/compose/release-notes] | everything |
+| RAM / disk | ≥ 8 GB RAM, ≥ 8 GB free disk (torch CPU + model + Neo4j) | containers |
+| Python | 3.12 | only for `tools/check_ownership.py` and lints outside containers |
+| Node.js | 20 LTS | only for frontend lints and type generation outside containers |
+
+**Commands:**
+1. `git clone <repo> && cd Guru-Setu-Revamp`
+2. `cp docs/10-devops/env.example .env`
+3. Edit `.env`: set `NEO4J_PASSWORD` (≥ 12 chars) and `JWT_SECRET_KEY` (`python -c "import secrets;print(secrets.token_urlsafe(48))"`); set `ANTHROPIC_API_KEY`, or `LLM_PROVIDER=none`.
+4. `docker compose up -d --build`. The first build downloads torch and the model, about 8–10 min on a good connection; with cached images it takes ≤ 5 min (NFR-08).
+5. `docker compose exec backend python -m scripts.seed --reset` (≤ 60 s, NFR-10)
+6. Open http://localhost:3000 and log in as `aarav@demo.gurusetu` / `Demo@123`.
+7. Run the tests: `docker compose exec -e TODAY_OVERRIDE=2026-10-10 backend pytest -q`. A single test: `… pytest -q tests/test_security.py::test_03_unauthenticated`.
 
 ## 1. Environments
 
-| ID | Name | Where | Purpose | Differences |
-|---|---|---|---|---|
-| ENV-01 | Local dev | Each builder's laptop, Docker Compose | Build and test | `TODAY_OVERRIDE=2026-10-10`, `LLM_PROVIDER=anthropic` (key in `.env`) or `none` |
-| ENV-02 | Demo | The presenting laptop, Docker Compose | Stage demo and judging | Same images as ENV-01; `LLM_PROVIDER=none` unless venue Wi-Fi is tested; fresh `seed --reset` before each run |
-| ENV-03 | Hosted (optional) | Render (backend) and Netlify (frontend) on new accounts [A-22] | Only if the rules require a URL | Neo4j Aura; TLS at the platform edge; synthetic data only; not required for P0 |
+| ID | Name | Where / URL | Purpose | Data | Access | Differences |
+|---|---|---|---|---|---|---|
+| ENV-01 | Local dev (also the test environment, A-23) | Each builder's laptop: http://localhost:3000, http://localhost:8000/api/v1, Neo4j browser http://localhost:7474 | Build and test | Synthetic seed | The builder | `TODAY_OVERRIDE=2026-10-10` for tests; `LLM_PROVIDER=anthropic` (key in `.env`) or `none` |
+| ENV-02 | Demo | The presenting laptop, same localhost URLs | Stage demo and judging | Synthetic seed, re-anchored with `--anchor-date` | The presenter | Same images as ENV-01; `LLM_PROVIDER=none` unless venue Wi-Fi is tested; fresh `seed --reset` before each run |
+| ENV-03 | Hosted (optional) | Render (backend) and Netlify (frontend) on new accounts, Neo4j Aura [A-22]; URLs assigned on deploy | Only if the rules require a URL (D-5) | Synthetic seed | Public link, demo accounts | TLS at the platform edge; `CORS_ORIGINS` set to the Netlify URL; not required for P0 |
 
-There is no staging and no production. Real data is out of scope (NG-03).
+There is no separate test, staging or production environment. Real data is out of scope (NG-03).
+
+## 1.1 Infrastructure
+
+- **Hosting choice:** local Docker Compose on one laptop. The demo must work offline (NFR-04) and with no account dependencies. ENV-03 is optional.
+- **Resources (per laptop):**
+
+| Service | Memory | Notes |
+|---|---|---|
+| neo4j | ≤ 1.5 GB (`NEO4J_server_memory_heap_max__size=1G`, `NEO4J_server_memory_pagecache_size=256M`) | Seed is < 10k nodes |
+| backend | ≈ 1.5 GB (torch CPU + MiniLM) | 1 uvicorn worker (A-13) |
+| frontend | ≈ 300 MB | `next start` |
+
+- **Networking:** the Compose default bridge network. Only ports 3000, 8000 and 7474/7687 are published, bound to `127.0.0.1`. No domain and no TLS for ENV-01/02.
+- **Managed services:** none for ENV-01/02. ENV-03 would use the free tiers of Render, Netlify and Neo4j Aura [VERIFY: each provider's current free-tier limits].
+- **Cost:** USD 0 for infrastructure. LLM spend is ≤ USD 5 total (NFR-09, ai-system §7).
 
 ## 2. Docker Compose (`docker-compose.yml` at repo root)
 
@@ -63,9 +97,36 @@ Copy [env.example](env.example) to `.env` at the repo root. Every variable is de
 3. Ten minutes before: `docker compose up -d`, `seed --reset`, then log in as each persona in separate browser profiles (student, faculty, HOD, IQAC).
 4. Keep the backup video (team plan §13) on the desktop.
 
-## 6. Release and distribution
+## 6. Release
 
-There are no releases. The submission is the repo at a tagged commit, `genesis-submission`, plus the running demo. The repo must contain no `.env`, no real data and no `uploads/` (SEC-10, SEC-14).
+| Item | Rule |
+|---|---|
+| Build artifact | The git tag plus Docker images built locally from it (`docker compose build`). No registry. |
+| Versioning | Tags `rc1` (13:15 code freeze) and `genesis-submission` (the final submitted commit). |
+| Schema migration order | `schema.cypher` is applied idempotently at API startup (constraints and indexes only), then `scripts.seed --reset`. There is no data migration: all data is synthetic and re-seeded. |
+| Downtime | Acceptable (demo system). A release is `docker compose up -d --build` followed by a reseed. |
+| Rollback | `git checkout <previous tag> && docker compose up -d --build && docker compose exec backend python -m scripts.seed --reset` (about 2 min with cached layers). |
+| Repo hygiene | The repo must contain no `.env`, no real data and no `uploads/` (SEC-10, SEC-14). |
+
+**Smoke-test checklist (after every release, rehearsal or rollback):**
+1. `curl -s localhost:8000/api/v1/health` returns 200 with `neo4j: "up"`.
+2. All 4 personas log in and land on their home screen.
+3. API-015 for Aarav on `op-edge-ai` returns a score of 38–50 with verdict `close`.
+4. Upload `seed/demo_uploads/aarav_cv_workshop.png`: status `certified` in ≤ 2 s (cache hit).
+5. Meera's SCR-06 shows 13 mentees with 3 flagged.
+6. API-033 as Suresh returns 200; API-035 downloads an XLSX whose README!A1 starts with "DRAFT".
+
+## 7. Backups and recovery
+
+- **What is backed up:** nothing beyond git. Every runtime datum is synthetic and reproducible from `backend/seed/` plus `scripts.seed`. The only non-reproducible artifacts are the extraction cache, the eval labels and the results, and all of them are committed (`backend/extraction_cache/`, `backend/seed/labels/`, `docs/plan/eval-results.md`).
+- **Targets:** RPO is not applicable (no user data). RTO is ≤ 5 minutes (compose up plus seed).
+- **Restore drill:** TEST-53 (clean clone to running) is the drill. It is run at the core freeze and on demo eve.
+
+## 8. Domains not included
+
+- **CI/CD:** skipped. With a 15-hour, 4-person build, the checks run manually (§4) at each gate (docs/phases), and `tools/check_ownership.py` runs before every push. A pipeline would cost about 1 hour to set up and would never deploy.
+- **Observability:** merged here and in backend §11. Logs are JSON lines with `request_id` (architecture §5), and liveness and readiness are API-040. There are no metrics, traces or alerts: one process on one laptop, watched by its operator.
+- **Distribution:** skipped. Nothing is packaged or published.
 
 ## Verify
 

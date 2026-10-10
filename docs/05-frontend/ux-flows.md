@@ -7,8 +7,6 @@ Status:       Draft v1 | assumptions in this document: A-03, A-20
 
 Screens and components (§6, §7) and client state (§8) are sections of this document.
 
----
-
 ## 1. Principles for this UI
 
 - Verified versus claimed is always visible: every skill chip carries its trust badge (REQ-003, REQ-004).

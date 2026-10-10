@@ -7,8 +7,6 @@ Status:       Draft v1 | assumptions in this document: A-09, A-10, A-16, A-17
 
 Eval plan (§10) is a section of this document.
 
----
-
 ## 1. Role of AI
 
 | ID | Component | Kind | Used for | Why a model | What stays deterministic |
@@ -26,7 +24,7 @@ No model makes a trust decision, sees mentoring data, or produces user-visible f
 | Setting | Value |
 |---|---|
 | Provider / SDK | Anthropic, official `anthropic` Python SDK (A-09) |
-| Model | `claude-opus-5-5` [VERIFY: docs.anthropic.com models overview at hour 0] |
+| Model | `claude-opus-5-5` (model ID and USD 4 / 20 per MTok checked 2026-10 against the Claude API reference; re-check at hour 0 with one call, T0.P1.1) |
 | Endpoint | Messages API through `client.beta.messages.create` (needed for fallbacks) |
 | Input | One user message: the file as an `image` block (JPEG/PNG, base64, longest side downscaled to 1568 px) or a `document` block (PDF, base64; only page 1 is relevant), followed by a text block with the prompt in §2.3 |
 | Output | `output_config: {"format": {"type": "json_schema", "schema": <§2.2>}, "effort": "low"}`; thinking not set (adaptive default); `max_tokens: 2048` |
@@ -116,7 +114,7 @@ Run in `ml/verification.py` after extraction, in this order. The first rule that
 | 7 | Confidence | see below | ≥ `CERT_AUTO_CERTIFY_MIN` (0.85) gives `certified`; otherwise `needs_review` with one reason per failed check |
 
 **Confidence:** `0.40·name_ok + 0.25·issuer_known + 0.20·date_ok + 0.15·complete`, rounded to 2 decimals. The inputs:
-- `name_ok`: `rapidfuzz.fuzz.token_set_ratio(norm(holder_name), norm(student.name)) ≥ 85`, where `norm` lower-cases, strips punctuation and honorifics (`mr`, `ms`, `dr`) and collapses spaces. Reason if false: `name_mismatch`.
+- `name_ok`: `rapidfuzz.fuzz.token_set_ratio(norm(holder_name), norm(student.name)) ≥ 85`, where `norm` applies Unicode NFKD and drops combining accents, lower-cases, strips punctuation and honorifics (`mr`, `ms`, `dr`) and collapses spaces (TEST-62). Reason if false: `name_mismatch`.
 - `issuer_known`: the normalised issuer matches an `Issuer.name` or one of its `aliases` with `token_set_ratio ≥ 90`. Reason: `unknown_issuer`.
 - `date_ok`: `issue_date` is not null, not after today, and not before `student.enrolled_on − 730 days`. Reason: `date_invalid`.
 - `complete`: title, issuer and issue_date are non-null and at least one skill exists. Reason: `incomplete`.
@@ -185,7 +183,7 @@ score      = semantic_c + skill_c + concept_c          # exact sum of the shown 
 - **Estimate per uncached call:**
   - Input: about 2,300 image tokens plus about 700 prompt tokens.
   - Output: about 300–800 tokens including low-effort thinking.
-  - At $4 input and $20 output per million tokens [VERIFY: anthropic.com/pricing], that is about USD 0.01 + 0.016 ≈ **USD 0.03** (NFR-09: ≤ 0.05).
+  - At $4 input and $20 output per million tokens (checked 2026-10), that is about USD 0.01 + 0.016 ≈ **USD 0.03** (NFR-09: ≤ 0.05).
 - **Budget:** about 60 uncached calls (25 for cache build and eval, plus rehearsals) ≈ USD 2. `MAX_LLM_CALLS_PER_DAY=200` is a hard stop. When reached, uploads go to `failed` (manual entry).
 - **Latency:** typical 4–12 s; timeout 25 s; client polling every 2 s (NFR-02).
 

@@ -4,8 +4,6 @@ Audience:     P1–P4.
 Depends on:   phase-4 §4 (12:15 check); test-strategy §2.4, §5; environments §5–§6; security SEC-10, 14, 16; team plan §14 (demo story), §17 (disclosure), §19 (roadmap)
 Status:       Draft v1
 
----
-
 ## 1. Rules after 12:30 (FEATURE FREEZE)
 
 - Only fixes for bugs that break the demo scenario, a P0 test, or a security control. Each fix needs one reviewer who re-runs the affected scenario steps.

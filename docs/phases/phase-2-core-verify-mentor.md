@@ -4,8 +4,6 @@ Audience:     P1–P4.
 Depends on:   phase-1-foundation.md (G1 passed); ai-system §2–§3; backend §4, §6.1, §6.2, §6.5–§6.8, §9; security §4, SEC-06; ux-flows FLOW-02, 05, 06, 07, 08
 Status:       Draft v1
 
----
-
 ## 1. Goal and gate
 
 **Goal:** by 7:00, Aarav can upload the 4 demo files and get the right statuses, a reviewer can approve one, the HOD can allot, and Meera can log a group session whose attendees, action items and issues are stored and visible.

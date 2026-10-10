@@ -1,0 +1,5 @@
+# OpenAPI lint rules (run: npx @stoplight/spectral-cli lint docs/04-backend/openapi.yaml)
+extends: ["spectral:oas"]
+rules:
+  # Each operation has a summary; behaviour lives in docs/04-backend/backend.md (one fact, one home).
+  operation-description: off

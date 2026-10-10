@@ -4,14 +4,12 @@ Audience:     The 4 builders (P1–P4) and coding agents working on a task.
 Depends on:   docs/00-index.md and the whole spec pack; docs/plan/prd-v2-and-15h-plan.md §13 (team plan)
 Status:       Draft v1. This refines team plan §13.2–13.3. Where hours differ, this folder wins; where a spec fact differs, the spec pack wins.
 
----
-
 ## 1. Phases at a glance
 
 | Phase | Hours | Doc | Goal | Exit gate |
 |---|---|---|---|---|
 | 0 | 0:00–1:00 | [phase-0-setup.md](phase-0-setup.md) | Decisions made, repo boots for everyone | G0: compose healthy, health 200, frontend builds, decisions logged |
-| 1 | 1:00–4:00 | [phase-1-foundation.md](phase-1-foundation.md) | Old code secured and rewired under `/api/v1`; seed loads; login works for 4 roles | G1: security tests green, seed loads, role routing works |
+| 1 | 1:00–4:00 | [phase-1-foundation.md](phase-1-foundation.md) | Secure API skeleton under `/api/v1` built from scratch; seed loads; login works for 4 roles | G1: security tests green, seed loads, role routing works |
 | 2 | 4:00–7:00 | [phase-2-core-verify-mentor.md](phase-2-core-verify-mentor.md) | Certificate pipeline end to end; allotment, sessions, action items, issues | G2 (midpoint, 7:00): upload → Certified works; a session saves and lists |
 | 3 | 7:00–10:00 | [phase-3-core-match-track-evidence.md](phase-3-core-match-track-evidence.md) | Fit Check, candidates, mentor home, Mentee 360, mentorship page, dashboard, exports | **G3 CORE FREEZE (10:00)**: index §7 scenario passes twice; P0 tests green |
 | 4 | 10:00–12:30 | [phase-4-addon-a.md](phase-4-addon-a.md) | ADD-ON A (P1 requirements) in priority order | Each item merges only with the scenario still green |
@@ -59,8 +57,8 @@ Hours are relative to the start of the build ("0:00"). Write the real start time
 
 | Phase | P1 | P2 | P3 | P4 |
 |---|---|---|---|---|
-| 0 Setup | 1.0 deps + model bake | 1.0 backend import + compose | 1.0 frontend import + types | 1.0 seed skeleton + certificate template |
-| 1 Foundation | 3.0 embeddings, concepts, extraction skeleton | 3.0 deletions, core, auth, deps, notify, applications | 3.0 API client, shell, login, shared components | 3.0 seed data + seed script + certificate images |
+| 0 Setup | 1.0 deps + model bake | 1.0 scaffold commit + compose + main.py | 1.0 frontend deps + nav/features + types | 1.0 seed skeleton + certificate template |
+| 1 Foundation | 3.0 embeddings, concepts, extraction skeleton | 3.0 security helpers, core, auth, deps, notify, applications | 3.0 API client, shell, login, shared components | 3.0 seed data + seed script + certificate images |
 | 2 Core A | 3.0 MDL-01, verification, cache, trust | 3.0 certificates API + JOB, allotment, sessions, actions, issues | 3.0 SCR-04, SCR-10, SCR-08 | 3.0 seed certs, SCR-12, SCR-05 |
 | 3 Core B | 3.0 scorer, fit APIs, seed tuning, Fit UI | 3.0 tracking, Mentee 360, metrics, exports | 3.0 SCR-06, SCR-07, SCR-09 | 3.0 SCR-11, SCR-02, SCR-14/15, dry run |
 | 4 Add-on A | 2.5 Why API, skill gap, eval, tamper | 2.5 drill-down, reminders, issue lifecycle, requests, create opening | 2.5 WhyGraph, reminders UI, issue UI, opening form | 2.5 SCR-13, request dialogs, deck |

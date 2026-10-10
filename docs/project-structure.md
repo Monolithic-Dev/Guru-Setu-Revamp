@@ -4,15 +4,13 @@ Audience:     The team and coding agents.
 Depends on:   docs/00-index.md, architecture.md §9, parallel-work.md, backend.md §8, environments-and-deployment.md
 Status:       Draft v1. Facts come from the spec pack, read on 2026-10-10. Nothing here was run: `backend/` and `frontend/` do not exist yet.
 
----
-
 ## 1. State of the repo today
 
 | Part | Exists now | Created when |
 |---|---|---|
 | `docs/` spec pack, `AGENTS.md`, `CLAUDE.md`, `README.md`, `LICENSE`, `tools/` | Yes | — |
 | `backend/`, `frontend/` | **No** | Hour 0: P2 scaffolds both from scratch (scaffold commit, [phase-0 T0.P2.0](phases/phase-0-setup.md)) |
-| `docker-compose.yml`, `.env.example` | **No** | Phase 0, P2 (T0.P2.1) |
+| `docker-compose.yml` | **No** | Phase 0, P2 (T0.P2.1) |
 | `docs/general/` | Empty | — |
 
 **Build mode: from scratch** (A-05, decision D-1). The old GuruSetu repos are not needed, and no old code is copied. Phase 1 writes auth, core and the app shell instead of repairing them (about +2 h across P2 and P3 [I]).
@@ -23,7 +21,6 @@ Status:       Draft v1. Facts come from the spec pack, read on 2026-10-10. Nothi
 Guru-Setu-Revamp/
 ├─ AGENTS.md  CLAUDE.md  README.md  LICENSE
 ├─ docker-compose.yml          neo4j + backend + frontend           (P2)
-├─ .env.example  → copy to .env (never commit .env)                  (P2)
 ├─ tools/
 │   ├─ ownership.txt           who may edit which path
 │   └─ check_ownership.py      run before every push
@@ -55,7 +52,7 @@ Import rules ([architecture §9](02-architecture/architecture.md)): `api/v1` →
 | Person | Lane | Main paths |
 |---|---|---|
 | **P1** | AI/ML and Fit Check | `backend/app/ml/`, `api/v1/match.py`, `repos/match_repo.py`, `repos/ml_repo.py`, requirements, Dockerfile, `extraction_cache/`, `components/fit/`, `student/openings/` |
-| **P2** | Backend, graph, security | rest of `backend/app/`, compose, `.env.example`, `schema/`, `tools/`, most tests |
+| **P2** | Backend, graph, security | rest of `backend/app/`, compose, `docs/10-devops/env.example`, `schema/`, `tools/`, most tests |
 | **P3** | Frontend shell and mentor screens | `frontend/` by default, layouts, `package.json`, UI kit, certificate, review and session screens |
 | **P4** | Data, coordinator UI, pitch | `backend/seed/`, `scripts/seed.py`, coordinator and student-home screens, README, docs, deck, demo script |
 
@@ -129,7 +126,7 @@ Team size is 4 (confirmed by the team): 4 x 15 h = 60 person-hours.
 3. **Scope is large for 15 hours:** 45 endpoints, 16 screens, Neo4j with vectors, an LLM pipeline, XLSX exports. The docs' own cut order is sensible; use it early.
 4. **Unchecked external facts** the docs mark [VERIFY]: Genesis rules on prior code and AI, the model ID `claude-opus-5-5` and cost, the Anthropic SDK version, the `neo4j:5.26-community` tag, the CPU torch wheel URL, and NAAC criterion codes.
 5. **Vision input on stage:** the offline demo works only for files in the cache. Any new certificate needs a key and network.
-6. **Minor:** `AGENTS.md` and the README say `cp docs/10-devops/env.example .env`, while architecture §9 says `cp .env.example .env`. Both work after Phase 0, but pick one.
+6. **Resolved:** one env template only, `docs/10-devops/env.example`; every doc says `cp docs/10-devops/env.example .env` (the root `.env.example` copy was dropped). Previously: both worked after Phase 0, but pick one.
 
 Verified mechanically: all relative Markdown links resolve, and `openapi.yaml` has 45 `x-id: API-` lines (I did not check that they are unique).
 

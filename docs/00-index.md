@@ -5,8 +5,6 @@ Depends on:   all documents below
 Inputs used:  docs/plan/prd-v2-and-15h-plan.md (PRD v2 + 15-hour plan), gurusetu-pramaan-concept.md, gurusetu-enterprise-vision.md, GENESIS-GuruSetu-Audit-and-Proposal.md (these three are kept outside this repo)
 Status:       Draft v1 | assumptions log: §5
 
----
-
 ## 1. Brief as understood
 
 - **Project:** a web app (FastAPI + Neo4j + Next.js 14) built from scratch for the Genesis hackathon, Campus Problems track (the concept comes from the earlier GuruSetu prototype; no old code is reused, D-1).
@@ -45,7 +43,7 @@ The spec pack itself holds no schedules. The hour-by-hour build plan lives in [p
 | # | Domain | Decision | Path | Trigger or reason |
 |---|---|---|---|---|
 | 1 | Product and requirements | include (personas + glossary as sections) | 01-product/prd.md | Always |
-| 2 | Architecture and structure | include (ADRs + project structure as sections) | 02-architecture/architecture.md | Always; repair-vs-rewrite and datastore decisions |
+| 2 | Architecture and structure | include (ADRs + project structure as sections) | 02-architecture/architecture.md | Always; build-mode (scratch), datastore and router decisions |
 | 3 | Data and persistence | merge into #4 | 04-backend/backend.md, schema.cypher | Neo4j graph with ~20 entities; small project → merged |
 | 4 | Backend and API | include | 04-backend/backend.md, openapi.yaml | FastAPI server, 45 endpoints, background job |
 | 5 | Frontend and UX | include (screens, components, client state as sections) | 05-frontend/ux-flows.md | 16 screens across 4 roles |
@@ -53,8 +51,8 @@ The spec pack itself holds no schedules. The hour-by-hour build plan lives in [p
 | 7 | ML training and serving | skip | — | No model is trained; MiniLM is used pretrained, and its eval is EVAL-03 in #6 |
 | 8 | Data science and analytics | merge into #4 §7 | 04-backend/backend.md | Dashboard metrics only (MET-); no experiments or pipelines |
 | 9 | Security, privacy and compliance | include (threat model + compliance as sections) | 08-security/security-and-privacy.md | Personal and sensitive mentoring data, uploads, untrusted text into an LLM, audit criticals C1–C3 |
-| 10 | Integrations | merge into #6 (Anthropic) and #7 (none else) | — | The only third party is the Anthropic API; Cloudinary removed (ADR-13) |
-| 11 | DevOps, environments, release | include (short) | 10-devops/environments-and-deployment.md | Always; a working Dockerfile and env from hour 0 |
+| 10 | Integrations | merge into #6 (Anthropic); no other third party | — | The only third party is the Anthropic API; Cloudinary removed (ADR-13) |
+| 11 | DevOps, environments, release | include (quickstart, infra, release, backups); CI/CD and distribution skipped, observability merged (environments §8) | 10-devops/environments-and-deployment.md | Always; a working Dockerfile and env from hour 0 |
 | 12 | Testing and quality | include (failure modes + manual QA as sections) | 11-quality/test-strategy.md | Always |
 | 13 | Project-type specials | skip | — | No library API, game, contract or hardware |
 | 14–15 | Agent entry file + index | include | AGENTS.md, CLAUDE.md, 00-index.md | Always |
@@ -82,7 +80,8 @@ The spec pack itself holds no schedules. The hour-by-hour build plan lives in [p
 | FLOW / SCR | Flow / screen | ux-flows §3, §6 | FLOW-01..11 / SCR-01..16 |
 | SEC / THR | Security requirement / threat | security §5, §10 | SEC-01..21 / THR-01..14 |
 | ENV | Environment | environments §1 | ENV-01..03 |
-| TEST / FM | Test / failure mode | test-strategy §2, §4 | TEST-01..57 (gaps unused) / FM-01..13 |
+| T | Build task (outside the spec pack) | docs/phases | T0.P2.0 … T6.P4.3 |
+| TEST / FM | Test / failure mode | test-strategy §2, §4 | TEST-01..63 (gaps unused) / FM-01..18 |
 
 ## 5. Assumptions log
 
@@ -127,50 +126,49 @@ The three with the largest effect if wrong are marked ★. Correct these first.
 - NAAC criterion codes
 - DPDP Rules
 
-## 6. Traceability (REQ → realisation → test)
+## 6. Traceability
 
-| REQ | Tier | API | SCR / JOB | TEST |
-|---|---|---|---|---|
-| 001 | P0 | 005, 006, 007 | SCR-04, JOB-01 | 12, 13, 16 |
-| 002 | P0 | 009, 010, 011 | SCR-04, 10, JOB-01 | 05, 13 |
-| 003 | P0 | 003, 004 | SCR-04, JOB-01 | 15, 19 |
-| 004 | P0 | 012, 013, 015 | SCR-02, 03 | 18, 19 |
-| 005 | P0 | 015, 016, 003 | SCR-09 | 22, 39 |
-| 006 | P0 | 017, 018, 019 | SCR-03, 05, 09 | 23 |
-| 007 | P0 | 022, 023 | SCR-12 | 27 |
-| 008 | P0 | 026, 027 | SCR-08 | 28 |
-| 009 | P0 | 028 | SCR-05 | 29 |
-| 010 | P0 | 026, 030 | SCR-05, 07, 08 | 30 |
-| 011 | P0 | 026, 031, 032 | SCR-07, 08 | 31 |
-| 012 | P0 | 024 | SCR-06 | 33 |
-| 013 | P0 | 025 | SCR-07 | 43 |
-| 014 | P0 | 029, 019 | SCR-05 | 42 |
-| 015 | P0 | 027, 025, 035 | SCR-07 | 20, 21 |
-| 016 | P0 | 033 | SCR-11 | 32 |
-| 017 | P0 | 035, 036 | SCR-11 | 08, 21 |
-| 018 | P0 | 010, 018, 023, 030, 032 | SCR-07 timeline | 34 |
-| 031 | P0 | 001, 002 | SCR-01 | 03, 11 |
-| 037 | P0 | 008 | SCR-04 | 14 |
-| 038 | P0 | 037, 038 | SCR-14 | 35 |
-| 019 | P1 | 034 | SCR-13 | 37 |
-| 020 | P1 | 020 | SCR-03 | 24 |
-| 021 | P1 | 021 | SCR-02 | 25 |
-| 022 | P1 | 032 | SCR-07 | 38 |
-| 023 | P1 | 039 | SCR-14 | 36 |
-| 024 | P1 | 031, 045 | SCR-05 | 44 |
-| 025 | P1 | — | SCR-04, JOB-01 | 17 |
-| 026 | P1 | — (`scripts.eval_match`) | — | EVAL-03 |
-| 030 | P1 | 014 | SCR-15 | 47 |
-| 036 | P1 | 026, 032 | SCR-07, 08 | 26 |
-| 027 | P2 | 041 | SCR-07 | 45 |
-| 028 | P2 | 023 | SCR-12 | 27 |
-| 029 | P2 | 024, 043 | SCR-06, 07 | 46 |
-| 032 | P2 | 025 | SCR-07 | 48 |
-| 033 | P2 | 043, 035 | SCR-07 | 49 |
-| 034 | P2 | 042 | SCR-05 | 56 |
-| 035 | P2 | 044 | SCR-16 | 57 |
+The AC-level traceability matrix (REQ → AC → TEST with layer → realising API/SCR/ENT/JOB/MDL) lives in [test-strategy §6](11-quality/test-strategy.md). Every P0 row is filled. API-040 (health) has no REQ; it serves operations (NFR-08, ENV-).
 
-API-040 (health) has no REQ; it serves ENV-/NFR-08 operations.
+## 6.1 Reading order by kind of work
+
+| Work | Read |
+|---|---|
+| Anyone, first | AGENTS.md → this index → PRD §1–§8 → your current phase doc |
+| Building an API or service | backend.md (§2 data, §4 endpoint, §6 rules) + openapi.yaml + security §4 for that route |
+| Building a screen | ux-flows (§3 flow, §4 states and copy, §6 screen row) + the endpoint's openapi schema |
+| AI / matching | ai-system (§2 extraction, §3 verification, §4 scorer) |
+| Writing tests | test-strategy §2 cases + §6 matrix, and the REQ's ACs in the PRD |
+| Running or demoing | environments-and-deployment §0, §4, §5, §6 smoke checklist |
+
+**Module dependency order:** architecture §2.1 (this is not a schedule; the schedule is docs/phases).
+
+**Glossary:** PRD §4.
+
+**Mock register:** PRD §13 lists every `[MOCK]` with its replacement contract: academic records, accounts, certificates, extraction cache, criterion codes.
+
+## 6.2 VERIFY list
+
+| Fact | Where used | Where to check |
+|---|---|---|
+| Genesis rules on prior code and AI use | PRD §10, A-05, A-09 | Genesis rules document (decision D-1, D-2) |
+| Server-side fallback compatibility with structured output | ai-system §2.1 | Claude API docs; first live call (T2.P1.1) |
+| Anthropic Python SDK version | architecture §4 | pypi.org/project/anthropic (pin at T0.P1.1) |
+| FastAPI and Pydantic versions | architecture §4 | pypi.org (pin at T0.P1.1) |
+| `neo4j:5.26-community` image tag | environments §2 | hub.docker.com/_/neo4j |
+| PyTorch CPU wheel index URL | environments §2 | pytorch.org get-started |
+| Compose version | environments §0 | docs.docker.com |
+| Free tiers of Render, Netlify, Aura | environments §1.1 (ENV-03 only) | each provider's pricing page |
+| pytest, httpx, Playwright versions | test-strategy §1 | pypi.org, npmjs.com |
+| NAAC criterion codes 2.3.3, 5.3.1 | ENT-13, exports | Official NAAC manual (current version) |
+| DPDP Act and Rules obligations | security §11 | Gazette text of the DPDP Act 2023 and Rules |
+
+## 6.3 How to build from this pack with a coding agent
+
+1. Give the agent AGENTS.md (CLAUDE.md loads it automatically in Claude Code).
+2. Work one module at a time, in the dependency order of architecture §2.1, using a task from the current phase doc. Point the agent at only that task's governing sections (the task lists them under **Spec**).
+3. Ask it to implement against the listed acceptance criteria, add the TEST- cases from test-strategy §6, and run the document's **Verify** step plus `check_ownership.py`.
+4. Start a fresh agent session for each module or task, so context stays clean.
 
 ## 7. End-to-end verification scenario
 
@@ -206,5 +204,7 @@ Run on ENV-02 after `seed --reset`, with `LLM_PROVIDER=none`, and the network of
 7. The gain values in the API-015 example were recomputed (55.0 / 51.2 / 50.1).
 8. Demo upload file names were unified across the AI doc, backend seed, tests and scenario.
 9. A seed `--anchor-date` was added so the flags hold on any demo day.
+
+**Second audit (full prompt):** added the DevOps quickstart with prerequisites, infrastructure and cost, release and rollback, the smoke checklist, backups, and the reasons for skipping CI/CD, observability and distribution; added the AC-level traceability matrix, the test pyramid, the flaky-test policy, the definition of done, and edge-case tests TEST-58, 59, 61–63 with FM-14..18; rewrote AGENTS.md (commands first, three-tier boundaries, known traps); added reading order, the VERIFY list, the mock register and the coding-agent guide to this index; recorded the model ID as checked; removed decorative rules. **Planning note:** the prompt excludes schedules from the spec pack. docs/phases exists at the team's explicit request and sits outside the pack.
 
 **What remains assumed:** §5 (A-01..A-23) and the [VERIFY] facts listed under it. The scorer's exact before/after values depend on real MiniLM cosine values, so the tests assert ranges (A-16).

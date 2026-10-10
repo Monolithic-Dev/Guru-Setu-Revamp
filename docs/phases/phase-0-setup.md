@@ -4,8 +4,6 @@ Audience:     All four builders.
 Depends on:   docs/00-index.md §5 (assumptions), docs/02-architecture/architecture.md §8–§9, docs/10-devops/environments-and-deployment.md
 Status:       Draft v1
 
----
-
 ## 1. Goal and exit gate
 
 **Goal:** by 1:00, every shared file exists in its final form (parallel-work §3), every person can run `docker compose up -d --build`, sees a healthy API and a building frontend, and the decisions that would change the plan are recorded.
@@ -49,7 +47,7 @@ File ownership follows [parallel-work.md](parallel-work.md). Every task below to
 
 ### T0.P2.1 Compose, config, app entry, schema, generated models (45 min)
 - **Spec:** ADR-13, architecture §9, environments §2, backend §8, parallel-work §3
-- **Files (P2):** `docker-compose.yml`, `.env.example`, `backend/app/main.py`, `backend/app/core/config.py`, `backend/schema/schema.cypher`, `backend/app/api/v1/health.py`, `backend/app/services/jobs.py`, `backend/app/schemas/generated.py` (GEN, first run)
+- **Files (P2):** `docker-compose.yml`, `docs/10-devops/env.example` (only if a variable is missing), `backend/app/main.py`, `backend/app/core/config.py`, `backend/schema/schema.cypher`, `backend/app/api/v1/health.py`, `backend/app/services/jobs.py`, `backend/app/schemas/generated.py` (GEN, first run)
 - **Steps:**
   1. Rewrite `config.py` with pydantic-settings fields for **every** variable in backend §8, so nobody adds settings later. Remove `CLOUDINARY_*` and `OPENAI_API_KEY`. At startup, check `len(JWT_SECRET_KEY) >= 32` and `len(NEO4J_PASSWORD) >= 12`, and raise with a clear message otherwise (SEC-10).
   2. Write `main.py` once, in final form:
@@ -60,7 +58,7 @@ File ownership follows [parallel-work.md](parallel-work.md). Every task below to
   4. Add `api/v1/health.py` (API-040): run `RETURN 1` against Neo4j and return `{status, neo4j, llm_provider}`; 503 on failure.
   5. Run `datamodel-codegen --input docs/04-backend/openapi.yaml --input-file-type openapi --output backend/app/schemas/generated.py --output-model-type pydantic_v2.BaseModel`. The tool comes from P1's requirements; if T0.P1.1 isn't merged yet, run it from a local venv.
   6. Write `docker-compose.yml` per environments §2: neo4j `5.26-community` with healthcheck, backend depending on healthy neo4j, frontend depending on healthy backend; volumes `neo4j_data` and `uploads`; `env_file: .env`.
-  7. `cp docs/10-devops/env.example .env.example` at the root.
+  7. Do not create a root `.env.example`: the single template is `docs/10-devops/env.example` (`cp docs/10-devops/env.example .env`).
 - **Done when:** the G0 health check passes on your machine, and on one teammate's machine after `git pull`.
 
 ### T0.P3.1 Frontend clean-up, dependencies, shared frontend files (45 min)

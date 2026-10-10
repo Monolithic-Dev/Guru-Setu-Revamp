@@ -1,41 +1,54 @@
 # AGENTS.md: GuruSetu Verified Mentorship Graph
 
-You are building a 15-hour hackathon product. Students prove skills with verified certificates and use them to find research guides. Faculty mentors log and track sessions, action items and issues. HOD and IQAC see live mentoring compliance and export draft accreditation evidence. The stack is FastAPI + Neo4j 5 + Next.js 14, **built from scratch** (no old GuruSetu code is copied; decision D-1).
-
-## Read before writing code (in this order)
-1. [docs/00-index.md](docs/00-index.md): document map, ID registry, assumptions, end-to-end scenario
-2. [docs/01-product/prd.md](docs/01-product/prd.md): REQ-/NFR-/NG- with acceptance criteria. **NG- items are forbidden scope.**
-3. [docs/02-architecture/architecture.md](docs/02-architecture/architecture.md): components, ADRs, project structure, import rules
-4. [docs/04-backend/backend.md](docs/04-backend/backend.md) + [openapi.yaml](docs/04-backend/openapi.yaml) + [schema.cypher](docs/04-backend/schema.cypher): data, API, business rules, config
-5. Then the document for your area: [ai-system.md](docs/06-ai/ai-system.md), [ux-flows.md](docs/05-frontend/ux-flows.md), [security-and-privacy.md](docs/08-security/security-and-privacy.md), [environments-and-deployment.md](docs/10-devops/environments-and-deployment.md), [test-strategy.md](docs/11-quality/test-strategy.md)
-
-**What to build now:** [docs/phases/README.md](docs/phases/README.md) lists the phases, gates and task IDs. Open the current phase doc, take a task (`T<phase>.<person>.<n>`) and follow its steps and *Done when*. Update [docs/phases/status.md](docs/phases/status.md). **Edit only files your owner id owns** ([docs/phases/parallel-work.md](docs/phases/parallel-work.md), map in `tools/ownership.txt`); run `python tools/check_ownership.py P<n>` before every push. Where a phase doc and the spec pack disagree on a fact, the spec pack wins; fix the phase doc.
-
-## Hard rules
-- **Contracts are the source of truth.** Field names and types come from `openapi.yaml`, and labels and keys from `schema.cypher`. Change the contract file first, then the code, in the same commit.
-- **Priority:** build P0 before any P1, and P1 before P2. Do not build NG- items or roadmap items.
-- **Security is P0.** Every route needs a Pydantic response model (never return `password_hash`, `embedding`, `file_path`). Role checks and scope checks go in `app/api/deps.py` (security §3–§4). Out of scope → 404, wrong role → 403.
-- **Privacy:** session notes go only to their author. Issue text, notes and action text never appear in dashboards, exports, notifications or logs (REQ-015, SEC-15).
-- **Cypher only in `backend/app/repos/`** (and `scripts/seed.py`), always parameterised (SEC-17).
-- **The LLM extracts certificate fields only.** Trust, status and confidence are deterministic code (ai-system §3). Never give the model tools.
-- **Thresholds are config** (backend §8), never literals. Dates follow architecture §5.
-- **Every status change** writes a StatusEvent and the listed notifications, in the same transaction as the change (backend §5, §6.9).
-- Mark seeded or simulated things `[MOCK]` in the UI ("Sample data") and in code comments.
-- Use the IDs (REQ-, API-, SCR-, TEST-) in commit messages, test names and comments where they help traceability.
-
 ## Commands
 ```
-cp docs/10-devops/env.example .env      # set NEO4J_PASSWORD, JWT_SECRET_KEY (+ ANTHROPIC_API_KEY or LLM_PROVIDER=none)
-docker compose up -d --build
-docker compose exec backend python -m scripts.seed --reset
-docker compose exec -e TODAY_OVERRIDE=2026-10-10 backend pytest -q
-ruff check backend && npm --prefix frontend run lint
-npx @stoplight/spectral-cli lint docs/04-backend/openapi.yaml
-npx openapi-typescript docs/04-backend/openapi.yaml -o frontend/src/lib/types.ts
+cp docs/10-devops/env.example .env                                   # set NEO4J_PASSWORD, JWT_SECRET_KEY; ANTHROPIC_API_KEY or LLM_PROVIDER=none
+docker compose up -d --build                                         # build + run (schema is applied at API startup; no migrations)
+docker compose exec backend python -m scripts.seed --reset           # seed synthetic data (add --anchor-date YYYY-MM-DD for demo day)
+docker compose exec -e TODAY_OVERRIDE=2026-10-10 backend pytest -q   # all backend tests
+docker compose exec -e TODAY_OVERRIDE=2026-10-10 backend pytest -q tests/test_security.py::test_03_unauthenticated   # one test
+ruff check backend                                                   # backend lint
+npm --prefix frontend run lint && npx --prefix frontend tsc --noEmit # frontend lint + type-check
+npx @stoplight/spectral-cli lint docs/04-backend/openapi.yaml        # contract lint
+npm --prefix frontend run gen:types                                  # regenerate frontend/src/lib/types.ts
+python tools/check_ownership.py P<n>                                 # before every push
 ```
 Demo logins (synthetic): `aarav@`, `meera@`, `suresh@` (HOD), `kavya@` (IQAC) at `demo.gurusetu`, password `Demo@123`.
 
-## Definition of done for any change
-- The acceptance criteria of the REQ it implements pass, and its TEST- cases from test-strategy exist and are green.
-- No new endpoint, field or screen without a REQ behind it. If one is needed, add the REQ to the PRD first.
-- `pytest -q`, ruff, frontend lint and the spectral lint pass. The primary flow (PRD §8) still runs on a fresh seed.
+## Project
+A 15-hour hackathon build. Students verify certificates and get explained fit for research openings. Faculty mentors log and track sessions, action items and issues. HOD and IQAC get live compliance and draft NAAC evidence exports. FastAPI + Neo4j 5 + Next.js 14, **built from scratch** (no old GuruSetu code is copied; decision D-1). Start at [docs/00-index.md](docs/00-index.md).
+
+## Where things live
+| Path | What | Governing doc |
+|---|---|---|
+| `backend/app/api/v1/` | Routers, auto-discovered by `main.py` | [backend.md §4](docs/04-backend/backend.md), [openapi.yaml](docs/04-backend/openapi.yaml) |
+| `backend/app/services/`, `repos/` | Business rules / Cypher | backend.md §5–§7, [schema.cypher](docs/04-backend/schema.cypher) |
+| `backend/app/ml/` | Extraction, verification, embeddings, scorer | [ai-system.md](docs/06-ai/ai-system.md) |
+| `backend/seed/`, `scripts/` | Synthetic data, seed and eval scripts | backend.md §10 |
+| `frontend/src/app/` | Screens SCR-01..16 | [ux-flows.md](docs/05-frontend/ux-flows.md) |
+| access and visibility rules | — | [security-and-privacy.md §4](docs/08-security/security-and-privacy.md) |
+| tests and traceability | — | [test-strategy.md](docs/11-quality/test-strategy.md) |
+| what to build now | Task `T<phase>.<person>.<n>` | [docs/phases/README.md](docs/phases/README.md), status in `docs/phases/status.md` |
+
+## Conventions
+- JSON and Python `snake_case`; Neo4j labels `PascalCase`, relationships `UPPER_SNAKE`.
+- Errors are `application/problem+json` with a stable `code` (backend §3.1). Raise `ApiError(code, status, detail)`.
+- Import rules: `api → deps, schemas, services`; `services → repos, ml`; Cypher only in `repos/` and `scripts/seed.py`, always parameterised.
+- Thresholds come from config (backend §8). Calendar dates are Asia/Kolkata; timestamps are UTC with a `Z` suffix.
+- Commit messages: `T2.P2.3 REQ-008: <what>`.
+
+## Boundaries
+**Always:** run your tests before finishing; build P0 before P1 before P2; write a StatusEvent and the listed notifications in the same transaction as any status change; update the governing doc when behaviour changes; edit only files your owner id owns (`tools/ownership.txt`).
+
+**Ask first:** adding a dependency (P1 owns `requirements.txt`, P3 owns `package.json`); changing `openapi.yaml` or `schema.cypher` (P2; additive only, docs/phases/parallel-work.md §5); changing a threshold default or a fit weight.
+
+**Never:** commit `.env`, uploads or real data; hand-edit `schemas/generated.py` or `lib/types.ts`; return `password_hash`, `embedding` or `file_path`; put note, issue or action text in dashboards, exports, notifications or logs; let the LLM decide status, trust or confidence; build NG- items from the PRD; change files outside your task.
+
+## Definition of done
+The REQ's acceptance criteria pass through the TEST- IDs in test-strategy §6; ruff, frontend lint, `tsc` and the spectral lint are green; `check_ownership.py` passes; the index §7 scenario still runs on a fresh seed.
+
+## Known traps
+- **403 vs 404:** wrong role → 403; right role but outside scope → 404, so existence never leaks (security §3–§4). HOD on API-027 is 403.
+- **Private fields are omitted, not null:** `notes`, issue `text` and `duplicate_of` are left out of the response when the caller may not see them.
+- **"Today" is seeded:** tests need `TODAY_OVERRIDE=2026-10-10`, and the demo needs `seed --anchor-date`. Otherwise the needs-attention flags and compliance numbers shift.
+- **Fit score rounding:** each component is rounded first, then summed, so `semantic + skill + concept == score` exactly (ai-system §4).

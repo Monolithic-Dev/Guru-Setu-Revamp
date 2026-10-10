@@ -7,8 +7,6 @@ Status:       Draft v1 | assumptions in this document: A-01, A-02, A-03, A-04, A
 
 Personas and the glossary are sections of this document (small project).
 
----
-
 ## 1. Summary
 
 College mentoring runs on signed paper registers. Nobody can see which mentee hasn't been met or what was promised in the last meeting. Student skills are self-claimed and unchecked, and accreditation evidence (NAAC mentoring ratio, mentor-wise issues raised and resolved, student achievements) is compiled by hand before every audit.
@@ -303,7 +301,7 @@ Targeted judging criteria are mapped in the team plan (docs/plan, §18). Every f
 | ID | Risk | Likelihood | Impact | Mitigation / fallback |
 |---|---|---|---|---|
 | RISK-01 | Genesis rules forbid reusing exhibited code | M | H | Check at hour 0; disclosure statement; list new work explicitly |
-| RISK-02 | 15 h is too short for repair plus build | H | H | Delete dead code instead of fixing it (NG-10); P0 only until the core freeze; cut order in the team plan |
+| RISK-02 | 15 h is too short for a scratch build | H | H | Build only P0 until the core freeze; never build NG-10 features; shared files and stubs created in Phase 0 so 4 people work in parallel; cut order in the team plan |
 | RISK-03 | LLM extraction fails or is slow on stage | M | H | Cache keyed by SHA-256 for every demo file (NFR-04); manual entry (REQ-037) |
 | RISK-04 | A judge finds a security hole | M | H | SEC- items in security doc are P0; tests TEST-01..11 |
 | RISK-05 | Session notes or confidential text leak via an endpoint or export | L | H | Server-side field filtering (REQ-015, REQ-036); TEST-20, TEST-21 |

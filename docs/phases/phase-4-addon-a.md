@@ -4,8 +4,6 @@ Audience:     P1–P4.
 Depends on:   phase-3 G3 passed (if it didn't, this phase is replaced by fixing; see phase-3 §1); PRD REQ-019..026, 030, 036; backend §4, §6.7, §6.10, §7; ai-system §3 (rule 6), §4, §10; ux-flows FLOW-03, 08, 09, 11
 Status:       Draft v1
 
----
-
 ## 1. Rules for this phase
 
 1. **Priority order is fixed** (team plan §13.2, with REQ-030/036 slotted in). If time runs out, the lowest items are dropped, never the higher ones.
@@ -119,7 +117,7 @@ P4 starts the deck at 10:00 while P2 builds API-034, then switches to SCR-13 at 
   - read the EXIF `Software` tag (Pillow `getexif().get(305)`) and match it against the editor list (case-insensitive);
   - ELA: re-save as JPEG at quality 90, take the mean absolute difference over all channels, and flag if > `ELA_THRESHOLD`.
   - Tune `ELA_THRESHOLD` on the seed files so that only the planted file trips it (A-17). If no value separates them, use the EXIF signal only and note it in the decisions log.
-  - Enable with `TAMPER_CHECK_ENABLED=true` in `.env.example` only after tuning.
+  - Enable with `TAMPER_CHECK_ENABLED=true` in `docs/10-devops/env.example` only after tuning.
 - **Done when:** TEST-17 passes, and a full seed reset produces no new `tamper_signal` on non-planted files.
 
 ### A9 Create opening (REQ-030)

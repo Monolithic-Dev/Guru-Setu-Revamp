@@ -4,8 +4,6 @@ Audience:     All four builders and coding agents.
 Depends on:   docs/phases/README.md, all phase docs, docs/02-architecture/architecture.md §9
 Status:       Draft v1
 
----
-
 ## 1. The rule
 
 **Every file has exactly one owner, and only the owner edits it.** The map is [tools/ownership.txt](../../tools/ownership.txt). Git only conflicts when two branches change the same lines of the same file, so file-disjoint branches merge cleanly in any order.
@@ -29,7 +27,7 @@ It prints `BLOCK` for any changed file you don't own. Make that change through i
 | Area | P1 | P2 | P3 | P4 |
 |---|---|---|---|---|
 | Backend app | `app/ml/**`, `api/v1/match.py` (API-012/013/015/016/020/021), `api/v1/endorsements.py` (API-041), `repos/match_repo.py`, `repos/ml_repo.py` (all Cypher used by `app/ml/`), `schemas/match.py` | Everything else in `backend/app/**`: `main.py`, `core/`, `api/deps.py`, all other `api/v1/*`, `services/`, `repos/`, `schemas/` | — | — |
-| Backend build | `requirements.txt`, `Dockerfile` | `docker-compose.yml`, `.env.example`, `backend/schema/` | — | — |
+| Backend build | `requirements.txt`, `Dockerfile` | `docker-compose.yml`, `docs/10-devops/env.example`, `backend/schema/` | — | — |
 | Data | `seed/aliases.json`, `seed/similar_overrides.json`, `seed/fit_tuning.json`, `extraction_cache/`, eval and cache scripts | — | — | All other `backend/seed/**`, `scripts/seed.py`, `scripts/check_seed.py` |
 | Backend tests | `test_verification`, `test_scorer`, `test_matching`, `test_embedding`, `test_extraction` | `conftest.py` and all other tests | — | — |
 | Frontend routes | SCR-03 `student/openings/**` | — | SCR-01, 04, 06, 07, 08, 09, 10, `faculty/openings/new`, all `layout.tsx` | SCR-02 `student/page.tsx`, SCR-05, SCR-11/12/13 `coordinator/**`, SCR-14 `notifications/**`, SCR-15 `faculty/openings/page.tsx`, SCR-16 |
@@ -110,7 +108,7 @@ A stub must compile and keep the final signature. If the signature has to change
 
 | Phase | P1 files | P2 files | P3 files | P4 files | Overlap |
 |---|---|---|---|---|---|
-| 0 | `requirements.txt`, `Dockerfile`, `ml/__init__.py` | scaffold commit (first), `docker-compose.yml`, `.env.example`, `main.py`, `config.py`, `schema/`, `api/v1/health.py`, `schemas/generated.py` (first run) | `frontend/**` cleanup, `package.json`, `lib/{types,nav,features}.ts`, frontend `Dockerfile` | `backend/seed/**` skeleton, `scripts/seed.py` stub, `tools/certgen/` | None after the scaffold commit (§8) |
+| 0 | `requirements.txt`, `Dockerfile`, `ml/__init__.py` | scaffold commit (first), `docker-compose.yml`, `main.py`, `config.py`, `schema/`, `api/v1/health.py`, `schemas/generated.py` (first run) | `frontend/**` cleanup, `package.json`, `lib/{types,nav,features}.ts`, frontend `Dockerfile` | `backend/seed/**` skeleton, `scripts/seed.py` stub, `tools/certgen/` | None after the scaffold commit (§8) |
 | 1 | `ml/embedding.py`, `ml/concepts.py`, `repos/ml_repo.py`, `ml/extraction.py`, `ml/seed_hooks.py`, `ml/schemas/`, `ml/prompts/`, `seed/aliases.json`, `seed/similar_overrides.json`, `seed/fit_tuning.json`, P1 tests | `core/*`, `api/deps.py`, `api/v1/{auth,students,applications,notifications}.py`, `services/{notify,status_history,applications}.py`, `repos/{users,students,applications,notifications}_repo.py`, `tests/conftest.py`, `tests/test_security.py`, `tests/test_applications.py` | `lib/api.ts`, `lib/problem.ts`, `hooks/`, `components/ui/**`, `components/why/WhyGraph.tsx` (stub), `components/mentor/RemindersPanel.tsx` (stub), layouts, `app/login`, P3 route stubs, `fixtures/p3/` | `seed/*.json` (except P1's three), `seed/labels/`, `seed/certificates/`, `seed/demo_uploads/`, `scripts/seed.py`, `scripts/check_seed.py` | None |
 | 2 | `ml/extraction.py`, `ml/verification.py`, `ml/trust.py`, `repos/ml_repo.py`, `extraction_cache/`, `scripts/build_extraction_cache.py`, `test_verification.py`, `test_extraction.py` | `api/v1/{certificates,mentorship}.py`, `services/{certificates,jobs,mentorship}.py`, `repos/{certificates,mentorship}_repo.py`, `tests/test_certificates.py`, `tests/test_mentorship.py` | `app/student/certificates/`, `app/reviews/`, `app/faculty/sessions/`, `components/mentor/*` (form parts) | `seed/certificates_index.json`, `scripts/seed.py` (step 5), P4 route stubs, `app/coordinator/allotment/`, `app/student/mentorship/`, `fixtures/p4/` | None |
 | 3 | `ml/scorer.py`, `api/v1/match.py`, `repos/match_repo.py`, `seed/fit_tuning.json`, `components/fit/**`, `app/student/openings/**`, `test_scorer.py`, `test_matching.py` | `api/v1/{tracking,dept,evidence}.py`, `services/{tracking,metrics,evidence_export}.py`, `repos/{tracking,metrics}_repo.py`, `tests/test_{tracking,metrics}.py` | `app/faculty/page.tsx`, `app/faculty/mentees/`, `app/faculty/openings/[id]/` | `app/coordinator/page.tsx`, `components/coordinator/`, `app/student/page.tsx`, `app/notifications/`, `app/faculty/openings/page.tsx` | None |

@@ -11,8 +11,6 @@ Status: draft v2. Owner: team. Supersedes PRD v1 (pasted draft) and merges the t
 Tags: [VERIFIED] found by search or code reading · [INFERRED] reasoning · [ASSUMED] default to confirm · [UNVERIFIED] check before claiming.
 Tier labels used throughout: **CORE** (must ship, hours 0–10) · **ADD-ON A** (hours 10–12.5) · **ADD-ON B** (only if A is done) · **ROADMAP** (pitch slide only, not built).
 
----
-
 ## 0. What changed from v1 (gap analysis)
 
 ### 0.1 Mentor-mentee items missing from the two concept docs
@@ -48,13 +46,9 @@ In the concept docs, "mentor" only means a faculty member who posts a research o
 ### 0.3 Tracking gaps in all three documents
 None of the three docs defined lifecycle states or "what counts as overdue". v2 defines a status model for every tracked object (§7) and the rules for flags and compliance (§8).
 
----
-
 ## 1. One-line vision
 
 **Mentoring built on proof: a student's verified achievements find the right mentor, every mentoring session is recorded and tracked in two minutes, and the college gets its accreditation evidence as a by-product.**
-
----
 
 ## 2. The problem
 
@@ -69,8 +63,6 @@ Mentoring in a college has four stages, and each is broken in a different way.
 
 **Root cause:** the same facts (who has which verified skill, who mentors whom, what was discussed, what was promised, what was resolved) sit on paper, in WhatsApp and in folders, and are never joined.
 
----
-
 ## 3. Users and roles
 
 | Role | Needs | Success looks like |
@@ -81,8 +73,6 @@ Mentoring in a college has four stages, and each is broken in a different way.
 | **Coordinator: IQAC view** | Evidence for mentoring and student achievements. | Exports a draft evidence pack in one click; every number traces to records. |
 
 To save build time, HOD and IQAC are **one Coordinator role with two tabs** [ASSUMED acceptable for the demo]. A dedicated Auditor role is ROADMAP.
-
----
 
 ## 4. Two kinds of mentorship (the v1 gap, made explicit)
 
@@ -97,8 +87,6 @@ To save build time, HOD and IQAC are **one Coordinator role with two tabs** [ASS
 
 Both use the same session, action-item and issue objects; the relationship type decides which dashboards and evidence they feed.
 
----
-
 ## 5. Core concept: the Trust Ladder (15-hour cut)
 
 | Level | Badge | Earned by | Match weight [ASSUMED, tune later] | Tier |
@@ -111,8 +99,6 @@ Both use the same session, action-item and issue objects; the relationship type 
 Pitch line: *"Self-claimed skills are cheap. We make every skill provable, and the proof that gets a student a mentor is the same proof the college needs for accreditation."*
 
 **Guardrails (CORE rules):** fit, never rank (no global score, no leaderboard); facts, not ratings (no anonymous reviews of professors); private by default.
-
----
 
 ## 6. Modules and features
 
@@ -203,8 +189,6 @@ Pitch line: *"Self-claimed skills are cheap. We make every skill provable, and t
 | Gap report: "no sports/cultural achievements from CSE this semester", "3 mentors below minimum meetings" | ADD-ON A |
 | Auditor portal, hash-chained evidence vault, Open Badges 3.0, NIRF simulator, CO-PO, SSR drafts | ROADMAP |
 
----
-
 ## 7. Status models (what is tracked)
 
 | Object | States | Who moves it |
@@ -220,8 +204,6 @@ Pitch line: *"Self-claimed skills are cheap. We make every skill provable, and t
 
 Every transition writes `{from, to, by, at}` to the object's history (audit trail, NFR).
 
----
-
 ## 8. Tracking rules (flags and compliance)
 
 All thresholds are configuration, not code [ASSUMED defaults; confirm with a faculty member].
@@ -235,8 +217,6 @@ All thresholds are configuration, not code [ASSUMED defaults; confirm with a fac
 | Compliance % (HOD, NAAC) | mentees with ≥ minimum meetings ÷ allotted mentees |
 | Issue resolution rate | resolved ÷ raised, per mentor and category |
 | Mentor load warning | > 20 mentees [VERIFIED range 10–20 in v1] |
-
----
 
 ## 9. Privacy and access matrix
 
@@ -253,8 +233,6 @@ All thresholds are configuration, not code [ASSUMED defaults; confirm with a fac
 | Exports | — | — | — | — | aggregates only |
 
 The backend enforces this; the UI hiding a field is not enough. One test per row is ADD-ON B.
-
----
 
 ## 10. Graph model (Neo4j) additions
 
@@ -281,8 +259,6 @@ On top of the repaired base model (audit §2.4/§11):
 ```
 
 Status history is stored as an append-only list on the node/edge (`history`) for the demo; a separate event log is ROADMAP.
-
----
 
 ## 11. Functional requirements
 
@@ -318,8 +294,6 @@ Status history is stored as an append-only list on the node/edge (`history`) for
 | FR-28 | Change of mentor with handover; semester review summary; learner-level tag; mentee feedback. | ADD-ON B |
 | FR-29 | At-risk suggestions from academics. | ADD-ON B |
 
----
-
 ## 12. Non-functional requirements
 
 - **Security:** no endpoint returns password hashes or embeddings; role + ownership checks on every mutation; authenticated, size- and type-limited uploads; password reset removed.
@@ -331,8 +305,6 @@ Status history is stored as an append-only list on the node/edge (`history`) for
 - **Prompt injection:** uploaded document text is treated as data; the extraction prompt only fills a fixed schema.
 
 **Seed dataset (synthetic):** 1 department, 4 mentors, ~50 students (12–13 each), 1 HOD, 1 IQAC; 8 openings; 2 semesters of academics; ~40 past sessions (mix of individual/group), ~60 action items (some overdue), ~15 issues (some open, one escalated); ~25 certificates including **1 duplicate and 1 suspicious**; 3 mentors compliant, 1 not (so the dashboard has something to show); hero personas Aarav (student) and Dr. Meera (mentor + guide).
-
----
 
 ## 13. The 15-hour build plan
 
@@ -413,8 +385,6 @@ Status history is stored as an append-only list on the node/edge (`history`) for
 
 **Cut order under pressure** (cut from the top): tamper signals → eval table → skill-gap → Why graph → full issue lifecycle → live certificate pipeline (switch to cached samples). **Never cut:** security fixes, session log, action-item tracking, mentor home, HOD dashboard, Fit Check.
 
----
-
 ## 14. Demo story (5 minutes, one continuous flow; all data synthetic)
 
 > **Numbers:** write the demo script from [index §7](../00-index.md) (exact steps and expected values), not from the numbers below. Where this section and index §7 differ, index §7 wins.
@@ -427,8 +397,6 @@ Status history is stored as an append-only list on the node/edge (`history`) for
 6. **IQAC (30 s).** "Generate evidence pack" → a **DRAFT** mentoring summary (ratio, mentor list, mentor-wise meetings and issues) and an achievements list. Show that **no private notes** are in it.
 7. **Close (15 s).** "One verified record, one session log. The student gets the right guide, the mentor knows who needs them, and the college has its evidence all year, without a single extra form." Then the roadmap slide.
 
----
-
 ## 15. Success metrics (measured on synthetic/consented data, not assumed)
 
 | Metric | How |
@@ -440,8 +408,6 @@ Status history is stored as an append-only list on the node/edge (`history`) for
 | Follow-up visibility | Time for a mentor to answer "who needs follow-up?": paper vs mentor home |
 | Evidence compilation time | Manual vs one-click export, timed once |
 | Mentee coverage / compliance | % allotted; % with ≥2 meetings in seed data |
-
----
 
 ## 16. Risks and mitigations
 
@@ -457,15 +423,11 @@ Status history is stored as an append-only list on the node/edge (`history`) for
 | Over-claiming (ML, RAG, "TRL 9") | Only claim what the demo shows and §15 measures |
 | Integration breaks late | Contracts at hour 1, midpoint check at hour 7, core freeze at hour 10 |
 
----
-
 ## 17. Disclosure statement (draft, adapt to the rules)
 
 > This project extends GuruSetu, an earlier prototype by members of our team, exhibited at TechFair 2026. For Genesis we built new: certificate verification and the trust ladder, explainable Fit Check matching, the digital mentor-mentee system (allotment, session logs, action items, issues, tracking), the coordinator dashboards and the draft evidence export, plus security fixes to the original code. The earlier prototype's matching was keyword-based.
 
 Use only if the rules allow prior code and the original owners agree.
-
----
 
 ## 18. How this meets typical judging criteria [ASSUMED criteria]
 
@@ -478,13 +440,9 @@ Use only if the rules allow prior code and the original owners agree.
 | Impact | Time to log, follow-up visibility, compliance, evidence ready all year |
 | Responsibility | Privacy matrix, DRAFT labels, synthetic data, fit-not-rank |
 
----
-
 ## 19. Roadmap slide (vision, not built)
 
 From the enterprise vision: skill viva · Graph-RAG copilot with cited answers · Open Badges 3.0 signed credentials with QR verifier · auditor/peer-team portal with hash-chained evidence vault · CO-PO autopilot · NIRF simulator · SSR/AQAR draft generator · APAAR / DigiLocker / ABC · Microsoft SSO · multi-campus tenancy · DPDP consent ledger · parent and counsellor workflows · peer and alumni mentors · email/WhatsApp capture and reminders · bridge finder, team composer, funding calls, AICACE co-founder matching.
-
----
 
 ## 20. Decide at hour 0 (15 minutes, before any code)
 

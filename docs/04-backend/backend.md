@@ -11,8 +11,6 @@ This file covers the data domain, the API spec and the backend design (small-pro
 - [schema.cypher](schema.cypher): constraints and indexes. Single source of truth for labels and keys.
 - [openapi.yaml](openapi.yaml): routes and payloads. Single source of truth for field names and types.
 
----
-
 ## 1. Store selection
 
 Neo4j 5 Community is the only datastore (ADR-02). The product is a graph of people, skills, evidence and mentoring links, read along relationships (mentor → mentees → sessions → actions), with a native 384-d vector index. Files live on a volume (CMP-14). There is no SQL, so the DDL contract is `schema.cypher` plus the Pydantic models generated from `openapi.yaml`.

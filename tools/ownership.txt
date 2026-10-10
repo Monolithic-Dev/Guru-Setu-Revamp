@@ -9,9 +9,9 @@
 
 # ── Root, tooling, devops (P2) ───────────────────────────────
 docker-compose.yml                              P2
-.env.example                                    P2
 .gitignore                                      P2
 tools/                                          P2
+.spectral.yaml                                  P2
 README.md                                       P4
 AGENTS.md                                       P4
 CLAUDE.md                                       P4

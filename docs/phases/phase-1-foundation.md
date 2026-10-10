@@ -4,8 +4,6 @@ Audience:     P1–P4.
 Depends on:   phase-0-setup.md (G0 passed); architecture §5, §8 (ADR-03), §9; backend §2–§5, §6.3, §8, §10; security §2–§5; ai-system §5; ux-flows §2, §4, §7, §8
 Status:       Draft v1
 
----
-
 ## 1. Goal and exit gate
 
 **Goal:** by 4:00 the system is safe to build on. The security tests pass, every request goes through the auth/deps/error stack, the seed builds the whole demo world, and each persona logs in to its own shell.
@@ -56,7 +54,7 @@ Status:       Draft v1
 - **Files:** `core/database.py`, `core/errors.py`, `core/middleware.py`, `tests/conftest.py` (`main.py` already imports these from T0.P2.1 and is not edited)
 - **First (10 min):** write `tests/conftest.py`: the `fresh_seed` session fixture (runs `scripts.seed --reset` with `TODAY_OVERRIDE=2026-10-10`) and persona token fixtures `aarav`, `meera`, `arjun`, `suresh`, `kavya`. Push it alone so others can write tests against it. Nobody else edits `conftest.py`; extra fixtures live in each owner's own test files.
 - **Steps:**
-  1. `database.py`: one driver created at startup (remove the per-request `verify_connectivity`, audit M4); `run_read(fn, **params)` and `run_write(fn, **params)` wrap `session.execute_read/write`; `ServiceUnavailable` becomes `ApiError("DB_UNAVAILABLE", 503)`.
+  1. `database.py`: one driver created at startup (never verify connectivity per request; that was audit M4 in the old prototype); `run_read(fn, **params)` and `run_write(fn, **params)` wrap `session.execute_read/write`; `ServiceUnavailable` becomes `ApiError("DB_UNAVAILABLE", 503)`.
   2. `errors.py`: `ApiError(code, status, detail, errors=None)` plus handlers that return `application/problem+json` with `type`, `title`, `status`, `detail`, `instance`, `code` and `request_id`. Pydantic `RequestValidationError` becomes 422 `VALIDATION_FAILED` with `errors[]`. The generic `Exception` handler returns 500 `INTERNAL` and never wraps `HTTPException` (audit H5).
   3. Middleware: take or generate `X-Request-ID` and echo it back; set `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer` and `X-Frame-Options: DENY`; log one JSON line per request with method, route template, status, latency_ms, user_id and request_id. No bodies and no headers (SEC-15).
   4. CORS from `CORS_ORIGINS` (SEC-12).

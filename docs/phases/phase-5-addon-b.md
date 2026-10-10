@@ -4,8 +4,6 @@ Audience:     Whoever has merged all their own ADD-ON A items before 11:30.
 Depends on:   phase-4-addon-a.md rules (§1); PRD REQ-027, 028, 029, 032, 033, 034, 035; backend §6.2, §6.4, §6.8, §7 (MET-11); security §4
 Status:       Draft v1
 
----
-
 ## 1. Entry rules
 
 - Start a B item only if (a) all your A items are merged, (b) it is before **11:30**, and (c) the item's estimate fits before 12:15. No B item merges after 12:15.
@@ -59,7 +57,7 @@ Status:       Draft v1
 
 ### B6 Session feedback (REQ-034)
 - **Backend:** API-042 by a present attendee only (409 `NOT_PRESENT` otherwise), replacing earlier feedback on `ATTENDED_BY.feedback(_comment)`. It is visible only in the author's API-027 (add `feedback` per attendee, author only).
-- **Frontend (P4):** after confirming on SCR-05, offer 👍 Helpful / 👎 Not helpful (text labels, not icons alone) plus an optional comment.
+- **Frontend (P4):** after confirming on SCR-05, offer "Helpful" / "Not helpful" buttons (text labels) plus an optional comment.
 - **Done when:** TEST-56 passes.
 
 ### B7 Faculty track record (REQ-035)

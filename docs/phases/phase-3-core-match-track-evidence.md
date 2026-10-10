@@ -4,8 +4,6 @@ Audience:     P1–P4.
 Depends on:   phase-2-core-verify-mentor.md (G2 passed or cut decisions taken); ai-system §4; backend §4, §6.4, §7, §10; ux-flows FLOW-03, 04, 09, 10, 11; security §4
 Status:       Draft v1
 
----
-
 ## 1. Goal and gate
 
 **Goal:** by 10:00 the full primary flow (PRD §8, index §7) runs on a fresh seed, twice in a row, with no fixtures left in any P0 screen.

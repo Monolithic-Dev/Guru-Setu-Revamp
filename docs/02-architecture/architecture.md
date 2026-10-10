@@ -7,8 +7,6 @@ Status:       Draft v1 | assumptions in this document: A-02, A-04, A-05, A-06, A
 
 Decision records (§8) and project structure (§9) are sections of this document. Security has its own document: [security-and-privacy.md](../08-security/security-and-privacy.md).
 
----
-
 ## 1. System context
 
 ```mermaid
@@ -194,7 +192,7 @@ If any step fails, the transaction rolls back and nothing is saved (FM-06).
 | ADR-06 | Audit trail is needed on 5 object types (REQ-018) | `StatusEvent` nodes keyed by `entity_id` | A list property on each node | One timeline query; Neo4j cannot store lists of maps |
 | ADR-07 | LLM output is untrusted and non-deterministic | LLM extracts fields only; trust and routing are deterministic code (ai-system §3) | LLM judges authenticity | Explainable; injection cannot certify a skill |
 | ADR-08 | Need vision extraction to a fixed schema | `claude-opus-5-5`, structured output, `effort: "low"`, SHA-256 cache, `LLM_PROVIDER=none` switch | Smaller model; OCR + regex | Small cost per call (NFR-09); the switch covers venues without network |
-| ADR-09 | Existing frontend keeps the JWT in localStorage | Keep it for the demo; expiry 480 min; strict output encoding | httpOnly cookie + CSRF | XSS would expose the token; accepted residual risk (security §9) |
+| ADR-09 | Token storage for a 15 h build: localStorage is the simplest with Bearer headers | Keep it for the demo; expiry 480 min; strict output encoding | httpOnly cookie + CSRF | XSS would expose the token; accepted residual risk (security §9) |
 | ADR-10 | Evidence must be editable by IQAC | XLSX via openpyxl | PDF | Coordinators can edit drafts; no PDF layout work |
 | ADR-11 | Routes need one consistent shape from the start | All routes go under `/api/v1/<area>`, one router file per area | Ad-hoc paths per feature | The frontend uses one client (`src/lib/api.ts`) and generated types |
 | ADR-12 | HOD and IQAC need overlapping views | One Coordinator area; content by role | Two apps | Less UI work; role checks on the server decide fields |
@@ -207,7 +205,6 @@ If any step fails, the transaction rolls back and nothing is saved (FM-06).
   AGENTS.md               agent entry file
   CLAUDE.md               "@AGENTS.md"
   docker-compose.yml      neo4j, backend, frontend (environments doc §2)
-  .env.example            copy of docs/10-devops/env.example
   docs/                   this spec pack
   tools/                  ownership.txt + check_ownership.py (one owner per file; docs/phases/parallel-work.md)
   backend/
@@ -256,7 +253,7 @@ If any step fails, the transaction rolls back and nothing is saved (FM-06).
 
 **Naming:** Python `snake_case`; JSON fields `snake_case`; Neo4j labels `PascalCase`, relationships `UPPER_SNAKE`, properties `snake_case`; React components `PascalCase.tsx`.
 
-**First-run commands:** `cp .env.example .env` → `docker compose up -d --build` → `docker compose exec backend python -m scripts.seed --reset` → open http://localhost:3000. Tests: `docker compose exec backend pytest -q`. Lint: `ruff check backend` and `npm --prefix frontend run lint`.
+**First-run commands:** `cp docs/10-devops/env.example .env` → `docker compose up -d --build` → `docker compose exec backend python -m scripts.seed --reset` → open http://localhost:3000. Tests: `docker compose exec backend pytest -q`. Lint: `ruff check backend` and `npm --prefix frontend run lint`.
 
 ## Verify
 

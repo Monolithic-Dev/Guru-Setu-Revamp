@@ -7,8 +7,6 @@ Status:       Draft v1 | assumptions in this document: A-04, A-21
 
 The threat model (§10) and compliance notes (§11) are sections of this document.
 
----
-
 ## 1. Assets and data classification
 
 | Class | Data | Stored in | Readable by |
