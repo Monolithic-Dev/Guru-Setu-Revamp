@@ -84,6 +84,21 @@ paths:
         '404': {$ref: '#/components/responses/NotFound'}
 
   /me/profile:
+    get:
+      tags: [students]
+      operationId: getMyProfile
+      x-id: API-048
+      x-req: [REQ-004]
+      x-tier: P1
+      summary: Own profile with completeness, per-field trust labels, projects and resume info
+      responses:
+        '200':
+          description: Own profile
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/MyProfile'}
+        '401': {$ref: '#/components/responses/Unauthenticated'}
+        '403': {$ref: '#/components/responses/Forbidden'}
     patch:
       tags: [students]
       operationId: patchMyProfile
@@ -325,6 +340,29 @@ paths:
         '401': {$ref: '#/components/responses/Unauthenticated'}
         '404': {$ref: '#/components/responses/NotFound'}
 
+    patch:
+      tags: [openings]
+      operationId: patchOpening
+      x-id: API-049
+      x-req: [REQ-030]
+      x-tier: P1
+      summary: Edit an opening (owner only; omitted fields untouched; required skills are a full list)
+      parameters: [{$ref: '#/components/parameters/Id'}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/OpeningPatch'}
+      responses:
+        '200':
+          description: Updated opening
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Opening'}
+        '401': {$ref: '#/components/responses/Unauthenticated'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '422': {$ref: '#/components/responses/ValidationFailed'}
   /openings/{id}/fit:
     get:
       tags: [openings]
@@ -967,6 +1005,259 @@ paths:
               schema: {$ref: '#/components/schemas/Health'}
         '503': {$ref: '#/components/responses/Problem'}
 
+  /concepts:
+    get:
+      tags: [students]
+      operationId: searchConcepts
+      x-id: API-047
+      x-req: [REQ-004]
+      x-tier: P1
+      summary: Skill typeahead over concept names and aliases (max 10)
+      parameters:
+        - {name: q, in: query, required: false, schema: {type: string, maxLength: 40}}
+      responses:
+        '200':
+          description: Matches
+          content:
+            application/json:
+              schema:
+                type: array
+                maxItems: 10
+                items: {$ref: '#/components/schemas/ConceptSuggestion'}
+        '401': {$ref: '#/components/responses/Unauthenticated'}
+
+  /me/recommendations:
+    get:
+      tags: [openings]
+      operationId: getMyRecommendations
+      x-id: API-050
+      x-req: [REQ-004]
+      x-tier: P1
+      summary: Openings grouped for the student (best, worth a look, stretch, not eligible) with eligibility and reasons
+      responses:
+        '200':
+          description: Grouped recommendations
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Recommendations'}
+        '401': {$ref: '#/components/responses/Unauthenticated'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+
+  /openings/{id}/eligibility:
+    get:
+      tags: [openings]
+      operationId: getEligibility
+      x-id: API-051
+      x-req: [REQ-004]
+      x-tier: P1
+      summary: Eligibility rules for the calling student, each with a plain-words detail
+      parameters: [{$ref: '#/components/parameters/Id'}]
+      responses:
+        '200':
+          description: Eligibility
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Eligibility'}
+        '401': {$ref: '#/components/responses/Unauthenticated'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+
+  /me/faculty-profile:
+    get:
+      tags: [students]
+      operationId: getMyFacultyProfile
+      x-id: API-052
+      x-req: [REQ-004]
+      x-tier: P1
+      summary: Own faculty profile
+      responses:
+        '200':
+          description: Faculty profile
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/FacultyProfile'}
+        '401': {$ref: '#/components/responses/Unauthenticated'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+    patch:
+      tags: [students]
+      operationId: patchMyFacultyProfile
+      x-id: API-052
+      x-req: [REQ-004]
+      x-tier: P1
+      summary: Update own faculty profile (omitted fields untouched; lists are replaced in full)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/FacultyProfilePatch'}
+      responses:
+        '200':
+          description: Updated faculty profile
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/FacultyProfile'}
+        '401': {$ref: '#/components/responses/Unauthenticated'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '422': {$ref: '#/components/responses/ValidationFailed'}
+
+  /faculty/{faculty_id}:
+    get:
+      tags: [students]
+      operationId: getFacultyPublic
+      x-id: API-053
+      x-req: [REQ-035]
+      x-tier: P1
+      summary: Public faculty profile with the track record (facts only; no ratings)
+      parameters:
+        - {name: faculty_id, in: path, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Faculty profile
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/FacultyPublic'}
+        '401': {$ref: '#/components/responses/Unauthenticated'}
+        '404': {$ref: '#/components/responses/NotFound'}
+
+  /faculty:
+    get:
+      tags: [students]
+      operationId: listFaculty
+      x-id: API-058
+      x-req: [REQ-005]
+      x-tier: P2
+      summary: Guide directory for the calling student, ordered by shared topics (no scores)
+      parameters:
+        - {name: query, in: query, required: false, schema: {type: string, maxLength: 60}}
+        - {name: accepting, in: query, required: false, schema: {type: boolean}}
+      responses:
+        '200':
+          description: Faculty cards
+          content:
+            application/json:
+              schema:
+                type: array
+                maxItems: 50
+                items: {$ref: '#/components/schemas/FacultyCard'}
+        '401': {$ref: '#/components/responses/Unauthenticated'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+
+  /me/resume:
+    get:
+      tags: [students]
+      operationId: getMyResume
+      x-id: API-055
+      x-req: [REQ-004]
+      x-tier: P2
+      summary: Metadata of the current resume
+      responses:
+        '200':
+          description: Resume info
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ResumeInfo'}
+        '401': {$ref: '#/components/responses/Unauthenticated'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+    post:
+      tags: [students]
+      operationId: uploadResume
+      x-id: API-055
+      x-req: [REQ-004]
+      x-tier: P2
+      summary: Upload a PDF resume (field `file`, at most 5 MB and 4 pages); it supersedes the previous one
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file: {type: string, format: binary}
+      responses:
+        '201':
+          description: Resume stored
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ResumeInfo'}
+        '401': {$ref: '#/components/responses/Unauthenticated'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '413': {$ref: '#/components/responses/Problem'}
+        '415': {$ref: '#/components/responses/Problem'}
+        '422': {$ref: '#/components/responses/ValidationFailed'}
+        '429': {$ref: '#/components/responses/RateLimited'}
+
+  /students/{student_id}/resume/file:
+    get:
+      tags: [students]
+      operationId: getResumeFile
+      x-id: API-056
+      x-req: [REQ-004]
+      x-tier: P2
+      summary: Resume PDF (the student, their mentors, the HOD, and faculty the student applied to)
+      parameters: [{$ref: '#/components/parameters/StudentId'}]
+      responses:
+        '200':
+          description: PDF
+          content:
+            application/pdf:
+              schema: {type: string, format: binary}
+        '401': {$ref: '#/components/responses/Unauthenticated'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+
+  /me/resume/suggestions:
+    post:
+      tags: [students]
+      operationId: suggestFromResume
+      x-id: API-057
+      x-req: [REQ-004]
+      x-tier: P2
+      summary: Skills found in the resume text (no AI). Nothing is added until the student applies a selection.
+      responses:
+        '200':
+          description: Suggestions
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ResumeSuggestions'}
+        '401': {$ref: '#/components/responses/Unauthenticated'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+
+  /me/resume/suggestions/apply:
+    post:
+      tags: [students]
+      operationId: applyResumeSuggestions
+      x-id: API-057
+      x-req: [REQ-004]
+      x-tier: P2
+      summary: Add the selected suggestions as claimed skills (trust 0). A resume never certifies anything.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [skills]
+              properties:
+                skills:
+                  type: array
+                  minItems: 1
+                  maxItems: 30
+                  items: {type: string, minLength: 1, maxLength: 40}
+      responses:
+        '200':
+          description: Updated profile
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/MyProfile'}
+        '401': {$ref: '#/components/responses/Unauthenticated'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '422': {$ref: '#/components/responses/ValidationFailed'}
+
 components:
   securitySchemes:
     bearer:
@@ -1048,7 +1339,7 @@ components:
         instance: {type: string}
         code:
           type: string
-          enum: [UNAUTHENTICATED, TOKEN_EXPIRED, INVALID_CREDENTIALS, FORBIDDEN, NOT_FOUND, METHOD_NOT_ALLOWED, VALIDATION_FAILED,
+          enum: [UNAUTHENTICATED, TOKEN_EXPIRED, INVALID_CREDENTIALS, FORBIDDEN, NOT_FOUND, METHOD_NOT_ALLOWED, VALIDATION_FAILED, NOT_ELIGIBLE,
                  NOT_YOUR_MENTEE, ALREADY_APPLIED, INVALID_TRANSITION, NOT_PRESENT, OPENING_CLOSED, ALREADY_REVIEWED,
                  FILE_TOO_LARGE, UNSUPPORTED_FILE_TYPE, RATE_LIMITED, DB_UNAVAILABLE, INTERNAL]
         request_id: {type: string}
@@ -1157,6 +1448,31 @@ components:
           maxItems: 30
           description: Full list of claimed skill names; certified/endorsed skills are unaffected
           items: {type: string, minLength: 1, maxLength: 40}
+        skill_levels:
+          type: object
+          description: Self-assessed level per skill name. It never changes a trust level.
+          additionalProperties: {$ref: '#/components/schemas/SkillLevel'}
+        programme: {oneOf: [{$ref: '#/components/schemas/Programme'}, {type: 'null'}]}
+        year: {type: integer, minimum: 1, maximum: 5}
+        headline: {type: [string, 'null'], maxLength: 120}
+        self_reported_cgpa: {type: [number, 'null'], minimum: 0, maximum: 10, description: 'Labelled self-reported everywhere; never raises a trust level'}
+        links:
+          type: array
+          maxItems: 5
+          description: https URLs only
+          items: {type: string, maxLength: 200}
+        availability_hours: {type: [integer, 'null'], minimum: 0, maximum: 40}
+        available_from: {type: [string, 'null'], format: date}
+        preferences:
+          type: array
+          maxItems: 5
+          items: {type: string, minLength: 1, maxLength: 30}
+        open_to_opportunities: {type: boolean}
+        projects:
+          type: array
+          maxItems: 10
+          description: Full list; replaces the stored projects
+          items: {$ref: '#/components/schemas/ProjectInput'}
 
     CertificateStatus:
       type: string
@@ -1275,6 +1591,26 @@ components:
         status: {type: string, enum: [open, closed]}
         created_at: {type: string, format: date-time}
         applicant_count: {type: [integer, 'null'], description: Owner only}
+        preferred_skills:
+          type: array
+          maxItems: 10
+          items: {type: string, minLength: 1, maxLength: 40}
+        positions: {type: integer, minimum: 1}
+        deadline: {type: [string, 'null'], format: date}
+        eligible_years:
+          type: array
+          maxItems: 5
+          items: {type: integer, minimum: 1, maximum: 5}
+        min_cgpa: {type: [number, 'null']}
+        allowed_departments:
+          type: array
+          maxItems: 5
+          items: {type: string, maxLength: 10}
+        eligibility_mode: {$ref: '#/components/schemas/EligibilityMode'}
+        mode: {$ref: '#/components/schemas/WorkMode'}
+        duration_weeks: {type: [integer, 'null'], minimum: 1, maximum: 52}
+        hours_per_week: {type: [integer, 'null'], minimum: 1, maximum: 40}
+        positions_left: {type: integer}
     OpeningCreate:
       type: object
       additionalProperties: false
@@ -1287,6 +1623,25 @@ components:
           minItems: 1
           maxItems: 10
           items: {type: string, minLength: 1, maxLength: 40}
+        preferred_skills:
+          type: array
+          maxItems: 10
+          items: {type: string, minLength: 1, maxLength: 40}
+        positions: {type: integer, minimum: 1, maximum: 20}
+        deadline: {type: [string, 'null'], format: date}
+        eligible_years:
+          type: array
+          maxItems: 5
+          items: {type: integer, minimum: 1, maximum: 5}
+        min_cgpa: {type: [number, 'null'], minimum: 0, maximum: 10}
+        allowed_departments:
+          type: array
+          maxItems: 5
+          items: {type: string, maxLength: 10}
+        eligibility_mode: {$ref: '#/components/schemas/EligibilityMode'}
+        mode: {$ref: '#/components/schemas/WorkMode'}
+        duration_weeks: {type: [integer, 'null'], minimum: 1, maximum: 52}
+        hours_per_week: {type: [integer, 'null'], minimum: 1, maximum: 40}
     FitChip:
       type: object
       required: [concept, kind, trust_level]
@@ -1431,6 +1786,13 @@ components:
               name: {type: string}
               roll_no: {type: string}
               year: {type: integer}
+              suggested_mentor:
+                type: [object, 'null']
+                description: Assistive only; the HOD decides. Mentors under the load limit, ordered by topic overlap.
+                properties:
+                  mentor_id: {type: string}
+                  name: {type: string}
+                  reason: {type: string}
     AllotmentRequest:
       type: object
       additionalProperties: false
@@ -1914,3 +2276,372 @@ components:
         status: {type: string, enum: [ok]}
         neo4j: {type: string, enum: [up, down]}
         llm_provider: {type: string, enum: [groq, anthropic, none]}
+
+    # ---- Profiles and matching v2 (additive; docs/plan/profiles-and-matching-plan.md) ----
+    Programme:
+      type: string
+      enum: [btech, mtech, phd, other]
+    SkillLevel:
+      type: string
+      enum: [beginner, intermediate, advanced]
+    EligibilityMode:
+      type: string
+      enum: [advisory, strict]
+    WorkMode:
+      type: string
+      enum: [on_campus, remote, hybrid]
+    ProjectInput:
+      type: object
+      additionalProperties: false
+      required: [title]
+      properties:
+        title: {type: string, minLength: 1, maxLength: 100}
+        description: {type: [string, 'null'], maxLength: 300}
+        link: {type: [string, 'null'], maxLength: 200, description: 'https URL only'}
+        skills:
+          type: array
+          maxItems: 8
+          items: {type: string, minLength: 1, maxLength: 40}
+    Project:
+      type: object
+      required: [id, title, skills]
+      properties:
+        id: {type: string}
+        title: {type: string}
+        description: {type: [string, 'null']}
+        link: {type: [string, 'null']}
+        skills:
+          type: array
+          items: {type: string}
+    CgpaView:
+      type: object
+      required: [source]
+      properties:
+        record: {type: [number, 'null'], description: 'Institutional record [MOCK]; read-only'}
+        record_term: {type: [string, 'null']}
+        self_reported: {type: [number, 'null']}
+        effective: {type: [number, 'null'], description: 'The record when it exists, else the self-reported value'}
+        source: {type: string, enum: [record, self_reported, unknown]}
+    MySkill:
+      type: object
+      required: [concept, trust_level, claimed, sources]
+      properties:
+        concept: {type: string}
+        trust_level: {type: integer, minimum: 0, maximum: 2, description: 'From certificates and endorsements only, never from the student'}
+        claimed: {type: boolean}
+        level: {$ref: '#/components/schemas/SkillLevel'}
+        sources:
+          type: array
+          items:
+            type: object
+            required: [evidence_id, title]
+            properties:
+              evidence_id: {type: string}
+              title: {type: string}
+        endorsed_by:
+          type: array
+          items: {type: string}
+    CompletenessItem:
+      type: object
+      required: [key, label, done]
+      properties:
+        key: {type: string}
+        label: {type: string}
+        done: {type: boolean}
+    Completeness:
+      type: object
+      required: [percent, items]
+      properties:
+        percent: {type: integer, minimum: 0, maximum: 100}
+        items:
+          type: array
+          items: {$ref: '#/components/schemas/CompletenessItem'}
+        next_action: {type: [string, 'null']}
+    ResumeInfo:
+      type: object
+      required: [id, uploaded_at, size_bytes, pages, status]
+      properties:
+        id: {type: string}
+        uploaded_at: {type: string, format: date-time}
+        size_bytes: {type: integer}
+        pages: {type: integer}
+        status: {type: string, enum: [current, superseded]}
+    MyProfile:
+      type: object
+      required: [user_id, name, roll_no, dept_code, year, interests, links, preferences, cgpa, skills, projects, completeness, open_to_opportunities]
+      properties:
+        user_id: {type: string}
+        name: {type: string}
+        roll_no: {type: string}
+        dept_code: {type: string, description: Read-only; the institution controls it}
+        programme: {$ref: '#/components/schemas/Programme'}
+        year: {type: integer, minimum: 1, maximum: 5}
+        headline: {type: [string, 'null']}
+        bio: {type: [string, 'null']}
+        interests:
+          type: array
+          items: {type: string}
+        links:
+          type: array
+          items: {type: string}
+        availability_hours: {type: [integer, 'null']}
+        available_from: {type: [string, 'null'], format: date}
+        preferences:
+          type: array
+          items: {type: string}
+        open_to_opportunities: {type: boolean}
+        cgpa: {$ref: '#/components/schemas/CgpaView'}
+        skills:
+          type: array
+          items: {$ref: '#/components/schemas/MySkill'}
+        projects:
+          type: array
+          items: {$ref: '#/components/schemas/Project'}
+        resume:
+          oneOf:
+            - {$ref: '#/components/schemas/ResumeInfo'}
+            - {type: 'null'}
+        certificates_certified: {type: integer}
+        completeness: {$ref: '#/components/schemas/Completeness'}
+    ConceptSuggestion:
+      type: object
+      required: [name]
+      properties:
+        name: {type: string}
+        matched_alias: {type: [string, 'null']}
+    EligibilityCheck:
+      type: object
+      required: [rule, status, detail]
+      properties:
+        rule: {type: string, enum: [open, deadline, capacity, year, department, min_cgpa, not_a_repeat, guide_capacity]}
+        status: {type: string, enum: [ok, failed, unknown]}
+        detail: {type: string}
+    Eligibility:
+      type: object
+      required: [eligible, mode, checks]
+      properties:
+        eligible: {type: boolean, description: 'False when any check failed. Unknown checks do not fail it.'}
+        mode: {$ref: '#/components/schemas/EligibilityMode'}
+        checks:
+          type: array
+          items: {$ref: '#/components/schemas/EligibilityCheck'}
+    RecommendedOpening:
+      type: object
+      required: [id, title, faculty, required_skills, status, my_fit, eligibility, reasons, positions, positions_left]
+      properties:
+        id: {type: string}
+        title: {type: string}
+        faculty: {$ref: '#/components/schemas/UserRef'}
+        required_skills:
+          type: array
+          items: {type: string}
+        preferred_skills:
+          type: array
+          items: {type: string}
+        status: {type: string, enum: [open, closed]}
+        my_fit:
+          type: object
+          required: [score, verdict]
+          properties:
+            score: {type: number}
+            verdict: {type: string, enum: [ready, close, not_yet]}
+        my_application_status:
+          type: [string, 'null']
+        eligibility: {$ref: '#/components/schemas/Eligibility'}
+        reasons:
+          type: array
+          description: One-line explanations built from the fit chips (templates, no model)
+          items: {type: string}
+        positions: {type: integer}
+        positions_left: {type: integer}
+        deadline: {type: [string, 'null'], format: date}
+        eligible_years:
+          type: array
+          items: {type: integer}
+        min_cgpa: {type: [number, 'null']}
+        mode: {$ref: '#/components/schemas/WorkMode'}
+        duration_weeks: {type: [integer, 'null']}
+        hours_per_week: {type: [integer, 'null']}
+    RecommendationGroup:
+      type: object
+      required: [key, label, items]
+      properties:
+        key: {type: string, enum: [best, worth, stretch, ineligible]}
+        label: {type: string}
+        items:
+          type: array
+          items: {$ref: '#/components/schemas/RecommendedOpening'}
+    Recommendations:
+      type: object
+      required: [cold_start, completeness_percent, groups]
+      properties:
+        cold_start: {type: boolean, description: 'Fewer than two skills: ranked by interests and department'}
+        completeness_percent: {type: integer}
+        groups:
+          type: array
+          items: {$ref: '#/components/schemas/RecommendationGroup'}
+    OpeningPatch:
+      type: object
+      additionalProperties: false
+      properties:
+        title: {type: string, minLength: 5, maxLength: 120}
+        description: {type: string, maxLength: 2000}
+        required_skills:
+          type: array
+          minItems: 1
+          maxItems: 10
+          items: {type: string, minLength: 1, maxLength: 40}
+        preferred_skills:
+          type: array
+          maxItems: 10
+          items: {type: string, minLength: 1, maxLength: 40}
+        positions: {type: integer, minimum: 1, maximum: 20}
+        deadline: {type: [string, 'null'], format: date}
+        eligible_years:
+          type: array
+          maxItems: 5
+          items: {type: integer, minimum: 1, maximum: 5}
+        min_cgpa: {type: [number, 'null'], minimum: 0, maximum: 10}
+        allowed_departments:
+          type: array
+          maxItems: 5
+          items: {type: string, maxLength: 10}
+        eligibility_mode: {$ref: '#/components/schemas/EligibilityMode'}
+        mode: {$ref: '#/components/schemas/WorkMode'}
+        duration_weeks: {type: [integer, 'null'], minimum: 1, maximum: 52}
+        hours_per_week: {type: [integer, 'null'], minimum: 1, maximum: 40}
+        status: {type: string, enum: [open, closed]}
+    FacultyResearchArea:
+      type: object
+      additionalProperties: false
+      required: [concept]
+      properties:
+        concept: {type: string, minLength: 1, maxLength: 40}
+        primary: {type: boolean}
+    FacultyCourse:
+      type: object
+      additionalProperties: false
+      required: [code, title]
+      properties:
+        code: {type: string, minLength: 1, maxLength: 20}
+        title: {type: string, minLength: 1, maxLength: 100}
+        term_id: {type: [string, 'null'], maxLength: 20}
+        topics:
+          type: array
+          maxItems: 8
+          items: {type: string, minLength: 1, maxLength: 40}
+    FacultyQualification:
+      type: object
+      additionalProperties: false
+      required: [degree, institution]
+      properties:
+        degree: {type: string, minLength: 1, maxLength: 60}
+        institution: {type: string, minLength: 1, maxLength: 100}
+        year: {type: [integer, 'null'], minimum: 1950, maximum: 2100}
+    FacultyProfilePatch:
+      type: object
+      additionalProperties: false
+      properties:
+        research_areas:
+          type: array
+          maxItems: 10
+          items: {$ref: '#/components/schemas/FacultyResearchArea'}
+        expertise:
+          type: array
+          maxItems: 15
+          items: {type: string, minLength: 1, maxLength: 40}
+        courses:
+          type: array
+          maxItems: 15
+          items: {$ref: '#/components/schemas/FacultyCourse'}
+        qualifications:
+          type: array
+          maxItems: 5
+          items: {$ref: '#/components/schemas/FacultyQualification'}
+        publications:
+          type: array
+          maxItems: 10
+          items: {type: string, minLength: 1, maxLength: 200}
+        max_guided_students: {type: integer, minimum: 0, maximum: 50}
+        accepting_guides: {type: boolean}
+        office_hours: {type: [string, 'null'], maxLength: 200}
+        links:
+          type: array
+          maxItems: 5
+          items: {type: string, maxLength: 200}
+    FacultyProfile:
+      type: object
+      required: [user_id, name, designation, dept_code, research_areas, expertise, courses, qualifications, publications, accepting_guides, links]
+      properties:
+        user_id: {type: string}
+        name: {type: string}
+        designation: {type: string}
+        dept_code: {type: string}
+        employee_id: {type: [string, 'null']}
+        research_areas:
+          type: array
+          items: {$ref: '#/components/schemas/FacultyResearchArea'}
+        expertise:
+          type: array
+          items: {type: string}
+        courses:
+          type: array
+          items: {$ref: '#/components/schemas/FacultyCourse'}
+        qualifications:
+          type: array
+          items: {$ref: '#/components/schemas/FacultyQualification'}
+        publications:
+          type: array
+          items: {type: string}
+        max_guided_students: {type: [integer, 'null']}
+        guided_students: {type: integer, description: Active guide links}
+        accepting_guides: {type: boolean}
+        office_hours: {type: [string, 'null']}
+        links:
+          type: array
+          items: {type: string}
+    FacultyPublic:
+      type: object
+      required: [profile, track_record]
+      properties:
+        profile: {$ref: '#/components/schemas/FacultyProfile'}
+        track_record: {$ref: '#/components/schemas/TrackRecord'}
+        open_openings:
+          type: array
+          items:
+            type: object
+            required: [id, title]
+            properties:
+              id: {type: string}
+              title: {type: string}
+    FacultyCard:
+      type: object
+      required: [user_id, name, designation, research_areas, shared_topics, open_openings, accepting_guides]
+      properties:
+        user_id: {type: string}
+        name: {type: string}
+        designation: {type: string}
+        research_areas:
+          type: array
+          items: {type: string}
+        shared_topics:
+          type: array
+          description: Topics this faculty member shares with the calling student; the list is ordered by overlap and carries no score
+          items: {type: string}
+        open_openings: {type: integer}
+        accepting_guides: {type: boolean}
+        guided_students: {type: integer}
+        max_guided_students: {type: [integer, 'null']}
+    ResumeSuggestions:
+      type: object
+      required: [skills, note]
+      properties:
+        skills:
+          type: array
+          items:
+            type: object
+            required: [concept, already_claimed]
+            properties:
+              concept: {type: string}
+              already_claimed: {type: boolean}
+        note: {type: string}

@@ -199,6 +199,7 @@ Every error is RFC 9457 `application/problem+json`:
 | FORBIDDEN | 403 | Role not allowed on this route | Show "You don't have access to this." |
 | NOT_FOUND | 404 | Missing, or outside the caller's scope (no existence leak) | Show not-found state |
 | METHOD_NOT_ALLOWED | 405 | The route exists but not for this HTTP method | Treat as a client bug |
+| NOT_ELIGIBLE | 409 | The opening is `strict` and the student fails an eligibility rule; `errors[]` names each failed rule | Show the failing rules; the student can fix the profile and retry |
 | VALIDATION_FAILED | 422 | Field errors | Show `errors[]` beside fields |
 | NOT_YOUR_MENTEE | 422 | Attendee or student is not linked to this mentor | Show detail |
 | ALREADY_APPLIED | 409 | Duplicate application | Show "You have already applied." |
@@ -263,6 +264,27 @@ Roles: S = student, F = faculty, H = hod, I = iqac. "Scope" refers to security Â
 | API-043 | PATCH /mentees/{student_id} | `{learner_level?, learner_note?, marked_at_risk?}` | F (assigned mentor) | 200 `MenteeOverview` | 404, 422 | 029, 033 | P2 |
 | API-044 | GET /faculty/{faculty_id}/track-record | Facts, not ratings | all | 200 `TrackRecord` | 404 | 035 | P2 |
 | API-045 | POST /me/meeting-requests | Message to the assigned mentor `{message}` | S | 201 | 404 (no mentor), 422 | 024 | P1 |
+
+### 4.2 Profiles and matching v2 (additive; plan in [profiles-and-matching-plan.md](../plan/profiles-and-matching-plan.md))
+
+| ID | Method & path | Purpose | Roles (scope) | Success | Errors | Tier |
+|---|---|---|---|---|---|---|
+| API-046 | PATCH /me/profile (extended) | programme, year, headline, self-reported CGPA, links, availability, preferences, projects (full list), skill levels | S | 200 `StudentProfile` | 422 | P1 |
+| API-047 | GET /concepts?q= | Skill typeahead | all | 200 `ConceptSuggestion[]` | | P1 |
+| API-048 | GET /me/profile | Own profile with completeness and trust labels | S | 200 `MyProfile` | | P1 |
+| API-049 | PATCH /openings/{id} | Edit an opening; v2 fields also accepted by POST | F (owner) | 200 `Opening` | 403, 404, 422 | P1 |
+| API-050 | GET /me/recommendations | Openings grouped best / worth / stretch / ineligible, with eligibility and reasons | S | 200 `Recommendations` | | P1 |
+| API-051 | GET /openings/{id}/eligibility | Eligibility checks for the caller | S | 200 `Eligibility` | 404 | P1 |
+| API-052 | GET, PATCH /me/faculty-profile | Faculty profile; lists are replaced in full | F | 200 `FacultyProfile` | 422 | P1 |
+| API-053 | GET /faculty/{id} | Public faculty profile plus the track record | all | 200 `FacultyPublic` | 404 | P1 |
+| API-055 | GET, POST /me/resume | Resume metadata, upload (PDF only) | S | 200/201 `ResumeInfo` | 413, 415, 422, 429 | P2 |
+| API-056 | GET /students/{id}/resume/file | Resume PDF | S self, mentors, HOD, faculty the student applied to | 200 PDF | 404 | P2 |
+| API-057 | POST /me/resume/suggestions, /apply | Skills found in the resume text (no AI); apply adds claimed skills | S | 200 | 404, 422 | P2 |
+| API-058 | GET /faculty | Guide directory by shared topics (no scores) | S | 200 `FacultyCard[]` | | P2 |
+
+**Eligibility (6.11).** Checks: `open`, `deadline`, `capacity` (accepted < `positions`), `year` (in `eligible_years`, empty = any), `department` (in `allowed_departments`, default the poster's), `min_cgpa` (record first, then self-reported; no value gives `unknown`, which does not fail), `not_a_repeat`, `guide_capacity` (faculty `max_guided_students`). `advisory` (default) only warns; `strict` makes API-017 return `409 NOT_ELIGIBLE`. **CGPA never enters the fit score.** Accepting the last position closes the opening in the same transaction (StatusEvent entity `opening`).
+
+**Privacy (security section 4 additions).** Self-reported values are labelled and never raise a trust level. The resume file is visible to the student, their mentors, the HOD and faculty the student applied to; never to IQAC or other faculty (404).
 
 ### 4.1 Worked examples (seed values)
 

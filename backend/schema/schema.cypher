@@ -73,3 +73,12 @@ CREATE VECTOR INDEX student_embedding IF NOT EXISTS FOR (s:Student) ON (s.embedd
   OPTIONS {indexConfig: {`vector.dimensions`: 384, `vector.similarity_function`: 'cosine'}};
 CREATE VECTOR INDEX opening_embedding IF NOT EXISTS FOR (o:Opening) ON (o.embedding)
   OPTIONS {indexConfig: {`vector.dimensions`: 384, `vector.similarity_function`: 'cosine'}};
+
+// Profiles and matching v2 (docs/plan/profiles-and-matching-plan.md). Additive: nothing above changes.
+// Student extras live as properties on :Student; projects, resumes, courses and qualifications are small nodes
+// because Neo4j cannot store a list of maps as a property.
+CREATE CONSTRAINT project_id IF NOT EXISTS FOR (p:Project) REQUIRE p.id IS UNIQUE;
+CREATE CONSTRAINT resume_id IF NOT EXISTS FOR (r:Resume) REQUIRE r.id IS UNIQUE;
+CREATE CONSTRAINT qualification_id IF NOT EXISTS FOR (q:Qualification) REQUIRE q.id IS UNIQUE;
+CREATE CONSTRAINT course_key IF NOT EXISTS FOR (c:Course) REQUIRE c.key IS UNIQUE;
+CREATE INDEX resume_status IF NOT EXISTS FOR (r:Resume) ON (r.status);
