@@ -202,10 +202,21 @@ def test_patch_claimed_skills_full_list_semantics(client, aarav):
     assert set(skills) == {"python", "deep learning", "pytorch"}
     assert all(s["claimed"] and s["trust_level"] == 0 and s["sources"] == [] for s in skills.values())
 
-    # a certified skill the student stops claiming must survive (claimed false, trust kept)
+    # A certified skill the student stops claiming must survive (claimed false,
+    # trust kept). The certified state has to be a real certified Evidence that
+    # PROVES the concept, not just trust_level set on the edge: trust is derived
+    # from Evidence, never read back from the edge (backend 6.2), which is what
+    # lets a rejected certificate drop the skill again (TEST-15).
     _cypher(
         """
-        MATCH (:Student {user_id: 'u-aarav'})-[h:HAS_SKILL]->(:Concept {name: 'python'})
+        MATCH (s:Student {user_id: 'u-aarav'}), (c:Concept {name: 'python'})
+        MERGE (e:Evidence {id: 'ev-test'})
+          SET e.kind = 'certificate', e.status = 'certified', e.skills = ['python'],
+              e.title = 'Python for Everybody', e.sha256 = 'test-sha-claimed-skills',
+              e.created_at = '2026-01-01T00:00:00Z'
+        MERGE (s)-[:SUBMITTED]->(e)
+        MERGE (e)-[:PROVES]->(c)
+        WITH s, c MATCH (s)-[h:HAS_SKILL]->(c)
         SET h.trust_level = 1, h.evidence_ids = ['ev-test']
         """
     )
