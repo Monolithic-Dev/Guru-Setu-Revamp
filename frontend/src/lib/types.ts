@@ -1033,12 +1033,30 @@ export interface components {
         /** @enum {string} */
         CertificateLevel: "international" | "national" | "state" | "university" | "college" | "online" | "other" | "unknown";
         /** @enum {string} */
-        CertificateType: "hackathon" | "course" | "workshop" | "competition" | "internship" | "paper" | "sports" | "cultural" | "other";
+        CertificateType: "hackathon" | "course" | "workshop" | "competition" | "internship" | "paper" | "sports" | "cultural" | "project" | "other";
+        /**
+         * @description What the guided work produced. A description of the output, never a grade.
+         * @enum {string}
+         */
+        OutputType: "report" | "prototype" | "paper" | "dataset" | "other";
         Certificate: {
             id: string;
             status: components["schemas"]["CertificateStatus"];
-            /** @enum {string} */
-            media_type: "image/jpeg" | "image/png" | "application/pdf";
+            /**
+             * @description Null for a project record, which has no file
+             * @enum {string|null}
+             */
+            media_type: "image/jpeg" | "image/png" | "application/pdf" | null;
+            /**
+             * @description A project record is written by the guide when guided work is completed (REQ-040)
+             * @enum {string}
+             */
+            kind?: "certificate" | "project_record";
+            /** @description Project record only: what was done, in the guide's words */
+            summary?: string | null;
+            output_type?: components["schemas"]["OutputType"] | null;
+            /** @description Project record only: the guide who vouched for it */
+            recorded_by?: string | null;
             holder_name?: string | null;
             title?: string | null;
             issuer?: string | null;
@@ -1052,7 +1070,7 @@ export interface components {
             confidence?: number | null;
             reasons: ("duplicate_file" | "duplicate_image" | "duplicate_certificate_id" | "not_a_certificate" | "injection_text" | "tamper_signal" | "name_mismatch" | "unknown_issuer" | "date_invalid" | "incomplete" | "extraction_failed" | "manual_entry" | "interrupted")[];
             /** @enum {string|null} */
-            source?: "llm" | "cache" | "manual" | null;
+            source?: "llm" | "cache" | "manual" | "guide" | null;
             review_reason?: string | null;
             /** Format: date-time */
             created_at: string;
@@ -1205,6 +1223,14 @@ export interface components {
         ApplicationPatch: {
             /** @enum {string} */
             status: "shortlisted" | "accepted" | "rejected" | "completed";
+            /** @description Required when status is completed, rejected for any other status */
+            completion?: components["schemas"]["ProjectCompletion"];
+        };
+        ProjectCompletion: {
+            summary: string;
+            /** @description The skills the guide vouches for. Each must be one the opening requires or the student already lists. */
+            skills: string[];
+            output_type: components["schemas"]["OutputType"];
         };
         WhyGraph: {
             nodes: {
@@ -1581,7 +1607,7 @@ export interface components {
         Notification: {
             id: string;
             /** @enum {string} */
-            type: "application_received" | "application_status" | "certificate_result" | "review_needed" | "allotted" | "session_logged" | "action_assigned" | "issue_escalated" | "issue_raised_by_mentee" | "meeting_request";
+            type: "application_received" | "application_status" | "certificate_result" | "review_needed" | "allotted" | "session_logged" | "action_assigned" | "issue_escalated" | "issue_raised_by_mentee" | "meeting_request" | "project_recorded";
             title: string;
             body?: string | null;
             link: string;
@@ -2483,6 +2509,7 @@ export interface operations {
             403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
+            422: components["responses"]["ValidationFailed"];
         };
     };
     listMyApplications: {
