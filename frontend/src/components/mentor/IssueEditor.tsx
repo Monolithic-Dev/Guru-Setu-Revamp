@@ -1,5 +1,5 @@
 "use client";
-// Repeater for issues raised in a session (FLOW-07): student, category, text. The confidential toggle arrives with add-on A4.
+// Repeater for issues raised in a session (FLOW-07): student, category, text, confidential (add-on A4, REQ-036).
 import { Plus, Trash2 } from "lucide-react";
 import { TOPICS, type Topic } from "./TopicChips";
 
@@ -8,6 +8,7 @@ export interface IssueDraft {
   student_id: string;
   category: Topic;
   text: string;
+  confidential: boolean;
 }
 
 export interface IssueEditorProps {
@@ -75,6 +76,19 @@ export function IssueEditor({ items, students, errors, onChange, onAdd, max = 10
               </div>
               {msg(i, "text")}
             </div>
+            <label className="inline-flex min-h-[40px] cursor-pointer items-center gap-2 text-sm font-bold text-gray-700 sm:col-span-2">
+              <input
+                type="checkbox"
+                className="h-4 w-4 accent-brand"
+                checked={it.confidential}
+                onChange={(e) => update(i, { confidential: e.target.checked })}
+                aria-describedby={`${fid(i, "confidential")}-help`}
+              />
+              Confidential
+              <span id={`${fid(i, "confidential")}-help`} className="text-xs font-medium text-gray-600">
+                Counted only as &quot;confidential&quot;; text visible to you and the student.
+              </span>
+            </label>
           </div>
         </fieldset>
       ))}

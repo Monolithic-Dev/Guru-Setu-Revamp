@@ -154,7 +154,7 @@ export function SessionForm({ rows, openings, prefillStudentId, onSaved, onCance
       confidential: false,
       next_followup: followup || null,
       action_items: actions.map(({ student_id, text, owner, due_date }) => ({ student_id, text: text.trim(), owner, due_date })),
-      issues: issues.map(({ student_id, category, text }) => ({ student_id, category, text: text.trim(), confidential: false })),
+      issues: issues.map(({ student_id, category, text, confidential }) => ({ student_id, category, text: text.trim(), confidential })),
     };
 
     setBusy(true);
@@ -346,7 +346,7 @@ export function SessionForm({ rows, openings, prefillStudentId, onSaved, onCance
             clear("issues");
           }}
           onAdd={() =>
-            setIssues((a) => [...a, { key: newKey(), student_id: selectedStudents.length === 1 ? selectedStudents[0].id : "", category: topics[0] ?? "academic", text: "" }])
+            setIssues((a) => [...a, { key: newKey(), student_id: selectedStudents.length === 1 ? selectedStudents[0].id : "", category: topics[0] ?? "academic", text: "", confidential: false }])
           }
         />
       </section>
