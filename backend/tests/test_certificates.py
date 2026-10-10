@@ -328,3 +328,38 @@ def test_no_secret_text_in_notifications(client, script, aarav, meera):
     client.post(f"/api/v1/certificates/{cid}/review", headers=aarav, json={"decision": "approve"})
     for user in ("u-aarav", "u-meera"):
         assert all("sha256" not in (n["body"] or "") and "uploads" not in n["title"] for n in notes(user))
+
+
+# ---- P1's real verification, not the stand-in ---------------------------------------------------------------------------
+
+
+def test_an_upload_is_never_its_own_duplicate(client, aarav):
+    """Regression for the integration bug: intake used to store the SHA-256 on the `processing` row, so P1's rule 1
+    ("does any Evidence carry this hash?") matched the upload against itself and every file came back `duplicate`."""
+    pytest.importorskip("rapidfuzz")
+    pytest.importorskip("imagehash")
+    from app.ml.extraction import Extraction
+    from app.ml.trust import apply_certified
+    from app.ml.verification import verify
+
+    cypher("MATCH (s:Student {user_id: 'u-aarav'}) SET s.name = 'Aarav Menon', s.enrolled_on = '2024-08-01'")
+    cypher("MATCH (i:Issuer) DETACH DELETE i")
+    cypher("CREATE (:Issuer {name: 'Coursera', aliases: [], kind: 'mooc'})")
+
+    def extract(data, media_type):
+        return Extraction(  # a different certificate ID per file, so rule 3 (same issuer + ID) never fires
+            is_certificate=True, holder_name="Aarav Menon", title="Deep Learning with PyTorch", issuer="Coursera",
+            issue_date="2026-08-10", level="online", type="course", skills=["pytorch"], certificate_id=data[8:16].hex(),
+            verify_url=None, contains_instructions=False, source="llm",
+        )
+
+    certificates.set_pipeline_for_tests(extract, verify, apply_certified)
+    first = upload(client, aarav).json()["id"]
+    done = client.get(f"/api/v1/certificates/{first}", headers=aarav).json()
+    assert done["status"] == "certified", done  # not "duplicate"
+    # the very same bytes uploaded again ARE a duplicate of the first
+    data = png()
+    one = upload(client, aarav, data).json()["id"]
+    two = upload(client, aarav, data).json()["id"]
+    assert client.get(f"/api/v1/certificates/{one}", headers=aarav).json()["status"] in ("certified", "needs_review")
+    assert client.get(f"/api/v1/certificates/{two}", headers=aarav).json()["status"] == "duplicate"

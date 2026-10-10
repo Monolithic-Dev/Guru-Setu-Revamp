@@ -8,6 +8,7 @@ import RemindersPanel from "@/components/mentor/RemindersPanel";
 import { EmptyState, ErrorState, LoadingRegion, PageHeader, Skeleton, useToast } from "@/components/ui";
 import { api } from "@/lib/api";
 import { features } from "@/lib/features";
+import { getSession } from "@/lib/session";
 import { formatDate, formatRelative } from "@/lib/format";
 import { isApiError, type ApiError } from "@/lib/problem";
 import type { components } from "@/lib/types";
@@ -23,6 +24,7 @@ export default function NotificationsPage() {
   const [error, setError] = useState<ApiError | undefined>();
   const [loading, setLoading] = useState(true);
   const [more, setMore] = useState(false);
+  const [remindable, setRemindable] = useState(false); // API-039 is for students and faculty only
 
   const load = useCallback(async (next: string | null) => {
     setError(undefined);
@@ -42,6 +44,8 @@ export default function NotificationsPage() {
   }, []);
 
   useEffect(() => {
+    const role = getSession()?.role;
+    setRemindable(role === "student" || role === "faculty");
     void load(null);
   }, [load]);
 
@@ -60,7 +64,7 @@ export default function NotificationsPage() {
     <>
       <PageHeader title="Notifications" subtitle={loading ? undefined : unread > 0 ? `${unread} unread` : "You're all caught up"} />
       <div className="space-y-6">
-        {features.reminders ? <RemindersPanel /> : null}
+        {features.reminders && remindable ? <RemindersPanel /> : null}
         {loading ? (
           <LoadingRegion label="Loading notifications">
             <div className="space-y-2">
