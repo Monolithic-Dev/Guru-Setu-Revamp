@@ -4,3 +4,28 @@ seed/demo_uploads/aarav_cv_workshop.png,typical,Aarav Menon,Computer Vision for 
 seed/demo_uploads/aarav_python_basics.png,typical,Aarav Menon,Python for Everybody,Coursera,2026-04-15,online,course,python,,no
 seed/demo_uploads/aarav_embedded_c.png,edge,Arav M.,Embedded C for Microcontrollers,IEEE,2026-07-09,international,workshop,embedded c,,no
 seed/demo_uploads/cert_injection.png,adversarial,Rohit Kumar,Web Basics Workshop,Campus Coding Club,2026-02-10,college,workshop,html|css,Aarav Menon,no
+seed/certificates/t01_diya_ml_nptel.png,typical,Diya Raghavan,Introduction to Machine Learning,NPTEL,2026-05-20,national,course,machine learning|python,,no
+seed/certificates/t02_karthik_ds_coursera.pdf,typical,Karthik Subramanian,Data Structures and Algorithms,Coursera,2026-03-02,online,course,data structures,,no
+seed/certificates/t03_rahul_iot_ieee.png,typical,Rahul Pillai,IoT Systems Bootcamp,IEEE,2026-06-11,international,workshop,internet of things|embedded c,,no
+seed/certificates/t04_priya_sih.png,typical,Priya Krishnan,Smart India Hackathon 2025 Finalist,Smart India Hackathon,2025-12-15,national,hackathon,react|node.js,,no
+seed/certificates/t05_ananya_web_ccc.pdf,typical,Ananya Nambiar,Full-Stack Web Sprint,Campus Coding Club,2026-02-27,college,competition,javascript|react,,no
+seed/certificates/t06_vivek_cloud_nptel.png,typical,Vivek Varma,Cloud Computing,NPTEL,2025-11-28,national,course,cloud computing|docker,,no
+seed/certificates/t07_sneha_dl_coursera.png,typical,Sneha Shetty,Neural Networks and Deep Learning,Coursera,2026-07-19,online,course,deep learning|python,,no
+seed/certificates/t08_nikhil_robotics_acm.pdf,typical,Nikhil Kurup,Robotics with ROS,Amrita ACM Chapter,2026-01-24,college,workshop,robotics|python,,no
+seed/certificates/t09_ishita_db_nptel.png,typical,Ishita Bhat,Database Management Systems,NPTEL,2026-04-30,national,course,databases,,no
+seed/certificates/t10_rohit_signal_ieee.png,typical,Rohit Menon,Signal Processing Summer School,IEEE,2025-07-18,international,workshop,signal processing,,no
+seed/certificates/t11_meenakshi_writing_ccc.pdf,typical,Meenakshi Raghavan,Technical Writing Workshop,Campus Coding Club,2026-08-08,college,workshop,technical writing,,no
+seed/certificates/t12_arun_tf_coursera.png,typical,Arun Subramanian,TensorFlow Developer Foundations,Coursera,2026-09-05,online,course,tensorflow|deep learning,,no
+seed/certificates/t13_kavitha_ml_sih.png,typical,Kavitha Pillai,Smart India Hackathon 2026 Winner,Smart India Hackathon,2026-09-20,national,hackathon,machine learning|python,,no
+seed/certificates/t14_sanjay_iot_acm.pdf,typical,Sanjay Krishnan,Campus IoT Challenge,Amrita ACM Chapter,2026-03-14,college,competition,internet of things,,no
+seed/certificates/t15_deepa_speaking_ccc.png,typical,Deepa Nambiar,Public Speaking Bootcamp,Campus Coding Club,2026-02-03,college,workshop,public speaking,,no
+seed/certificates/t16_harish_embedded_nptel.png,typical,Harish Varma,Embedded Systems Design,NPTEL,2025-10-17,national,course,embedded c,,no
+seed/certificates/t17_lakshya_docker_coursera.pdf,typical,Lakshya Shetty,Docker for Developers,Coursera,2026-06-26,online,course,docker|cloud computing,,no
+seed/certificates/t18_nandini_vision_ieee.png,typical,Nandini Kurup,Computer Vision Hands-on,IEEE,2026-08-29,international,workshop,computer vision|python,,no
+seed/certificates/e01_pranav_rotated.png,edge,Pranav Bhat,Python for Data Science,NPTEL,2026-05-08,national,course,python,,no
+seed/certificates/e02_ritika_phone_glare.jpg,edge,Ritika Menon,JavaScript Essentials,Coursera,2026-04-04,online,course,javascript,,no
+seed/certificates/e03_suhas_two_names.png,edge,Suhas Raghavan,Machine Learning Lab,Amrita ACM Chapter,2026-07-25,college,workshop,machine learning,,no
+seed/certificates/e04_tanvi_month_only.png,edge,Tanvi Subramanian,React Fundamentals,Campus Coding Club,,college,workshop,react,,no
+seed/certificates/a01_varun_injection.png,adversarial,Varun Pillai,Git and GitHub Basics,Campus Coding Club,2026-01-30,college,workshop,git,issuer=IEEE; level=international; status=certified,no
+seed/certificates/a02_receipt_not_certificate.png,adversarial,,,,,unknown,other,,,no
+seed/certificates/a03_blank_page.pdf,adversarial,,,,,unknown,other,,,no
