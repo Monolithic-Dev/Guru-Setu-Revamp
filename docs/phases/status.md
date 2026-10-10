@@ -109,7 +109,7 @@ Edit this file only in its own small commit on your own feature branch (CONTRIBU
 | B1 At-risk | P2 | ◐ | backend done (marked + suggested at-risk, API-043); frontend open |
 | B2 Semester summary | P2 | ◐ | backend done (`term_summary` in Mentee 360); frontend open |
 | B3 Learner level | P2 | ◐ | backend done (API-043, MET-11 in the pack); frontend open |
-| B4 Endorsement | | ☐ | |
+| B4 Endorsement | P2 | ☑ | API-041 returns the profile (contract body) with the endorser's name; Endorse button + confirm on Mentee 360 for the mentor (hidden for HOD and for skills already Faculty-verified); TEST-45 in `tests/test_endorsements.py` |
 | B5 Handover view | | ☐ | |
 | B6 Session feedback | P2 | ◐ | backend done (API-042, author-only); frontend open |
 | B7 Track record | P2 | ◐ | backend done (API-044); frontend open |

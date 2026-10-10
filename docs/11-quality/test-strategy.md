@@ -89,7 +89,7 @@ Calibrated to 15 h (A-01):
 | ID | Case | Expected | REQ |
 |---|---|---|---|
 | TEST-44 (P1) | API-045 as Aarav; API-031 as Aarav about self | Meera gets `meeting_request` and `issue_raised_by_mentee`; the issue appears in API-025 for Meera | 024 |
-| TEST-45 (P2) | API-041 by Meera (guide of Aarav after accept) for "pytorch"; by Arjun | trust_level 2 with `endorsed_by` Meera; 404 for Arjun | 027 |
+| TEST-45 (P2) | API-041 by Meera (guide of Aarav after accept) for "pytorch"; by Arjun | 201 with the student profile: trust_level 2 and `endorsed_by` showing the faculty **name** ("Dr. Meera Raman"); 404 for Arjun, 403 for HOD / student / IQAC, 404 for a skill the student does not list. Realised in `tests/test_endorsements.py` | 027 |
 | TEST-46 (P2) | Seed mentee with 68% attendance; API-043 `marked_at_risk: true` on another | Row reasons include `suggested_at_risk` and `marked_at_risk` respectively | 029 |
 | TEST-47 (P1) | API-014 valid; 4-character title; 11 skills | 201 and visible in API-012 with fit; 422; 422 | 030 |
 | TEST-48 (P2) | API-025 `term_summary` for Aarav | Each number equals the count derived from the same response's lists | 032 |
