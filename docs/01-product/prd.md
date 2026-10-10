@@ -148,6 +148,11 @@ Priorities: **P0** = CORE (must ship), **P1** = ADD-ON A, **P2** = ADD-ON B. End
 - AC-006.3 Given the owner accepts a shortlisted application, then Aarav sees status "Accepted" and Dr. Meera appears under "My guides" on his mentorship page.
 - AC-006.4 Given a student tries to change an application status, then the response is 403.
 
+**REQ-040 (P2) Project completion record.** When the faculty member who posted an opening marks an accepted application completed, the system shall require a project record: what was done (20-600 characters), the skills they vouch for (1-8, each one the opening requires or the student already lists) and what the work produced (report, prototype, paper, dataset or other). It shall store the record as evidence certified by that named guide, link it to the skills it proves, make the guide an endorser of each (so each reads Faculty-verified with their name), notify the student, and count it as a `project` achievement. There is no grade or rating field. The summary text is visible to the student, their mentors and the HOD, and never appears in an export or dashboard.
+- AC-040.1 Given Dr. Meera marks Aarav's accepted application completed with the record, then Aarav's Certificates page shows "Project: Edge AI for Agriculture, guided by Dr. Meera Raman", each vouched skill reads "Faculty-verified · Dr. Meera Raman", and his fit for that opening rises.
+- AC-040.2 Given the record is missing, too short, vouches for a skill unrelated to the opening and the student, or is sent with any other status, then the response is 422 and nothing changes.
+- AC-040.3 Given the achievements export, then the project is counted under type `project` and the summary text is absent.
+
 **REQ-030 (P1) Create opening.** When faculty submit a title (5–120 chars), description (≤ 2000 chars) and 1–10 required skills, the system shall create an open opening and compute its embedding.
 - AC-030.1 Given a valid form, then the opening appears in students' opening lists with fit scores.
 

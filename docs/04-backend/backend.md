@@ -236,7 +236,7 @@ Roles: S = student, F = faculty, H = hod, I = iqac. "Scope" refers to security Â
 | API-015 | GET /openings/{id}/fit?student_id= | Fit Check; `student_id` only for the owner faculty viewing an applicant | S (self), F (owner, applicant only) | 200 `Fit` | 404 | 004 | P0 |
 | API-016 | GET /openings/{id}/candidates | Applicants ranked by fit | F (owner) | 200 `Candidate[]` | 404 | 005 | P0 |
 | API-017 | POST /openings/{id}/applications | Apply | S | 201 `Application` | 404, 409 | 006 | P0 |
-| API-018 | PATCH /applications/{id} | Change status `{status}` | F (owner of opening) | 200 `Application` | 403, 404, 409 | 006 | P0 |
+| API-018 | PATCH /applications/{id} | Change status `{status}`; `completed` also needs `completion {summary, skills, output_type}` (REQ-040) | F (owner of opening) | 200 `Application` | 403, 404, 409, 422 | 006, 040 | P0 |
 | API-019 | GET /me/applications | Own applications (S) | S | 200 `Application[]` | | 006, 014 | P0 |
 | API-020 | GET /openings/{id}/why | Why-paths for the caller | S | 200 `WhyGraph` | 404 | 020 | P1 |
 | API-021 | GET /me/skill-gaps | Top 5 unlocking skills | S | 200 `SkillGap[]` | | 021 | P1 |
@@ -437,6 +437,7 @@ Computed per active MENTORS link for the mentor's home (API-024) and for the HOD
 | issue_escalated (P1) | HOD | API-032 escalated | "Issue escalated by {mentor}" | /coordinator |
 | issue_raised_by_mentee (P1) | Assigned mentor | API-031 by student | "{student} raised an issue" | /faculty/mentees/{id} |
 | meeting_request (P1) | Assigned mentor | API-045 | "{student} requested a meeting" (body = the student's own message) | /faculty/mentees/{id} |
+| project_recorded | Student | API-018 (completed) | "{faculty} recorded your work on {opening}" | /student/certificates |
 
 Notification bodies never contain session notes or issue text.
 
