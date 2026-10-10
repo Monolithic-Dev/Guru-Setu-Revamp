@@ -14,6 +14,26 @@ Screens and components (§6, §7) and client state (§8) are sections of this do
 - The mentor's next action is one tap from the home screen: "Log session" and "Open" on every mentee row.
 - No page renders data it did not get from the API. Hiding fields is never the privacy control; the server is (security §4).
 
+### 1.1 Visual style (carried over from the earlier GuruSetu UI)
+
+The look matches the earlier GuruSetu prototype, so the product is recognisable. Tokens live in `frontend/tailwind.config.ts`; shared classes in `src/app/globals.css`. Every screen owner (P1, P3, P4) uses these, not ad-hoc colours.
+
+| Element | Rule | Token / class |
+|---|---|---|
+| Primary colour | Maroon `#8C1515` for headers, primary buttons, section titles, active nav; hover `#7A1212`, pressed `#6B1010` | `brand`, `brand-hover`, `brand-active` |
+| Accent | Gold `#D4AF37` for match/score badges and highlights, **as a fill only**, with `gold-ink` text on it (gold text on white fails contrast) | `gold`, `gold-soft`, `gold-ink` |
+| Canvas | Light grey page background `#F2F2F2`; content sits on white cards | `bg-canvas` |
+| Page header | Maroon band, white text, name/greeting in black weight; sticky on mobile | `AppShell` |
+| Cards | White, `rounded-card` (1.5rem), thin `gray-100` border, `shadow-sm`, padding 20 px | `.card` |
+| Section titles | Maroon, `font-black`, uppercase, `tracking-widest`, small size | `.section-title` |
+| Buttons | Primary: maroon pill (`rounded-2xl`), white uppercase black-weight label; secondary: maroon outline | `.btn-primary`, `.btn-secondary` |
+| Toggles | Segmented pill (grey track, maroon active segment), e.g. the role switch on login | `components/ui` |
+| Pills and chips | `rounded-full`, small bold text; status is always written as text | `StatusPill`, `SkillChip` |
+| Body text | `gray-900` / `gray-600`; never `gray-400` for text (contrast, NFR-05) | — |
+| Icons | `lucide-react` (bundled, offline), always with a text label or `aria-label` | — |
+
+Avatars use initials, not an external avatar service (offline demo, no external assets).
+
 ## 2. Information architecture
 
 ```mermaid
