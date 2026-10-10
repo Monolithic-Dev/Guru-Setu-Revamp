@@ -17,6 +17,7 @@ from app.core.errors import ApiError
 from app.repos import mentorship_repo
 from app.schemas.auth import CurrentUser
 from app.schemas.generated import IssueCreate, IssuePatch, SessionCreate
+from app.services import terms
 from app.services.access import assert_mentor_of
 from app.services.notify import notify, render_title
 from app.services.status_history import history_for, record_status
@@ -110,21 +111,11 @@ def _field_errors(body: SessionCreate) -> list[dict[str, str]]:
 
 def _term_error(tx, session_date: date) -> dict[str, str] | None:
     """The session date must fall in the current or the previous term. With no terms loaded the check is skipped."""
-    terms = mentorship_repo.terms(tx)
-    if not terms:
+    current, previous = terms.resolve(tx)
+    if current is None:
         return None
-    ordered = sorted(terms, key=lambda t: t["start_date"])
-    configured = get_settings().current_term_id
-    now = today().isoformat()
-    current = next((t for t in ordered if t["id"] == configured), None) if configured else None
-    if current is None:
-        current = next((t for t in ordered if t["start_date"] <= now <= t["end_date"]), None)
-    if current is None:
-        current = next((t for t in reversed(ordered) if t["start_date"] <= now), ordered[0])
-    previous = [t for t in ordered if t["end_date"] < current["start_date"]]
-    allowed_from = (previous[-1] if previous else current)["start_date"]
-    day = session_date.isoformat()
-    if not (allowed_from <= day <= current["end_date"]):
+    allowed_from = (previous or current)["start_date"]
+    if not (allowed_from <= session_date.isoformat() <= current["end_date"]):
         return {"field": "date", "message": "Session date must be in the current or previous term."}
     return None
 
