@@ -121,9 +121,9 @@ Edit this file only in its own small commit on your own feature branch (CONTRIBU
 | T6.P1.2 Eval numbers → slide | P1 | ☐ | |
 | T6.P2.1 Scans + hygiene | P2 | ☐ | |
 | T6.P2.2 rc1 + submission tag | P2 | ☐ | |
-| T6.P3.1 a11y + responsive (TEST-51) | P3 | ☐ | |
-| T6.P3.2 Playwright (optional) | P3 | ☐ | |
-| T6.P3.3 Cleanup | P3 | ☐ | |
+| T6.P3.1 a11y + responsive (TEST-51) | P3 | ☑ | Lighthouse a11y 100 desktop + 100 mobile on SCR-01/04/06/07/08/09/10 + A9; FLOW-07 keyboard-only OK; 360 px no h-scroll on all P3 screens (sample data). For P4's qa-log. SCR-02/03/05/11 are P1/P4 screens |
+| T6.P3.2 Playwright (optional) | P3 | ◐ | e2e/primary-flow.spec.ts written (index §7 steps 1,3,4,6,7,9,10); not run yet: needs live API + seed on main |
+| T6.P3.3 Cleanup | P3 | ☑ | /dev/components removed; no console.log; no fixture imports in src/app; lint + tsc clean |
 | T6.P4.1 Deck | P4 | ☐ | |
 | T6.P4.2 Script + rehearsals ×2 | P4 | ☐ | |
 | T6.P4.3 Video + submission | P4 | ☐ | |
