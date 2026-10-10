@@ -4,6 +4,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { CalendarClock, CheckCircle2, MessageSquarePlus, TriangleAlert } from "lucide-react";
+import { SessionFeedback } from "@/components/student/SessionFeedback";
 import { Dialog, EmptyState, ErrorState, LoadingRegion, PageHeader, Skeleton, StatusPill, useToast } from "@/components/ui";
 import { useApi } from "@/hooks/useApi";
 import { api } from "@/lib/api";
@@ -35,6 +36,7 @@ export default function MyMentorshipPage() {
   const toast = useToast();
   const { data, error, loading, reload } = useApi<MyMentorship>("/me/mentorship");
   const [busy, setBusy] = useState<string | null>(null);
+  const [rating, setRating] = useState<string | null>(null); // session whose feedback form is open
   const [meeting, setMeeting] = useState(false);
   const [issue, setIssue] = useState(false);
   const [message, setMessage] = useState("");
@@ -47,6 +49,7 @@ export default function MyMentorshipPage() {
     try {
       await api.post(`/sessions/${s.id}/confirm`);
       toast.success("Thanks, your attendance is confirmed");
+      setRating(s.id); // B6: offer feedback right after a successful confirm
     } catch (e) {
       toast.error(isApiError(e) && e.code === "NOT_PRESENT" ? "You were marked absent for this session." : "Couldn't confirm. Try again.");
     } finally {
@@ -156,7 +159,10 @@ export default function MyMentorshipPage() {
           </h2>
           {mentor ? (
             <>
-              <p className="text-lg font-black text-gray-900">{mentor.name}</p>
+              {/* B7 REQ-035: the mentor's name opens their track record. */}
+              <Link href={`/faculty-profile/${mentor.user_id}`} className="text-lg font-black text-brand underline underline-offset-2">
+                {mentor.name}
+              </Link>
               <p className="text-sm text-gray-600">
                 {mentor.designation} · <a className="font-bold text-brand underline" href={`mailto:${mentor.email}`}>{mentor.email}</a>
               </p>
@@ -170,7 +176,15 @@ export default function MyMentorshipPage() {
           {data.guides.length > 0 ? (
             <p className="text-sm text-gray-600">
               Research guide{data.guides.length === 1 ? "" : "s"}:{" "}
-              {data.guides.map((g) => `${g.mentor.name}${g.opening_title ? ` (${g.opening_title})` : ""}`).join(", ")}
+              {data.guides.map((g, i) => (
+                <span key={g.id}>
+                  {i > 0 ? ", " : null}
+                  <Link href={`/faculty-profile/${g.mentor.user_id}`} className="font-bold text-brand underline">
+                    {g.mentor.name}
+                  </Link>
+                  {g.opening_title ? ` (${g.opening_title})` : null}
+                </span>
+              ))}
             </p>
           ) : null}
         </section>
@@ -306,12 +320,24 @@ export default function MyMentorshipPage() {
                       <TriangleAlert aria-hidden size={14} /> Marked absent
                     </span>
                   ) : s.confirmed_at ? (
-                    <span className="inline-flex items-center gap-1 text-xs font-bold text-green-800">
-                      <CheckCircle2 aria-hidden size={14} /> Confirmed
+                    <span className="flex flex-wrap items-center gap-3">
+                      <span className="inline-flex items-center gap-1 text-xs font-bold text-green-800">
+                        <CheckCircle2 aria-hidden size={14} /> Confirmed
+                      </span>
+                      <button
+                        type="button"
+                        className="text-xs font-bold text-brand underline"
+                        aria-expanded={rating === s.id}
+                        onClick={() => setRating(rating === s.id ? null : s.id)}
+                      >
+                        {rating === s.id ? "Hide feedback" : "Rate this session"}
+                      </button>
                     </span>
                   ) : (
                     <StatusPill status="unconfirmed" />
                   )}
+                  {/* Absent attendees never get the buttons (the API answers 409 NOT_PRESENT anyway). */}
+                  {s.present && s.confirmed_at && rating === s.id ? <SessionFeedback sessionId={s.id} label={formatDate(s.date)} /> : null}
                 </li>
               ))}
             </ul>
