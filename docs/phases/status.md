@@ -1,7 +1,7 @@
 # Build Status Board
 
 Legend: ☐ todo · ◐ doing · ☑ done · ✂ cut. Update your own rows when you start or finish a task. Bugs go in §8 with an owner (the **file owner** from `tools/ownership.txt`).
-Edit this file only in its own small commit straight to `main` after `git pull --rebase`. On a conflict, keep both sides ([parallel-work.md](parallel-work.md) §1).
+Edit this file only in its own small commit on your own feature branch (CONTRIBUTING §6). On a conflict, keep both sides ([parallel-work.md](parallel-work.md) §1).
 `0:00 = ____` (real start time)
 
 ## 0. Decisions (T0.ALL.1) → details in `docs/plan/decisions-log.md`

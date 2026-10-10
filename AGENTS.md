@@ -36,6 +36,7 @@ A 15-hour hackathon build. Students verify certificates and get explained fit fo
 - Import rules: `api → deps, schemas, services`; `services → repos, ml`; Cypher only in `repos/` and `scripts/seed.py`, always parameterised.
 - Thresholds come from config (backend §8). Calendar dates are Asia/Kolkata; timestamps are UTC with a `Z` suffix.
 - Commit messages: `T2.P2.3 REQ-008: <what>`.
+- Git: one feature branch per person; never push to `main` and never merge your own PR; open a PR only at a lead-announced checkpoint. Full rules in [CONTRIBUTING.md](CONTRIBUTING.md); per-person prompts in [docs/phases/prompts/](docs/phases/prompts/).
 
 ## Boundaries
 **Always:** run your tests before finishing; build P0 before P1 before P2; write a StatusEvent and the listed notifications in the same transaction as any status change; update the governing doc when behaviour changes; edit only files your owner id owns (`tools/ownership.txt`).

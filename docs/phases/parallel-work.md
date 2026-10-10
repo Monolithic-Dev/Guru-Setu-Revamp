@@ -12,7 +12,7 @@ Three exceptions, each with its own rule:
 
 | Kind | Files | Rule |
 |---|---|---|
-| **ALL** (shared, append-only) | `docs/phases/status.md` | Edit only your own rows or append bugs, in a separate commit straight to `main` after `git pull --rebase`. If git still reports a conflict, keep both sides. |
+| **ALL** (shared, append-only) | `docs/phases/status.md` | Edit only your own rows or append bugs, in a separate small commit on your own branch (CONTRIBUTING §6). If a rebase reports a conflict, keep both sides. |
 | **GEN** (generated) | `frontend/src/lib/types.ts`, `backend/app/schemas/generated.py` | Never hand-edit. Change only by re-running the generator after a contract change (§5). On a conflict, re-run the generator and take its output. |
 | **Seams** (one person's code shows up on another's screen) | The slots in §4 | The owner of the host file places a **slot**; the feature owner fills a separate file. Nobody edits the other's file. |
 
@@ -94,15 +94,18 @@ A stub must compile and keep the final signature. If the signature has to change
 
 ## 6. Git workflow
 
-- **Branches:** `p<n>/<task-id>-<slug>`, for example `p2/t2-p2-3-sessions`. Branch from the latest `main`, and merge back at least once an hour and at every gate.
+The full workflow is in [CONTRIBUTING.md](../../CONTRIBUTING.md). In short:
+
+- **Branches:** one feature branch per person (`feature/p1-ml-fit`, `feature/p2-backend-core`, `feature/p3-frontend-mentor`, `feature/p4-seed-coordinator`), created from the latest `main` after the scaffold commit. Task IDs go in commit messages, not branch names.
+- **Pull requests only:** nobody pushes to `main` or merges their own PR (the one exception is the scaffold commit, T0.P2.0). PRs are opened at lead-announced checkpoints (C1, G1, G2, G3, freeze, final) and merged by the lead with **Rebase and merge**.
 - **Before pushing:**
-  1. `git pull --rebase origin main`
+  1. `git fetch origin && git rebase origin/main`
   2. `python tools/check_ownership.py P<n>`
   3. Your own tests: `pytest -q <your test files>`, or `npm run lint` plus `tsc --noEmit` for frontend
-  4. Push and merge (fast-forward or a PR without review). Because files are disjoint, the merge order doesn't matter.
-- **`main` must always boot.** After merging, run `docker compose up -d --build` and `seed --reset` once if you touched the backend or seed. If you break `main`, fixing it is your top priority.
+  4. `git push --force-with-lease origin <your branch>` (your own branch only). Because files are disjoint, the merge order doesn't matter.
+- **`main` must always boot.** After each merge the lead runs `docker compose up -d --build`, `seed --reset` and the tests. If a merge breaks `main`, the author fixes it first.
 - **Never commit:** `.env`, uploads, `node_modules`, `.next`, exports (`.gitignore` covers these).
-- **Shared commits** (`status.md`, contract edits, GEN outputs) go straight to `main` as separate small commits, never mixed into feature commits.
+- **Shared commits** (`status.md`, contract edits, GEN outputs) are separate small commits on your own branch, never mixed into feature commits. Contract commits start with `CONTRACT:`.
 
 ## 7. Conflict-free check per phase (who touches what)
 

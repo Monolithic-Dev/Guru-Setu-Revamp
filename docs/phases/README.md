@@ -67,7 +67,7 @@ Hours are relative to the start of the build ("0:00"). Write the real start time
 
 ## 4. Task ID scheme and status
 
-- Task IDs are `T<phase>.<person>.<n>`, for example `T2.P1.3`. They are used in branch names (`t2-p1-3-cache`) and commit messages (`T2.P1.3 REQ-001: build extraction cache`).
+- Task IDs are `T<phase>.<person>.<n>`, for example `T2.P1.3`. They are used in commit messages (`T2.P1.3 REQ-001: build extraction cache`). Branches are one per person, not per task ([CONTRIBUTING.md](../../CONTRIBUTING.md)).
 - Each task lists: estimate, dependencies, spec references, files, steps, and **Done when** (a command or check).
 - Keep live status in [status.md](status.md): one line per task. The status is ☐ todo / ◐ doing / ☑ done / ✂ cut.
 
@@ -77,9 +77,9 @@ Hours are relative to the start of the build ("0:00"). Write the real start time
 
 1. **Contracts first.** `docs/04-backend/openapi.yaml` and `schema.cypher` are frozen at G0. Changing them needs a 1-line message to the team, and a contract edit plus regenerated TS types (`npx openapi-typescript …`) in the same commit.
 2. **Frontend never waits for the backend.** Until the real endpoint lands, a screen renders the `example` payloads from `docs/04-backend/backend.md §4.1`, or a fixture in `frontend/src/fixtures/<API-id>.json`. Swap to live calls at the gate.
-3. **Branches:** short-lived per task, merged to `main` at least once per hour. `main` must always boot (`docker compose up` plus seed). Never commit `.env`, uploads or real data.
+3. **Branches and PRs:** one feature branch per person, pull requests only at lead-announced checkpoints, rebase-and-merge by the lead ([CONTRIBUTING.md](../../CONTRIBUTING.md)). `main` must always boot (`docker compose up` plus seed). Never commit `.env`, uploads or real data.
 4. **Stand-ups (5 minutes):** at 1:00, 4:00, 7:00 (30-minute integration check), 10:00 (freeze review) and 12:30. Each person says: done, next, blocked, and anything to cut.
-5. **Gate rule:** a phase isn't done until its gate checklist passes on `main` on one machine. If a gate fails, the next phase's first 30 minutes go to fixing it, and that time comes off the lowest-priority task of the next phase.
+5. **Gate rule:** a phase isn't done until its gate checklist passes on `main` on one machine, after the lead has merged that checkpoint's PRs. If a gate fails, the next phase's first 30 minutes go to fixing it, and that time comes off the lowest-priority task of the next phase.
 6. **Cut order** (team plan §13.4): tamper → eval → skill-gap → Why graph → full issue lifecycle → live extraction (switch to cache only). **Never cut:** security fixes, session log, action items, mentor home, HOD dashboard, Fit Check.
 7. **Seeded "today":** run every test and rehearsal with `TODAY_OVERRIDE=2026-10-10`, or re-anchor the seed (`--anchor-date`).
 

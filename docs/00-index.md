@@ -34,7 +34,7 @@ Status:       Draft v1 | assumptions log: §5
 | 9 | [../AGENTS.md](../AGENTS.md) (+ `CLAUDE.md` → `@AGENTS.md`) | Agent entry: read order, hard rules, commands, definition of done | — |
 | — | [project-structure.md](project-structure.md) | Target repo tree, ownership, end-to-end data flow, keys and manual setup, open flaws | — |
 | — | [plan/prd-v2-and-15h-plan.md](plan/prd-v2-and-15h-plan.md) | Demo story, disclosure, pitch material (not part of the spec pack) | — |
-| — | [phases/](phases/README.md) | Phase-wise build plan: tasks `T<phase>.<person>.<n>`, gates G0–G3, add-ons, freeze; [parallel-work.md](phases/parallel-work.md) + `tools/ownership.txt` for conflict-free work | Task IDs |
+| — | [phases/](phases/README.md) | Phase-wise build plan: tasks `T<phase>.<person>.<n>`, gates G0–G3, add-ons, freeze; [parallel-work.md](phases/parallel-work.md) + `tools/ownership.txt` for conflict-free work; [../CONTRIBUTING.md](../CONTRIBUTING.md) for the branch and PR workflow; [phases/prompts/](phases/prompts/README.md) for the four builder prompts | Task IDs |
 
 The spec pack itself holds no schedules. The hour-by-hour build plan lives in [phases/README.md](phases/README.md), with phase docs 0–6 and a live [status board](phases/status.md). It refines the team plan in `docs/plan/` §13.
 

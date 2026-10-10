@@ -12,7 +12,10 @@ docker-compose.yml                              P2
 .gitignore                                      P2
 tools/                                          P2
 .spectral.yaml                                  P2
+tools/certgen/                                  P4
+.github/                                        P2
 README.md                                       P4
+CONTRIBUTING.md                                 P4
 AGENTS.md                                       P4
 CLAUDE.md                                       P4
 
@@ -20,6 +23,7 @@ CLAUDE.md                                       P4
 backend/                                        P2
 backend/requirements.txt                        P1
 backend/Dockerfile                              P1
+backend/.dockerignore                           P1
 backend/app/schemas/generated.py                GEN
 
 # P1: ML package, match routes, endorsement route, match repo
