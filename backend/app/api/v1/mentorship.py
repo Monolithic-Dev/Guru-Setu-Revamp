@@ -91,7 +91,7 @@ def patch_action_item(
 @router.post(
     "/issues", response_model=Issue, response_model_exclude_unset=True, status_code=201, operation_id="raiseIssue"
 )
-def raise_issue(body: IssueCreate, user: CurrentUser = Depends(require_role("faculty"))) -> dict:
+def raise_issue(body: IssueCreate, user: CurrentUser = Depends(require_role("faculty", "student"))) -> dict:
     return mentorship.create_issue(user, body)
 
 

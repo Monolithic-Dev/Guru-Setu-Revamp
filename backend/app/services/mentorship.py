@@ -313,9 +313,31 @@ def patch_action_item(user: CurrentUser, item_id: str, new_status: str) -> dict[
 # ============================== issues (API-031, API-032) ==============================
 
 
+# raised -> acknowledged -> in_progress -> resolved (backend 6.7); a mentor may skip ahead, never go back
+_ISSUE_NEXT = {
+    "raised": {"acknowledged", "resolved"},
+    "acknowledged": {"in_progress", "resolved"},
+    "in_progress": {"resolved"},
+}
+
+
+def _issue_not_found() -> ApiError:
+    return ApiError("NOT_FOUND", 404, "The issue was not found.")
+
+
 def create_issue(user: CurrentUser, body: IssueCreate) -> dict[str, Any]:
+    """API-031. A mentor or guide raises it about a mentee; a student raises it about themselves (REQ-024)."""
+    student_raised = user.role == "student"
+    if student_raised and (body.student_id != user.user_id or body.session_id or body.confidential):
+        # A student can only speak for themselves, outside any session, and cannot mark it confidential.
+        raise ApiError(
+            "VALIDATION_FAILED", 422, "Students can raise a non-confidential issue about themselves only.",
+            errors=[{"field": "student_id", "message": "Must be you; no session_id or confidential flag"}],
+        )
+
     def work(tx):
-        assert_mentor_of(tx, user.user_id, body.student_id)  # 404 unless an active mentor or guide
+        if not student_raised:
+            assert_mentor_of(tx, user.user_id, body.student_id)  # 404 unless an active mentor or guide
         session_id = body.session_id
         if session_id and not mentorship_repo.session_logged_by(tx, session_id, user.user_id):
             raise ApiError("NOT_FOUND", 404, "The session was not found.")
@@ -325,55 +347,95 @@ def create_issue(user: CurrentUser, body: IssueCreate) -> dict[str, Any]:
             "category": body.category.value,
             "text": body.text,
             "confidential": bool(body.confidential),
-            "raised_by_role": "faculty",
+            "raised_by_role": user.role,
             "now": utc_now_iso(),
         }
         mentorship_repo.add_issues(tx, session_id, user.user_id, [issue])
         record_status(tx, "issue", issue["id"], None, "raised", user)
+        if student_raised:
+            mentor = mentorship_repo.assigned_mentor_id(tx, user.user_id)
+            if mentor:
+                notify(
+                    tx, mentor, "issue_raised_by_mentee",
+                    render_title("issue_raised_by_mentee", student=user.name), link=f"/faculty/mentees/{user.user_id}",
+                )
         stored = mentorship_repo.get_issue(tx, issue["id"])
         return shape_issue(user, stored, history_for(tx, [issue["id"]])[issue["id"]])
 
     return run_write(work)
 
 
+def _check_issue_visible(tx, user: CurrentUser, issue: dict[str, Any]) -> None:
+    """404 unless the caller may touch this issue: a mentor of the student (never another mentor's confidential one),
+    or the HOD for an escalated, non-confidential issue of their department."""
+    if user.role == "faculty":
+        assert_mentor_of(tx, user.user_id, issue["student_id"])
+        if issue["confidential"] and issue.get("raised_by") != user.user_id:
+            raise _issue_not_found()
+    elif not (issue["escalated"] and not issue["confidential"] and issue["dept_code"] == user.dept_code):
+        raise _issue_not_found()
+
+
 def patch_issue(user: CurrentUser, issue_id: str, body: IssuePatch) -> dict[str, Any]:
-    """P0 subset: `raised -> resolved` with a resolution note. The wider lifecycle, escalation and the confidential
-    toggle arrive with add-on A4 and return 409 until then."""
+    """API-032: status moves forward, `escalated: true` (irreversible), `confidential`, all in ONE transaction with
+    their StatusEvents and the HOD notification."""
+    requested = body.model_fields_set
+    if body.status is None and not body.escalated and "confidential" not in requested:
+        raise ApiError(
+            "VALIDATION_FAILED", 422, "Nothing to update.",
+            errors=[{"field": "status", "message": "Send status, escalated or confidential."}],
+        )
+    if body.status is not None and body.status.value == "resolved" and not body.resolution:
+        raise ApiError(
+            "VALIDATION_FAILED", 422, "A resolution note is required.",
+            errors=[{"field": "resolution", "message": "Write what was done to resolve this issue."}],
+        )
 
     def work(tx):
         issue = mentorship_repo.get_issue(tx, issue_id)
         if issue is None:
-            raise ApiError("NOT_FOUND", 404, "The issue was not found.")
-        if user.role == "faculty":
-            assert_mentor_of(tx, user.user_id, issue["student_id"])
-            if issue["confidential"] and issue.get("raised_by") != user.user_id:
-                raise ApiError("NOT_FOUND", 404, "The issue was not found.")
-        elif not (issue["escalated"] and not issue["confidential"]):  # HOD: escalated issues only
-            raise ApiError("NOT_FOUND", 404, "The issue was not found.")
+            raise _issue_not_found()
+        _check_issue_visible(tx, user, issue)
+        is_hod = user.role == "hod"
+        status, props = issue["status"], {}
 
-        requested = body.model_fields_set
-        not_yet = body.status is not None and body.status.value != "resolved"
-        if body.escalated or "confidential" in requested or not_yet:
-            raise ApiError("INVALID_TRANSITION", 409, "This issue action is not available yet.")
-        if body.status is None or body.status.value != "resolved":
-            raise ApiError(
-                "VALIDATION_FAILED",
-                422,
-                "Nothing to update.",
-                errors=[{"field": "status", "message": "Set status to resolved."}],
-            )
-        if not body.resolution:
-            raise ApiError(
-                "VALIDATION_FAILED",
-                422,
-                "A resolution note is required.",
-                errors=[{"field": "resolution", "message": "Write what was done to resolve this issue."}],
-            )
-        if issue["status"] == "resolved":
-            raise ApiError("INVALID_TRANSITION", 409, "Cannot move issue from resolved to resolved.")
-        previous = issue["status"]
-        mentorship_repo.resolve_issue(tx, issue_id, body.resolution, utc_now_iso())
-        record_status(tx, "issue", issue_id, previous, "resolved", user)
+        if "confidential" in requested and body.confidential != issue["confidential"]:
+            if is_hod or issue.get("raised_by") != user.user_id:
+                raise ApiError("FORBIDDEN", 403, "Only the mentor who raised an issue can change its confidentiality.")
+            if body.confidential and issue["escalated"]:
+                raise ApiError("INVALID_TRANSITION", 409, "Escalated issues cannot be made confidential.")
+            props["confidential"] = bool(body.confidential)
+
+        escalated_now = False
+        if body.escalated and not issue["escalated"]:
+            if is_hod:
+                raise ApiError("FORBIDDEN", 403, "Only a mentor can escalate an issue.")
+            if issue["confidential"] or props.get("confidential"):
+                raise ApiError("INVALID_TRANSITION", 409, "Confidential issues cannot be escalated")
+            if status == "resolved":
+                raise ApiError("INVALID_TRANSITION", 409, "A resolved issue cannot be escalated.")
+            props["escalated"] = escalated_now = True
+
+        new_status = body.status.value if body.status is not None else None
+        if new_status is not None:
+            if is_hod and new_status != "resolved":
+                raise ApiError("INVALID_TRANSITION", 409, "The HOD can only resolve an escalated issue.")
+            if new_status not in _ISSUE_NEXT.get(status, set()):
+                raise ApiError("INVALID_TRANSITION", 409, f"Cannot move issue from {status} to {new_status}.")
+            props["status"] = new_status
+            if new_status == "resolved":
+                props["resolution"], props["resolved_at"] = body.resolution, utc_now_iso()
+
+        if props:
+            mentorship_repo.update_issue(tx, issue_id, props)
+        if new_status is not None:
+            record_status(tx, "issue", issue_id, status, new_status, user)
+        if escalated_now:
+            record_status(tx, "issue", issue_id, new_status or status, new_status or status, user, note="escalated")
+            for hod in mentorship_repo.hod_ids(tx, issue["dept_code"]):
+                notify(
+                    tx, hod, "issue_escalated", render_title("issue_escalated", mentor=user.name), link="/coordinator"
+                )
         updated = mentorship_repo.get_issue(tx, issue_id)
         return shape_issue(user, updated, history_for(tx, [issue_id])[issue_id])
 

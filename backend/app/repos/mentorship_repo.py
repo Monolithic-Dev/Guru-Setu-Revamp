@@ -311,7 +311,8 @@ def get_issue(tx, issue_id: str) -> dict[str, Any] | None:
     record = tx.run(
         """
         MATCH (i:Issue {id: $id})-[:ABOUT]->(st:Student)
-        RETURN i.id AS id, st.user_id AS student_id, i.category AS category, i.text AS text, i.status AS status,
+        RETURN i.id AS id, st.user_id AS student_id, st.dept_code AS dept_code,
+               i.category AS category, i.text AS text, i.status AS status,
                coalesce(i.escalated, false) AS escalated, coalesce(i.confidential, false) AS confidential,
                i.raised_by AS raised_by, i.raised_by_role AS raised_by_role, i.raised_at AS raised_at,
                i.resolved_at AS resolved_at, i.resolution AS resolution
@@ -321,13 +322,27 @@ def get_issue(tx, issue_id: str) -> dict[str, Any] | None:
     return record.data() if record else None
 
 
-def resolve_issue(tx, issue_id: str, resolution: str, now: str) -> None:
-    tx.run(
-        "MATCH (i:Issue {id: $id}) SET i.status = 'resolved', i.resolution = $resolution, i.resolved_at = $now",
-        id=issue_id,
-        resolution=resolution,
-        now=now,
-    ).consume()
+def update_issue(tx, issue_id: str, props: dict[str, Any]) -> None:
+    """Set only the given properties (status, resolution, resolved_at, escalated, confidential)."""
+    tx.run("MATCH (i:Issue {id: $id}) SET i += $props", id=issue_id, props=props).consume()
+
+
+def hod_ids(tx, dept_code: str) -> list[str]:
+    return [
+        r["id"]
+        for r in tx.run(
+            "MATCH (h:Staff {role: 'hod', dept_code: $d}) RETURN h.user_id AS id ORDER BY h.user_id", d=dept_code
+        )
+    ]
+
+
+def assigned_mentor_id(tx, student_id: str) -> str | None:
+    record = tx.run(
+        "MATCH (f:Faculty)-[:MENTORS {type: 'assigned', status: 'active'}]->(:Student {user_id: $sid}) "
+        "RETURN f.user_id AS id LIMIT 1",
+        sid=student_id,
+    ).single()
+    return record["id"] if record else None
 
 
 def session_logged_by(tx, session_id: str, faculty_id: str) -> bool:
