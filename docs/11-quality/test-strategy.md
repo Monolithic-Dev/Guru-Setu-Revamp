@@ -96,6 +96,7 @@ Calibrated to 15 h (A-01):
 | TEST-49 (P2) | Tag 3 mentees `slow` via API-043 → API-035 | Summary sheet shows "Slow learners identified: 3"; `learner_note` text absent from the export | 033 |
 | TEST-56 (P2) | API-042 twice by Aarav; once by an absent attendee | Second replaces first, visible only in the author's API-027; 409 `NOT_PRESENT` | 034 |
 | TEST-57 (P2) | API-044 for Meera | 4 count fields; schema has no rating fields | 035 |
+| TEST-74 (P2) | Meera completes Aarav's accepted application with a project record; then variants: no record, other status, unrelated skill, too short, empty skills, an output of "excellent", Arjun, Aarav, a second completion | 200 with a certified `project_record` (no file), skills Faculty-verified by name, notification, StatusEvent, guide link ended; every bad variant is 422/404/403/409 and changes nothing (rollback); another student 404; `/file` 404; counted as `project` and the summary is absent from both exports | 040 |
 
 ### 2.4 Non-functional
 | ID | Case | Expected | NFR |

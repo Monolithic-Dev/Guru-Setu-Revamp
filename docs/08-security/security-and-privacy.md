@@ -112,6 +112,7 @@ Implementation rule: response models declare the optional fields (`notes`, `text
 | Data | Purpose | Minimisation | Retention |
 |---|---|---|---|
 | Name, email, roll number | Identity, allotment, evidence | No phone, address or photo collected (the profile-photo upload is deleted) | Until `seed --reset` |
+| Project record summary (REQ-040) | Verifiable record of guided work | Free text the guide writes about the work, never a grade; visible to the student, their mentors and the HOD; never in exports, dashboards or notifications | Same |
 | Certificates | Verify skills; achievements evidence | Only page 1 of a PDF is processed; only the file goes to the LLM | Same |
 | Session notes, issues, actions | Mentoring continuity | Private by default; excluded from all exports | Same |
 | Academic snapshot `[MOCK]` | At-risk support | Synthetic | Same |

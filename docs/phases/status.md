@@ -145,3 +145,9 @@ Edit this file only in its own small commit on your own feature branch (CONTRIBU
 | E Guide directory and HOD mentor suggestion (API-058, SCR-19) | P2 | ☑ | shared-topic chips, no scores; TEST-72/73 |
 | F Opt-in discovery and invitations | - | ✂ | not built; contradicts REQ-005 unless the lead accepts the consent trade-off (decision X-2) |
 
+## 10. Project completion record (REQ-040, decision L-10)
+| Item | Owner | Status | Note |
+|---|---|---|---|
+| Contract: `ProjectCompletion`, `Certificate.kind/summary/output_type/recorded_by`, `project` type, `guide` source, `project_recorded` notification | P2 | ☑ | additive; `media_type` is now nullable (a record has no file) |
+| API-018 requires the record to complete; record + endorsements + notification in one transaction | P2 | ☑ | TEST-74, 7 tests; the existing transition tests send the record |
+| Complete dialog on the candidates screen, project card for the student, label on Mentee 360 | P2 | ☑ | checked in a real browser as Meera, Aarav and the HOD |
