@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "gen:types": "openapi-typescript ../docs/04-backend/openapi.yaml -o src/lib/types.ts",
-    "e2e": "playwright test",
+    "e2e": "playwright test -c e2e/playwright.config.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
