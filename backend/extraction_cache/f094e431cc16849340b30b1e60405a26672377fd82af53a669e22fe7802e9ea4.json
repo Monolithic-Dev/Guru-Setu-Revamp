@@ -1,0 +1,21 @@
+{
+  "_corrected": [
+    "issue_date: model read 2020-08-22, printed value is 2026-08-22"
+  ],
+  "_model": "qwen/qwen3.8-27b",
+  "_prompt_version": "extract_certificate_v1",
+  "certificate_id": "ACM-CV-2020-0188",
+  "contains_instructions": false,
+  "holder_name": "Aarav Menon",
+  "is_certificate": true,
+  "issue_date": "2026-08-22",
+  "issuer": "Amrita ACM Chapter",
+  "level": "unknown",
+  "skills": [
+    "computer vision",
+    "edge devices"
+  ],
+  "title": "Computer Vision for Edge Devices",
+  "type": "workshop",
+  "verify_url": null
+}

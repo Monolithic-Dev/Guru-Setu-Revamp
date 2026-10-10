@@ -1,0 +1,18 @@
+{
+  "_model": "qwen/qwen3.8-27b",
+  "_prompt_version": "extract_certificate_v1",
+  "certificate_id": "IEEE-EC-2026-7741",
+  "contains_instructions": false,
+  "holder_name": "Arav M.",
+  "is_certificate": true,
+  "issue_date": "2026-07-09",
+  "issuer": "IEEE",
+  "level": "unknown",
+  "skills": [
+    "embedded c",
+    "microcontrollers"
+  ],
+  "title": "Embedded C for Microcontrollers",
+  "type": "course",
+  "verify_url": null
+}

@@ -1,0 +1,14 @@
+{
+  "_comment": "Exact SIMILAR_TO scores for demo-critical pairs. Owner P1. Overrides win over model-computed scores (ai-system 5). MiniLM similarity of short phrases is noisy, so the pairs the demo depends on are pinned. Format: [name_a, name_b, score].",
+  "pairs": [
+    ["deep learning", "computer vision", 0.70],
+    ["pytorch", "deep learning", 0.80],
+    ["pytorch", "tensorflow", 0.75],
+    ["machine learning", "deep learning", 0.78],
+    ["python", "pytorch", 0.62],
+    ["edge ai", "computer vision", 0.65],
+    ["edge ai", "internet of things", 0.68],
+    ["embedded c", "c", 0.80],
+    ["natural language processing", "deep learning", 0.66]
+  ]
+}

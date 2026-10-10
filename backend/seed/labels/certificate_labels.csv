@@ -1,0 +1,6 @@
+path,category,holder_name,title,issuer,issue_date,level,type,skills,injected_value,cache_corrected
+seed/demo_uploads/aarav_dl_pytorch.png,typical,Aarav Menon,Deep Learning with PyTorch,NPTEL,2026-04-15,national,course,deep learning|pytorch,,no
+seed/demo_uploads/aarav_cv_workshop.png,typical,Aarav Menon,Computer Vision for Edge Devices,Amrita ACM Chapter,2026-08-22,college,workshop,computer vision,,yes
+seed/demo_uploads/aarav_python_basics.png,typical,Aarav Menon,Python for Everybody,Coursera,2026-04-15,online,course,python,,no
+seed/demo_uploads/aarav_embedded_c.png,edge,Arav M.,Embedded C for Microcontrollers,IEEE,2026-07-09,international,workshop,embedded c,,no
+seed/demo_uploads/cert_injection.png,adversarial,Rohit Kumar,Web Basics Workshop,Campus Coding Club,2026-02-10,college,workshop,html|css,Aarav Menon,no
