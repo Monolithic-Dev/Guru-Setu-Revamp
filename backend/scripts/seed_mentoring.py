@@ -231,8 +231,13 @@ def write_placeholder_files(items: list[tuple[str, str]], directory: str) -> int
     return len(items)
 
 
-def load(driver, anchor: dt.date, assignments: list[tuple[str, str]], names: dict[str, str]) -> dict[str, int]:
+def load(driver, anchor: dt.date, assignments: list[tuple[str, str]], names: dict[str, str],
+         with_evidence: bool = True) -> dict[str, int]:
+    """with_evidence=False leaves certificates to the caller, which runs real files through the pipeline (T2.P4.2)."""
     data = build(anchor, assignments, names)
+    if not with_evidence:
+        data["evidence"] = []
+        data["events"] = [e for e in data["events"] if e["entity_type"] != "evidence"]
     with driver.session() as db:
         for code, title, kinds, metrics in CRITERIA:
             db.run("MERGE (c:Criterion {code: $code}) SET c.framework = 'NAAC', c.title = $title, "
