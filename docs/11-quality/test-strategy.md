@@ -59,7 +59,7 @@ Calibrated to 15 h (A-01):
 | TEST-22 | API-016 on `op-edge-ai` after Aarav applies | 4 applicants sorted by score descending | 005 |
 | TEST-23 | Application transitions: every cell of backend §6.3; double apply; apply to a closed opening | Allowed → 200; disallowed → 409 `INVALID_TRANSITION`; 409 `ALREADY_APPLIED`; 409 `OPENING_CLOSED`; on accept, a guide MENTORS link exists | 006 |
 | TEST-24 (P1) | API-020 for Aarav before uploads | Contains edges deep learning –SIMILAR_TO– computer vision and computer vision ←REQUIRES– op-edge-ai | 020 |
-| TEST-25 (P1) | API-021 for Aarav | ≤ 5 items; first item `openings_unlocked ≥ 1` | 021 |
+| TEST-25 (P1) | API-021 for Aarav | ≤ 5 items, ranked by `openings_unlocked` then summed `total_gain`. On the seed no single certificate lifts an opening past `FIT_READY_MIN`, so every item has `openings_unlocked = 0` and the order comes from the gain | 021 |
 
 ### 2.3 Mentorship, tracking, privacy and metrics
 | ID | Case | Expected | REQ |
