@@ -62,7 +62,8 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /** Own profile with completeness, per-field trust labels, projects and resume info */
+        get: operations["getMyProfile"];
         put?: never;
         post?: never;
         delete?: never;
@@ -223,7 +224,8 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        patch?: never;
+        /** Edit an opening (owner only; omitted fields untouched; required skills are a full list) */
+        patch: operations["patchOpening"];
         trace?: never;
     };
     "/openings/{id}/fit": {
@@ -753,6 +755,178 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/concepts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Skill typeahead over concept names and aliases (max 10) */
+        get: operations["searchConcepts"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/recommendations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Openings grouped for the student (best, worth a look, stretch, not eligible) with eligibility and reasons */
+        get: operations["getMyRecommendations"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/openings/{id}/eligibility": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Eligibility rules for the calling student, each with a plain-words detail */
+        get: operations["getEligibility"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/faculty-profile": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Own faculty profile */
+        get: operations["getMyFacultyProfile"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update own faculty profile (omitted fields untouched; lists are replaced in full) */
+        patch: operations["patchMyFacultyProfile"];
+        trace?: never;
+    };
+    "/faculty/{faculty_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Public faculty profile with the track record (facts only; no ratings) */
+        get: operations["getFacultyPublic"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/faculty": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Guide directory for the calling student, ordered by shared topics (no scores) */
+        get: operations["listFaculty"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/resume": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Metadata of the current resume */
+        get: operations["getMyResume"];
+        put?: never;
+        /** Upload a PDF resume (field `file`, at most 5 MB and 4 pages); it supersedes the previous one */
+        post: operations["uploadResume"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/students/{student_id}/resume/file": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Resume PDF (the student, their mentors, the HOD, and faculty the student applied to) */
+        get: operations["getResumeFile"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/resume/suggestions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Skills found in the resume text (no AI). Nothing is added until the student applies a selection. */
+        post: operations["suggestFromResume"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/resume/suggestions/apply": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Add the selected suggestions as claimed skills (trust 0). A resume never certifies anything. */
+        post: operations["applyResumeSuggestions"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -764,7 +938,7 @@ export interface components {
             detail?: string;
             instance?: string;
             /** @enum {string} */
-            code: "UNAUTHENTICATED" | "TOKEN_EXPIRED" | "INVALID_CREDENTIALS" | "FORBIDDEN" | "NOT_FOUND" | "METHOD_NOT_ALLOWED" | "VALIDATION_FAILED" | "NOT_YOUR_MENTEE" | "ALREADY_APPLIED" | "INVALID_TRANSITION" | "NOT_PRESENT" | "OPENING_CLOSED" | "ALREADY_REVIEWED" | "FILE_TOO_LARGE" | "UNSUPPORTED_FILE_TYPE" | "RATE_LIMITED" | "DB_UNAVAILABLE" | "INTERNAL";
+            code: "UNAUTHENTICATED" | "TOKEN_EXPIRED" | "INVALID_CREDENTIALS" | "FORBIDDEN" | "NOT_FOUND" | "METHOD_NOT_ALLOWED" | "VALIDATION_FAILED" | "NOT_ELIGIBLE" | "NOT_YOUR_MENTEE" | "ALREADY_APPLIED" | "INVALID_TRANSITION" | "NOT_PRESENT" | "OPENING_CLOSED" | "ALREADY_REVIEWED" | "FILE_TOO_LARGE" | "UNSUPPORTED_FILE_TYPE" | "RATE_LIMITED" | "DB_UNAVAILABLE" | "INTERNAL";
             request_id?: string;
             errors?: {
                 field: string;
@@ -834,6 +1008,24 @@ export interface components {
             interests?: string[];
             /** @description Full list of claimed skill names; certified/endorsed skills are unaffected */
             claimed_skills?: string[];
+            /** @description Self-assessed level per skill name. It never changes a trust level. */
+            skill_levels?: {
+                [key: string]: components["schemas"]["SkillLevel"];
+            };
+            programme?: components["schemas"]["Programme"] | null;
+            year?: number;
+            headline?: string | null;
+            /** @description Labelled self-reported everywhere; never raises a trust level */
+            self_reported_cgpa?: number | null;
+            /** @description https URLs only */
+            links?: string[];
+            availability_hours?: number | null;
+            /** Format: date */
+            available_from?: string | null;
+            preferences?: string[];
+            open_to_opportunities?: boolean;
+            /** @description Full list; replaces the stored projects */
+            projects?: components["schemas"]["ProjectInput"][];
         };
         /** @enum {string} */
         CertificateStatus: "processing" | "certified" | "needs_review" | "rejected" | "duplicate" | "failed";
@@ -919,11 +1111,34 @@ export interface components {
             created_at: string;
             /** @description Owner only */
             applicant_count?: number | null;
+            preferred_skills?: string[];
+            positions?: number;
+            /** Format: date */
+            deadline?: string | null;
+            eligible_years?: number[];
+            min_cgpa?: number | null;
+            allowed_departments?: string[];
+            eligibility_mode?: components["schemas"]["EligibilityMode"];
+            mode?: components["schemas"]["WorkMode"];
+            duration_weeks?: number | null;
+            hours_per_week?: number | null;
+            positions_left?: number;
         };
         OpeningCreate: {
             title: string;
             description: string;
             required_skills: string[];
+            preferred_skills?: string[];
+            positions?: number;
+            /** Format: date */
+            deadline?: string | null;
+            eligible_years?: number[];
+            min_cgpa?: number | null;
+            allowed_departments?: string[];
+            eligibility_mode?: components["schemas"]["EligibilityMode"];
+            mode?: components["schemas"]["WorkMode"];
+            duration_weeks?: number | null;
+            hours_per_week?: number | null;
         };
         FitChip: {
             concept: string;
@@ -1022,6 +1237,12 @@ export interface components {
                 name: string;
                 roll_no: string;
                 year: number;
+                /** @description Assistive only; the HOD decides. Mentors under the load limit, ordered by topic overlap. */
+                suggested_mentor?: {
+                    mentor_id?: string;
+                    name?: string;
+                    reason?: string;
+                } | null;
             }[];
         };
         AllotmentRequest: {
@@ -1161,6 +1382,10 @@ export interface components {
             applications: components["schemas"]["Application"][];
             certificates: components["schemas"]["Certificate"][];
             attention_reasons?: components["schemas"]["AttentionReason"][];
+            /** @description Same as MenteeRow.attention_details, for the caller's own mentee row (P2 REQ-029) */
+            attention_details?: {
+                [key: string]: string;
+            };
             /** @description P2 REQ-032 */
             term_summary?: {
                 sessions_attended: number;
@@ -1386,6 +1611,238 @@ export interface components {
             /** @enum {string} */
             llm_provider: "groq" | "anthropic" | "none";
         };
+        /** @enum {string} */
+        Programme: "btech" | "mtech" | "phd" | "other";
+        /** @enum {string} */
+        SkillLevel: "beginner" | "intermediate" | "advanced";
+        /** @enum {string} */
+        EligibilityMode: "advisory" | "strict";
+        /** @enum {string} */
+        WorkMode: "on_campus" | "remote" | "hybrid";
+        ProjectInput: {
+            title: string;
+            description?: string | null;
+            /** @description https URL only */
+            link?: string | null;
+            skills?: string[];
+        };
+        Project: {
+            id: string;
+            title: string;
+            description?: string | null;
+            link?: string | null;
+            skills: string[];
+        };
+        CgpaView: {
+            /** @description Institutional record [MOCK]; read-only */
+            record?: number | null;
+            record_term?: string | null;
+            self_reported?: number | null;
+            /** @description The record when it exists, else the self-reported value */
+            effective?: number | null;
+            /** @enum {string} */
+            source: "record" | "self_reported" | "unknown";
+        };
+        MySkill: {
+            concept: string;
+            /** @description From certificates and endorsements only, never from the student */
+            trust_level: number;
+            claimed: boolean;
+            level?: components["schemas"]["SkillLevel"];
+            sources: {
+                evidence_id: string;
+                title: string;
+            }[];
+            endorsed_by?: string[];
+        };
+        CompletenessItem: {
+            key: string;
+            label: string;
+            done: boolean;
+        };
+        Completeness: {
+            percent: number;
+            items: components["schemas"]["CompletenessItem"][];
+            next_action?: string | null;
+        };
+        ResumeInfo: {
+            id: string;
+            /** Format: date-time */
+            uploaded_at: string;
+            size_bytes: number;
+            pages: number;
+            /** @enum {string} */
+            status: "current" | "superseded";
+        };
+        MyProfile: {
+            user_id: string;
+            name: string;
+            roll_no: string;
+            /** @description Read-only; the institution controls it */
+            dept_code: string;
+            programme?: components["schemas"]["Programme"];
+            year: number;
+            headline?: string | null;
+            bio?: string | null;
+            interests: string[];
+            links: string[];
+            availability_hours?: number | null;
+            /** Format: date */
+            available_from?: string | null;
+            preferences: string[];
+            open_to_opportunities: boolean;
+            cgpa: components["schemas"]["CgpaView"];
+            skills: components["schemas"]["MySkill"][];
+            projects: components["schemas"]["Project"][];
+            resume?: components["schemas"]["ResumeInfo"] | null;
+            certificates_certified?: number;
+            completeness: components["schemas"]["Completeness"];
+        };
+        ConceptSuggestion: {
+            name: string;
+            matched_alias?: string | null;
+        };
+        EligibilityCheck: {
+            /** @enum {string} */
+            rule: "open" | "deadline" | "capacity" | "year" | "department" | "min_cgpa" | "not_a_repeat" | "guide_capacity";
+            /** @enum {string} */
+            status: "ok" | "failed" | "unknown";
+            detail: string;
+        };
+        Eligibility: {
+            /** @description False when any check failed. Unknown checks do not fail it. */
+            eligible: boolean;
+            mode: components["schemas"]["EligibilityMode"];
+            checks: components["schemas"]["EligibilityCheck"][];
+        };
+        RecommendedOpening: {
+            id: string;
+            title: string;
+            faculty: components["schemas"]["UserRef"];
+            required_skills: string[];
+            preferred_skills?: string[];
+            /** @enum {string} */
+            status: "open" | "closed";
+            my_fit: {
+                score: number;
+                /** @enum {string} */
+                verdict: "ready" | "close" | "not_yet";
+            };
+            my_application_status?: string | null;
+            eligibility: components["schemas"]["Eligibility"];
+            /** @description One-line explanations built from the fit chips (templates, no model) */
+            reasons: string[];
+            positions: number;
+            positions_left: number;
+            /** Format: date */
+            deadline?: string | null;
+            eligible_years?: number[];
+            min_cgpa?: number | null;
+            mode?: components["schemas"]["WorkMode"];
+            duration_weeks?: number | null;
+            hours_per_week?: number | null;
+        };
+        RecommendationGroup: {
+            /** @enum {string} */
+            key: "best" | "worth" | "stretch" | "ineligible";
+            label: string;
+            items: components["schemas"]["RecommendedOpening"][];
+        };
+        Recommendations: {
+            /** @description Fewer than two skills: ranked by interests and department */
+            cold_start: boolean;
+            completeness_percent: number;
+            groups: components["schemas"]["RecommendationGroup"][];
+        };
+        OpeningPatch: {
+            title?: string;
+            description?: string;
+            required_skills?: string[];
+            preferred_skills?: string[];
+            positions?: number;
+            /** Format: date */
+            deadline?: string | null;
+            eligible_years?: number[];
+            min_cgpa?: number | null;
+            allowed_departments?: string[];
+            eligibility_mode?: components["schemas"]["EligibilityMode"];
+            mode?: components["schemas"]["WorkMode"];
+            duration_weeks?: number | null;
+            hours_per_week?: number | null;
+            /** @enum {string} */
+            status?: "open" | "closed";
+        };
+        FacultyResearchArea: {
+            concept: string;
+            primary?: boolean;
+        };
+        FacultyCourse: {
+            code: string;
+            title: string;
+            term_id?: string | null;
+            topics?: string[];
+        };
+        FacultyQualification: {
+            degree: string;
+            institution: string;
+            year?: number | null;
+        };
+        FacultyProfilePatch: {
+            research_areas?: components["schemas"]["FacultyResearchArea"][];
+            expertise?: string[];
+            courses?: components["schemas"]["FacultyCourse"][];
+            qualifications?: components["schemas"]["FacultyQualification"][];
+            publications?: string[];
+            max_guided_students?: number;
+            accepting_guides?: boolean;
+            office_hours?: string | null;
+            links?: string[];
+        };
+        FacultyProfile: {
+            user_id: string;
+            name: string;
+            designation: string;
+            dept_code: string;
+            employee_id?: string | null;
+            research_areas: components["schemas"]["FacultyResearchArea"][];
+            expertise: string[];
+            courses: components["schemas"]["FacultyCourse"][];
+            qualifications: components["schemas"]["FacultyQualification"][];
+            publications: string[];
+            max_guided_students?: number | null;
+            /** @description Active guide links */
+            guided_students?: number;
+            accepting_guides: boolean;
+            office_hours?: string | null;
+            links: string[];
+        };
+        FacultyPublic: {
+            profile: components["schemas"]["FacultyProfile"];
+            track_record: components["schemas"]["TrackRecord"];
+            open_openings?: {
+                id: string;
+                title: string;
+            }[];
+        };
+        FacultyCard: {
+            user_id: string;
+            name: string;
+            designation: string;
+            research_areas: string[];
+            /** @description Topics this faculty member shares with the calling student; the list is ordered by overlap and carries no score */
+            shared_topics: string[];
+            open_openings: number;
+            accepting_guides: boolean;
+            guided_students?: number;
+            max_guided_students?: number | null;
+        };
+        ResumeSuggestions: {
+            skills: {
+                concept: string;
+                already_claimed: boolean;
+            }[];
+            note: string;
+        };
     };
     responses: {
         /** @description Error (see code) */
@@ -1541,6 +1998,28 @@ export interface operations {
             };
             401: components["responses"]["Unauthenticated"];
             404: components["responses"]["NotFound"];
+        };
+    };
+    getMyProfile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Own profile */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MyProfile"];
+                };
+            };
+            401: components["responses"]["Unauthenticated"];
+            403: components["responses"]["Forbidden"];
         };
     };
     patchMyProfile: {
@@ -1836,6 +2315,36 @@ export interface operations {
             };
             401: components["responses"]["Unauthenticated"];
             404: components["responses"]["NotFound"];
+        };
+    };
+    patchOpening: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["Id"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OpeningPatch"];
+            };
+        };
+        responses: {
+            /** @description Updated opening */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Opening"];
+                };
+            };
+            401: components["responses"]["Unauthenticated"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            422: components["responses"]["ValidationFailed"];
         };
     };
     getFit: {
@@ -2624,6 +3133,308 @@ export interface operations {
                 };
             };
             503: components["responses"]["Problem"];
+        };
+    };
+    searchConcepts: {
+        parameters: {
+            query?: {
+                q?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Matches */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConceptSuggestion"][];
+                };
+            };
+            401: components["responses"]["Unauthenticated"];
+        };
+    };
+    getMyRecommendations: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Grouped recommendations */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Recommendations"];
+                };
+            };
+            401: components["responses"]["Unauthenticated"];
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    getEligibility: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["Id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Eligibility */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Eligibility"];
+                };
+            };
+            401: components["responses"]["Unauthenticated"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    getMyFacultyProfile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Faculty profile */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FacultyProfile"];
+                };
+            };
+            401: components["responses"]["Unauthenticated"];
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    patchMyFacultyProfile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FacultyProfilePatch"];
+            };
+        };
+        responses: {
+            /** @description Updated faculty profile */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FacultyProfile"];
+                };
+            };
+            401: components["responses"]["Unauthenticated"];
+            403: components["responses"]["Forbidden"];
+            422: components["responses"]["ValidationFailed"];
+        };
+    };
+    getFacultyPublic: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                faculty_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Faculty profile */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FacultyPublic"];
+                };
+            };
+            401: components["responses"]["Unauthenticated"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    listFaculty: {
+        parameters: {
+            query?: {
+                query?: string;
+                accepting?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Faculty cards */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FacultyCard"][];
+                };
+            };
+            401: components["responses"]["Unauthenticated"];
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    getMyResume: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Resume info */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResumeInfo"];
+                };
+            };
+            401: components["responses"]["Unauthenticated"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    uploadResume: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    file: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Resume stored */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResumeInfo"];
+                };
+            };
+            401: components["responses"]["Unauthenticated"];
+            403: components["responses"]["Forbidden"];
+            413: components["responses"]["Problem"];
+            415: components["responses"]["Problem"];
+            422: components["responses"]["ValidationFailed"];
+            429: components["responses"]["RateLimited"];
+        };
+    };
+    getResumeFile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                student_id: components["parameters"]["StudentId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description PDF */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/pdf": string;
+                };
+            };
+            401: components["responses"]["Unauthenticated"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    suggestFromResume: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Suggestions */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResumeSuggestions"];
+                };
+            };
+            401: components["responses"]["Unauthenticated"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    applyResumeSuggestions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    skills: string[];
+                };
+            };
+        };
+        responses: {
+            /** @description Updated profile */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MyProfile"];
+                };
+            };
+            401: components["responses"]["Unauthenticated"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            422: components["responses"]["ValidationFailed"];
         };
     };
 }
