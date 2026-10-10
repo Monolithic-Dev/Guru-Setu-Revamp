@@ -44,9 +44,12 @@ class Settings(BaseSettings):
     upload_rate_limit_per_hour: int = 20
 
     # --- AI ---
-    llm_provider: Literal["anthropic", "none"] = "anthropic"
+    # D-2 (2026-10-10): the only key the team has is a Groq key, so MDL-01 runs
+    # on Groq. The `anthropic` branch is kept for a future key. ai-system 2.1.
+    llm_provider: Literal["groq", "anthropic", "none"] = "groq"
     anthropic_api_key: str = ""
-    llm_model: str = "claude-opus-5-5"
+    groq_api_key: str = ""
+    llm_model: str = "qwen/qwen3.8-27b"
     llm_timeout_s: int = 25
     max_llm_calls_per_day: int = 200
     extraction_cache_dir: str = "/app/extraction_cache"
@@ -100,6 +103,8 @@ class Settings(BaseSettings):
             problems.append("NEO4J_PASSWORD must be at least 12 characters.")
         if self.llm_provider == "anthropic" and not self.anthropic_api_key:
             problems.append("ANTHROPIC_API_KEY is required when LLM_PROVIDER=anthropic (or set LLM_PROVIDER=none).")
+        if self.llm_provider == "groq" and not self.groq_api_key:
+            problems.append("GROQ_API_KEY is required when LLM_PROVIDER=groq (or set LLM_PROVIDER=none).")
         if problems:
             raise ConfigError("Unsafe or incomplete configuration (SEC-10):\n- " + "\n- ".join(problems))
         return self
