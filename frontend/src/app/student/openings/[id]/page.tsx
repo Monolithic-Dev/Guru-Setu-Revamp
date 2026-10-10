@@ -12,6 +12,7 @@
  */
 
 import { useState } from "react";
+import Link from "next/link";
 import { useParams } from "next/navigation";
 
 import { FitPanel } from "@/components/fit/FitPanel";
@@ -117,7 +118,10 @@ export default function OpeningFitPage() {
       <header>
         <h1 className="text-xl font-black text-gray-900">{opening.data.title}</h1>
         <p className="mt-1 text-sm text-gray-600">
-          {opening.data.faculty.name}
+          {/* B7 REQ-035: the faculty name opens their track record. */}
+          <Link href={`/faculty-profile/${opening.data.faculty.user_id}`} className="font-bold text-brand underline underline-offset-2">
+            {opening.data.faculty.name}
+          </Link>
           {closed && " · Closed"}
         </p>
         {opening.data.description && (
