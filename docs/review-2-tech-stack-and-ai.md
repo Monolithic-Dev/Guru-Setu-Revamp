@@ -238,7 +238,7 @@ verdict:  ≥ 65 Ready · 40–64 Close · < 40 Not yet
 2. **Seed**: `python -m scripts.seed --reset` builds 56 users, 12 openings, concepts, embeddings and similarity edges (it prints counts).
 3. **Aarav's fit** for "Edge AI for Agriculture": **43.5 Close**, with the three components. Open **Why**: the graph path student → skill → similar concept → required skill.
 4. **Upload certificates:** one becomes **Certified** (AI read → rules decided), one is caught as a **duplicate** (pHash), one with a **name mismatch** goes to **needs_review**. Show the **review queue** on the mentor side and the **reason**.
-5. **Fit rises to 70.0 Ready**; he applies; the faculty sees applicants **ranked by verified fit**.
+5. **Fit rises to 70.9 Ready**; he applies; the faculty sees applicants **ranked by verified fit**.
 6. **Prompt-injection file:** shows `injection_text`, nothing adopted.
 7. **Mentor home:** exactly **3 flagged mentees** with reasons (all deterministic rules, no AI).
 8. **Dashboard and export:** live compliance, click a number to see the **exact rows**, download the **DRAFT** Excel, open it: no private text, formulas neutralised.
