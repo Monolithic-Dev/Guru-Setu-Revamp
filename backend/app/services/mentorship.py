@@ -17,7 +17,7 @@ from app.core.errors import ApiError
 from app.repos import mentorship_repo, students_repo
 from app.schemas.auth import CurrentUser
 from app.schemas.generated import IssueCreate, IssuePatch, MenteePatch, SessionCreate
-from app.services import overview, terms
+from app.services import faculty, overview, terms
 from app.services.access import assert_mentor_of
 from app.services.notify import notify, render_title
 from app.services.status_history import history_for, record_status
@@ -34,7 +34,13 @@ def _allotment_view(tx, dept_code: str) -> dict[str, Any]:
     mentors = [
         {**m, "overloaded": m["mentee_count"] > warn} for m in mentorship_repo.mentor_loads(tx, dept_code)
     ]
-    return {"mentors": mentors, "unallotted": mentorship_repo.unallotted_students(tx, dept_code)}
+    unallotted = mentorship_repo.unallotted_students(tx, dept_code)
+    suggestions = faculty.suggest_mentors(tx, [u["user_id"] for u in unallotted], dept_code, warn)
+    return {
+        "mentors": mentors,
+        "unallotted": [{**u, **({"suggested_mentor": suggestions[u["user_id"]]} if u["user_id"] in suggestions else {})}
+                       for u in unallotted],
+    }
 
 
 def allotment_view(user: CurrentUser) -> dict[str, Any]:

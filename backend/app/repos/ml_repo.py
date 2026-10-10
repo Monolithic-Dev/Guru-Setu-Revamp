@@ -22,7 +22,11 @@ RETURN s.dept_code   AS dept_code,
        s.bio         AS bio,
        s.interests   AS interests,
        skills        AS skills,
-       cert_titles   AS certificate_titles
+       cert_titles   AS certificate_titles,
+       s.programme   AS programme,
+       s.year        AS year,
+       s.headline    AS headline,
+       [(s)-[:HAS_PROJECT]->(p:Project) | p.title] AS project_titles
 """
 
 
@@ -37,7 +41,10 @@ MATCH (o:Opening {id: $opening_id})
 OPTIONAL MATCH (o)-[:REQUIRES]->(c:Concept)
 RETURN o.title       AS title,
        o.description AS description,
-       collect(DISTINCT c.name) AS required_concepts
+       collect(DISTINCT c.name) AS required_concepts,
+       [(o)-[:PREFERS]->(p:Concept) | p.name] AS preferred_concepts,
+       [(o)<-[:POSTED]-(:Faculty)-[:RESEARCHES]->(r:Concept) | r.name] AS faculty_research,
+       [(o)<-[:POSTED]-(:Faculty)-[:TEACHES]->(co:Course) | co.title] AS faculty_subjects
 """
 
 
