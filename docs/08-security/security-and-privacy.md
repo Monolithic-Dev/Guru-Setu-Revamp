@@ -133,6 +133,7 @@ These are listed in §11 and on the roadmap slide.
 | HTTP on localhost | Demo laptop only | Any hosted use: TLS |
 | BackgroundTasks lose work on restart (ADR-04) | JOB-02 marks such certificates `failed`; manual entry recovers | Real load: a queue |
 | pHash duplicate scan is O(n) over all certificates | ≤ 1,000 seed certificates | > 10k certificates: BK-tree or LSH |
+| `npm audit` reports 12 findings in the frontend toolchain (1 critical, 9 high, 2 moderate on 2026-10-10): `next` 14.x (DoS through the Image Optimizer and request deserialization in self-hosted apps), `eslint-config-next` and `tailwindcss` (transitive `chokidar`, `fast-glob`). Every fix is a major upgrade (Next 16, Tailwind 4) | The stack is fixed to Next 14 (A-01). The app never uses `next/image`, so the Image Optimizer is not reachable; the stack binds to `127.0.0.1`. The runtime image still carries the dev packages (it copies all of `node_modules`), so a leaner image is a cheap follow-up. `pip-audit` on the backend: no known vulnerabilities | Any hosted use: upgrade to a patched Next major and re-run `npm audit` |
 
 ## 10. Threat model
 
