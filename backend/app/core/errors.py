@@ -30,6 +30,7 @@ CODES: dict[str, tuple[str, int]] = {
     "INVALID_TRANSITION": ("Invalid status transition", 409),
     "NOT_PRESENT": ("Not marked present", 409),
     "OPENING_CLOSED": ("Opening is closed", 409),
+    "NOT_ELIGIBLE": ("Not eligible", 409),
     "ALREADY_REVIEWED": ("Already reviewed", 409),
     "FILE_TOO_LARGE": ("File too large", 413),
     "UNSUPPORTED_FILE_TYPE": ("Unsupported file type", 415),
