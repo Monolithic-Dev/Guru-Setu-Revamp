@@ -764,7 +764,7 @@ export interface components {
             detail?: string;
             instance?: string;
             /** @enum {string} */
-            code: "UNAUTHENTICATED" | "TOKEN_EXPIRED" | "INVALID_CREDENTIALS" | "FORBIDDEN" | "NOT_FOUND" | "VALIDATION_FAILED" | "NOT_YOUR_MENTEE" | "ALREADY_APPLIED" | "INVALID_TRANSITION" | "NOT_PRESENT" | "OPENING_CLOSED" | "ALREADY_REVIEWED" | "FILE_TOO_LARGE" | "UNSUPPORTED_FILE_TYPE" | "RATE_LIMITED" | "DB_UNAVAILABLE" | "INTERNAL";
+            code: "UNAUTHENTICATED" | "TOKEN_EXPIRED" | "INVALID_CREDENTIALS" | "FORBIDDEN" | "NOT_FOUND" | "METHOD_NOT_ALLOWED" | "VALIDATION_FAILED" | "NOT_YOUR_MENTEE" | "ALREADY_APPLIED" | "INVALID_TRANSITION" | "NOT_PRESENT" | "OPENING_CLOSED" | "ALREADY_REVIEWED" | "FILE_TOO_LARGE" | "UNSUPPORTED_FILE_TYPE" | "RATE_LIMITED" | "DB_UNAVAILABLE" | "INTERNAL";
             request_id?: string;
             errors?: {
                 field: string;
@@ -1242,6 +1242,10 @@ export interface components {
                 present: boolean;
                 /** Format: date-time */
                 confirmed_at?: string | null;
+                /** @description helpful or not_helpful. Author only (P2, REQ-034); omitted for everyone else */
+                feedback?: string | null;
+                /** @description Author only (P2, REQ-034) */
+                feedback_comment?: string | null;
             }[];
             action_items: components["schemas"]["ActionItem"][];
             issues: components["schemas"]["Issue"][];
