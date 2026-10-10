@@ -33,7 +33,8 @@ def issues(tx, dept: str) -> list[dict[str, Any]]:
         tx.run(
             """
             MATCH (i:Issue)-[:ABOUT]->(s:Student {dept_code: $d})
-            RETURN i.id AS id, s.user_id AS student_id, i.category AS category, i.status AS status,
+            RETURN i.id AS id, s.user_id AS student_id, s.name AS student_name, s.roll_no AS roll_no,
+                   i.category AS category, i.status AS status,
                    coalesce(i.confidential, false) AS confidential, coalesce(i.escalated, false) AS escalated,
                    i.raised_at AS raised_at, i.resolved_at AS resolved_at
             """,
@@ -67,6 +68,37 @@ def overdue_actions(tx, dept: str, day: str) -> int:
         d=dept,
         day=day,
     ).single()["n"]
+
+
+def overdue_action_rows(tx, dept: str, day: str) -> list[dict[str, Any]]:
+    """The rows behind MET-06: due date, student and the mentor whose session created the item. No action text."""
+    return _rows(
+        tx.run(
+            """
+            MATCH (a:ActionItem {status: 'open'})-[:FOR]->(s:Student {dept_code: $d}) WHERE a.due_date < $day
+            OPTIONAL MATCH (f:Faculty)-[:LOGGED]->(:Session)-[:CREATED]->(a)
+            RETURN a.id AS id, a.due_date AS due_date, a.owner AS owner, s.user_id AS student_id,
+                   s.name AS student_name, s.roll_no AS roll_no, f.name AS mentor_name
+            ORDER BY a.due_date, a.id
+            """,
+            d=dept,
+            day=day,
+        )
+    )
+
+
+def pending_review_rows(tx, dept: str) -> list[dict[str, Any]]:
+    return _rows(
+        tx.run(
+            """
+            MATCH (s:Student {dept_code: $d})-[:SUBMITTED]->(e:Evidence {status: 'needs_review'})
+            RETURN e.id AS id, e.title AS title, e.issuer AS issuer, coalesce(e.reasons, []) AS reasons,
+                   e.created_at AS created_at, s.user_id AS student_id, s.name AS student_name, s.roll_no AS roll_no
+            ORDER BY e.created_at, e.id
+            """,
+            d=dept,
+        )
+    )
 
 
 def meetings_held(tx, dept: str, start: str, end: str) -> dict[str, int]:

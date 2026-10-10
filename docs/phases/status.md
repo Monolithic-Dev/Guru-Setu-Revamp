@@ -93,7 +93,7 @@ Edit this file only in its own small commit on your own feature branch (CONTRIBU
 ## 5. Phase 4: Add-on A (merge by 12:15)
 | Item | Backend | Frontend | Status | Note |
 |---|---|---|---|---|
-| A1 Click-to-source | P2 | P4 | ☐ | |
+| A1 Click-to-source | P2 | P4 | ◐ | backend API-034 done (tests green); frontend P4 |
 | A2 Why graph | P1 | P3 | ☐ | |
 | A3 Reminders | P2 | P3 | ☐ | |
 | A4 Issue lifecycle + confidential | P2 | P3 | ☐ | |
