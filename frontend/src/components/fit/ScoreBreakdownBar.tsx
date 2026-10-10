@@ -53,7 +53,7 @@ export function ScoreBreakdownBar({ components, score }: ScoreBreakdownBarProps)
   return (
     <div>
       <div
-        className="flex h-3 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700"
+        className="flex h-3 w-full overflow-hidden rounded-full bg-slate-200"
         role="img"
         aria-label={
           `Score ${score.toFixed(1)} of 100: ` +
@@ -76,8 +76,8 @@ export function ScoreBreakdownBar({ components, score }: ScoreBreakdownBarProps)
               className={`h-2 w-2 shrink-0 rounded-full ${segment.dot}`}
               aria-hidden="true"
             />
-            <dt className="text-slate-600 dark:text-slate-400">{segment.label}</dt>
-            <dd className="font-medium tabular-nums text-slate-900 dark:text-slate-100">
+            <dt className="text-slate-600">{segment.label}</dt>
+            <dd className="font-medium tabular-nums text-slate-900">
               {components[segment.key].toFixed(1)}
             </dd>
           </div>
