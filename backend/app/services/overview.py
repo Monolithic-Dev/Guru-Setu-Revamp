@@ -9,7 +9,7 @@ from app.core.database import run_read
 from app.core.errors import ApiError
 from app.repos import applications_repo, certificates_repo, scope_repo, students_repo, tracking_repo
 from app.schemas.auth import CurrentUser
-from app.services import tracking
+from app.services import terms, tracking
 from app.services.access import assert_dept_hod, assert_mentor_of
 from app.services.status_history import history_for
 from app.services.visibility import shape_action_item, shape_issue
@@ -54,6 +54,29 @@ def _certificate(row: dict[str, Any]) -> dict[str, Any]:
     return dict(row)
 
 
+def _term_summary(tx, sessions, actions, issues, certificates) -> dict[str, int] | None:
+    """REQ-032: computed counts for the current term, no LLM."""
+    term = terms.resolve(tx)[0]
+    if term is None:
+        return None
+    start, end = term["start_date"], term["end_date"]
+
+    def within(stamp: str | None) -> bool:
+        return bool(stamp) and start <= stamp[:10] <= end
+
+    mine = [a for a in actions if within(a["created_at"])]
+    return {
+        "sessions_attended": sum(1 for s in sessions if s["present"] and start <= s["date"] <= end),
+        "actions_done": sum(1 for a in mine if a["status"] in ("done", "verified")),
+        "actions_total": len(mine),
+        "issues_raised": sum(1 for i in issues if within(i["raised_at"])),
+        "issues_resolved": sum(1 for i in issues if within(i["resolved_at"])),
+        "certificates_certified": sum(
+            1 for c in certificates if c["status"] == "certified" and within(c["updated_at"])
+        ),
+    }
+
+
 def mentee_overview(user: CurrentUser, student_id: str) -> dict[str, Any]:
     """API-025. Scope: any mentor of the student, or the HOD of the department; otherwise 404."""
 
@@ -82,8 +105,8 @@ def mentee_overview(user: CurrentUser, student_id: str) -> dict[str, Any]:
             if full_certs or c["status"] == "certified"
         ]
         rows = tracking.link_rows(tx, [user.user_id]) if user.role == "faculty" else []
-        reasons = next((r["attention_reasons"] for r in rows if r["student_id"] == student_id), [])
-        return {
+        mine = next((r for r in rows if r["student_id"] == student_id), None)
+        out = {
             "student": profile,
             "mentorships": [_mentorship(m) for m in tracking_repo.mentorships_of(tx, student_id)],
             "academics": [
@@ -95,9 +118,20 @@ def mentee_overview(user: CurrentUser, student_id: str) -> dict[str, Any]:
             "issues": [shape_issue(user, i, history.get(i["id"], [])) for i in issues],
             "applications": [_application(a, history.get(a["id"], [])) for a in applications],
             "certificates": certificates,
-            "attention_reasons": reasons,
-            "term_summary": None,  # P2 REQ-032
+            "attention_reasons": mine["attention_reasons"] if mine else [],
+            "term_summary": _term_summary(tx, sessions, actions, issues, certificates),
         }
+        if mine and mine["attention_details"]:
+            out["attention_details"] = mine["attention_details"]
+        # REQ-029, REQ-033: the level is for the assigned mentor and the HOD; the note and the at-risk mark are the
+        # assigned mentor's alone. They are omitted (never null) for everyone else.
+        flags = tracking_repo.student_flags(tx, student_id)
+        if user.role == "hod" or (full_certs and user.role == "faculty"):
+            out["learner_level"] = flags.get("learner_level")
+        if user.role == "faculty" and full_certs:
+            out["learner_note"] = flags.get("learner_note")
+            out["marked_at_risk"] = flags.get("marked_at_risk", False)
+        return out
 
     return run_read(read)
 

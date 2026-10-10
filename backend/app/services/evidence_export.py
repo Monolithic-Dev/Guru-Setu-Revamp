@@ -85,6 +85,9 @@ def mentoring_pack(user: CurrentUser) -> tuple[str, bytes]:
         ["MET-06", "overdue_actions", facts["overdue_actions"]],
         ["MET-12", "confirmed_share_pct", facts["confirmed_share"]],
     ]
+    levels = facts["learner_levels"]
+    summary.append(["MET-11", "Slow learners identified", levels.get("slow", 0)])
+    summary += [["MET-11", f"learner_level:{k}", levels.get(k, 0)] for k in ("slow", "average", "advanced")]
     for c in facts["issues_by_category"]:
         summary.append(["MET-03", f"issues_raised:{c['category']}", c["raised"]])
         summary.append(["MET-04", f"issues_resolved:{c['category']}", c["resolved"]])

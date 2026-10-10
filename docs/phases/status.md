@@ -106,13 +106,13 @@ Edit this file only in its own small commit on your own feature branch (CONTRIBU
 ## 6. Phase 5: Add-on B (stretch; start before 11:30 only)
 | Item | Owner | Status | Note |
 |---|---|---|---|
-| B1 At-risk | | ☐ | |
-| B2 Semester summary | | ☐ | |
-| B3 Learner level | | ☐ | |
+| B1 At-risk | P2 | ◐ | backend done (marked + suggested at-risk, API-043); frontend open |
+| B2 Semester summary | P2 | ◐ | backend done (`term_summary` in Mentee 360); frontend open |
+| B3 Learner level | P2 | ◐ | backend done (API-043, MET-11 in the pack); frontend open |
 | B4 Endorsement | | ☐ | |
 | B5 Handover view | | ☐ | |
-| B6 Session feedback | | ☐ | |
-| B7 Track record | | ☐ | |
+| B6 Session feedback | P2 | ◐ | backend done (API-042, author-only); frontend open |
+| B7 Track record | P2 | ◐ | backend done (API-044); frontend open |
 
 ## 7. Phase 6: Freeze and demo
 | Task | Owner | Status | Note |
