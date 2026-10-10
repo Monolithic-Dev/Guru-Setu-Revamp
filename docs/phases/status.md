@@ -43,7 +43,7 @@ Edit this file only in its own small commit on your own feature branch (CONTRIBU
 | T1.P3.4 Shared components | P3 | ☑ | UI kit + WhyGraph/RemindersPanel stubs pushed (seam 2:30); /dev/components |
 | T1.P3.5 Route stubs + fixtures | P3 | ☑ | SCR-04/06/07/08/09/10 on fixtures/p3 |
 | T1.P4.1 Seed content | P4 | ☐ | |
-| T1.P4.2 Seed loader | P4 | ☐ | |
+| T1.P4.2 Seed loader | P4 | ☑ | seed loader plus the mentoring seed; matches backend section 10 |
 | T1.P4.3 Certificate images + labels | P4 | ☐ | |
 | **G1** | all | ☐ | |
 
@@ -63,8 +63,8 @@ Edit this file only in its own small commit on your own feature branch (CONTRIBU
 | T2.P3.3 SCR-08 | P3 | ☑ | 12-present group session + 2 actions + issue; 422 mapping; Retry reuses Idempotency-Key (mocked API) |
 | T2.P4.1 Finish certificates | P4 | ☐ | |
 | T2.P4.2 Seed certificates via pipeline | P4 | ☐ | |
-| T2.P4.3 SCR-12 | P4 | ☐ | |
-| T2.P4.4 SCR-05 | P4 | ☐ | |
+| T2.P4.3 SCR-12 | P4 | ☑ | SCR-12 built in the integration pass |
+| T2.P4.4 SCR-05 | P4 | ☑ | SCR-05 built in the integration pass |
 | **G2 midpoint** | all | ☐ | |
 
 ## 4. Phase 3: Core B (gate G3 CORE FREEZE at 10:00)
@@ -83,9 +83,9 @@ Edit this file only in its own small commit on your own feature branch (CONTRIBU
 | T3.P3.2 SCR-07 | P3 | ☑ | notes only when sent; HOD read-only; verify/reopen/drop + resolve (mocked API-025/030/032) |
 | T3.P3.3 SCR-09 | P3 | ☑ | ranked + actions + 409 handling; interim CandidateFit until P1 components/fit lands |
 | T3.P3.4 SCR-08 live attendees | P3 | ☑ | live by default; sample data only with NEXT_PUBLIC_USE_FIXTURES=1; G3 grep clean |
-| T3.P4.1 SCR-11 | P4 | ☐ | |
-| T3.P4.2 SCR-02 | P4 | ☐ | |
-| T3.P4.3 SCR-14 + SCR-15 | P4 | ☐ | |
+| T3.P4.1 SCR-11 | P4 | ☑ | SCR-11 built in the integration pass |
+| T3.P4.2 SCR-02 | P4 | ☑ | SCR-02 built in the integration pass |
+| T3.P4.3 SCR-14 + SCR-15 | P4 | ☑ | SCR-14, SCR-15 built in the integration pass (SCR-13, SCR-16 too) |
 | T3.P4.4 SCR-05 live | P4 | ☐ | |
 | T3.P4.5 Dry run 9:15 | P4 | ☐ | |
 | **G3 CORE FREEZE** | all | ☐ | |
