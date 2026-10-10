@@ -97,7 +97,7 @@ The three with the largest effect if wrong are marked ★. Correct these first.
 | A-06 | The demo runs locally via Docker Compose; no hosted URL required | ENV-02 | Use ENV-03 (Render/Netlify + Aura) |
 | A-07 | One department (CSE) in the seed | NG-09, seed | Add departments to the seed; the model already supports it |
 | A-08 | The current term comes from seeded Term dates or `CURRENT_TERM_ID` | ENT-07, MET- | Set `CURRENT_TERM_ID` |
-| A-09 ★ | LLM use is allowed by the rules; an Anthropic API key is available; the Python SDK is used | ADR-08, MDL-01 | Run `LLM_PROVIDER=none` (cache + manual entry); say so in the pitch |
+| A-09 ★ | **Revised 2026-10-10 (D-2): the only key available is a Groq key**, so MDL-01 runs `qwen/qwen3.8-27b` on Groq through the `groq` SDK, not Anthropic. Verified with live calls. | ADR-08, MDL-01 | Run `LLM_PROVIDER=none` (cache + manual entry); say so in the pitch |
 | A-10 | Trust weights 0.40/0.85/1.00 and fit weights 0.25/0.60/0.15 are starting values, tuned only on EVAL-03 before the core freeze | ai-system §4 | Retune; update the AC-004.1 range and TEST-18/19 together |
 | A-11 | Seed scale ≤ 60 students, 12 openings, ≤ 1,000 certificates | Backend access patterns, NFR-01 | Add pagination and indexes |
 | A-12 | Tracking thresholds of 45 / 14 / 7 days | Backend §6.4, §8 | Change config values only |

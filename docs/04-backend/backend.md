@@ -472,9 +472,10 @@ All variables are listed in [env.example](../10-devops/env.example).
 | CORS_ORIGINS | csv | `http://localhost:3000` | no | |
 | UPLOAD_DIR | path | `/data/uploads` | no | |
 | MAX_UPLOAD_MB | int | 10 | no | NFR-07 |
-| LLM_PROVIDER | enum `anthropic\|none` | `anthropic` | no | ADR-08 |
-| ANTHROPIC_API_KEY | string | — | yes | Required only when LLM_PROVIDER=anthropic |
-| LLM_MODEL | string | `claude-opus-5-5` | no | MDL-01 |
+| LLM_PROVIDER | enum `groq\|anthropic\|none` | `groq` | no | ADR-08; D-2 moved MDL-01 to Groq |
+| ANTHROPIC_API_KEY | string | — | yes | Unused; kept for the `anthropic` branch |
+| GROQ_API_KEY | string | — | yes | Required when LLM_PROVIDER=groq (D-2) |
+| LLM_MODEL | string | `qwen/qwen3.8-27b` | no | MDL-01 (D-2) |
 | LLM_TIMEOUT_S | int | 25 | no | |
 | MAX_LLM_CALLS_PER_DAY | int | 200 | no | NFR-09 |
 | EXTRACTION_CACHE_DIR | path | `/app/extraction_cache` | no | |

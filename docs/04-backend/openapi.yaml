@@ -1909,4 +1909,4 @@ components:
       properties:
         status: {type: string, enum: [ok]}
         neo4j: {type: string, enum: [up, down]}
-        llm_provider: {type: string, enum: [anthropic, none]}
+        llm_provider: {type: string, enum: [groq, anthropic, none]}
