@@ -54,7 +54,7 @@ Edit this file only in its own small commit on your own feature branch (CONTRIBU
 | T2.P1.2 Verification | P1 | ☐ | |
 | T2.P1.3 Extraction cache | P1 | ☐ | |
 | T2.P1.4 Trust recompute | P1 | ☐ | |
-| T2.P2.1 Certificates API + jobs | P2 | ☐ | |
+| T2.P2.1 Certificates API + jobs | P2 | ☑ | TEST-06, 12, 13 against a scripted P1 pipeline; re-run with P1's real `extract`/`verify` |
 | T2.P2.2 Allotment | P2 | ☑ | TEST-27 |
 | T2.P2.3 Sessions | P2 | ☑ | TEST-20, 28, 29 |
 | T2.P2.4 Action items + issues | P2 | ☑ | TEST-30, 31 |
@@ -74,10 +74,10 @@ Edit this file only in its own small commit on your own feature branch (CONTRIBU
 | T3.P1.2 Fit APIs | P1 | ☐ | |
 | T3.P1.3 Seed tuning (A-16) | P1 | ☐ | |
 | T3.P1.4 Fit UI + SCR-03 | P1 | ☐ | |
-| T3.P2.1 Needs-attention + API-024 | P2 | ☐ | |
-| T3.P2.2 API-025 + API-029 | P2 | ☐ | |
-| T3.P2.3 Metrics + API-033 | P2 | ☐ | |
-| T3.P2.4 Exports | P2 | ☐ | |
+| T3.P2.1 Needs-attention + API-024 | P2 | ☑ | TEST-33 logic on a hand-built graph; re-check on the real seed |
+| T3.P2.2 API-025 + API-029 | P2 | ☑ | TEST-42, 43 |
+| T3.P2.3 Metrics + API-033 | P2 | ☑ | TEST-32 on a hand-built graph; P4's check_seed still to compare |
+| T3.P2.4 Exports | P2 | ☑ | TEST-08, 21 (needs `openpyxl` in requirements.txt, P1) |
 | T3.P2.5 Audit pass | P2 | ☐ | |
 | T3.P3.1 SCR-06 | P3 | ☐ | |
 | T3.P3.2 SCR-07 | P3 | ☐ | |
