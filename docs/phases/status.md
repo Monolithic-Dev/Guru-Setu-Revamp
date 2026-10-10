@@ -17,8 +17,8 @@ Edit this file only in its own small commit on your own feature branch (CONTRIBU
 ## 1. Phase 0: Setup (gate G0 at 1:00)
 | Task | Owner | Status | Note |
 |---|---|---|---|
-| T0.P2.0 Scaffold commit (everyone pulls after) | P2 | ☐ | |
-| T0.P2.1 Compose + config + main.py + generated models | P2 | ☐ | |
+| T0.P2.0 Scaffold commit (everyone pulls after) | P2 | ☑ | pushed to main (4ecfe76) |
+| T0.P2.1 Compose + config + main.py + generated models | P2 | ☑ | health 200 against Neo4j; spectral clean |
 | (all) Ran `check_ownership.py` once | all | ☐ | |
 | T0.P3.1 Frontend clean-up + all deps + nav/features/types | P3 | ☐ | |
 | T0.P1.1 All backend deps + Dockerfile + model bake + ml startup stub | P1 | ☐ | |
@@ -28,11 +28,11 @@ Edit this file only in its own small commit on your own feature branch (CONTRIBU
 ## 2. Phase 1: Foundation (gate G1 at 4:00)
 | Task | Owner | Status | Note |
 |---|---|---|---|
-| T1.P2.1 Security helpers + ADR-03 negative test | P2 | ☐ | |
-| T1.P2.2 Core repo/errors/logging | P2 | ☐ | |
-| T1.P2.3 Auth + deps + API-001/002 | P2 | ☐ | |
-| T1.P2.4 Notify + status history + API-037/038 | P2 | ☐ | |
-| T1.P2.5 Applications + profile | P2 | ☐ | |
+| T1.P2.1 Security helpers + ADR-03 negative test | P2 | ☑ | TEST-02 |
+| T1.P2.2 Core repo/errors/logging | P2 | ☑ | conftest.py pushed on feature/p2-backend-core |
+| T1.P2.3 Auth + deps + API-001/002 | P2 | ☑ | TEST-01, 03, 09, 10, 11 |
+| T1.P2.4 Notify + status history + API-037/038 | P2 | ☑ | TEST-35 foundation |
+| T1.P2.5 Applications + profile | P2 | ☑ | TEST-23, 07 |
 | T1.P1.1 Embeddings | P1 | ☐ | |
 | T1.P1.2 Concepts + SIMILAR_TO | P1 | ☐ | |
 | T1.P1.3 Extraction contract + adapter | P1 | ☐ | |
@@ -55,9 +55,9 @@ Edit this file only in its own small commit on your own feature branch (CONTRIBU
 | T2.P1.3 Extraction cache | P1 | ☐ | |
 | T2.P1.4 Trust recompute | P1 | ☐ | |
 | T2.P2.1 Certificates API + jobs | P2 | ☐ | |
-| T2.P2.2 Allotment | P2 | ☐ | |
-| T2.P2.3 Sessions | P2 | ☐ | |
-| T2.P2.4 Action items + issues | P2 | ☐ | |
+| T2.P2.2 Allotment | P2 | ☑ | TEST-27 |
+| T2.P2.3 Sessions | P2 | ☑ | TEST-20, 28, 29 |
+| T2.P2.4 Action items + issues | P2 | ☑ | TEST-30, 31 |
 | T2.P3.1 SCR-04 | P3 | ☐ | |
 | T2.P3.2 SCR-10 | P3 | ☐ | |
 | T2.P3.3 SCR-08 | P3 | ☐ | |
