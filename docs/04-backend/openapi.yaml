@@ -1703,6 +1703,8 @@ components:
               name: {type: string}
               present: {type: boolean}
               confirmed_at: {type: [string, 'null'], format: date-time}
+              feedback: {type: [string, 'null'], description: 'helpful or not_helpful. Author only (P2, REQ-034); omitted for everyone else'}
+              feedback_comment: {type: [string, 'null'], maxLength: 300, description: 'Author only (P2, REQ-034)'}
         action_items:
           type: array
           items: {$ref: '#/components/schemas/ActionItem'}
