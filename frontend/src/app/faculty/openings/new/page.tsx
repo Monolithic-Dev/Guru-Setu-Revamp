@@ -21,6 +21,16 @@ export default function NewOpeningPage() {
   const [draft, setDraft] = useState("");
   const [errors, setErrors] = useState<Partial<Record<Field, string>>>({});
   const [busy, setBusy] = useState(false);
+  // Opening v2 (all optional): capacity, deadline and the eligibility rules, evaluated openly for each student.
+  const [positions, setPositions] = useState("1");
+  const [deadline, setDeadline] = useState("");
+  const [years, setYears] = useState<number[]>([]);
+  const [minCgpa, setMinCgpa] = useState("");
+  const [strict, setStrict] = useState(false);
+  const [mode, setMode] = useState("");
+  const [weeks, setWeeks] = useState("");
+  const [hours, setHours] = useState("");
+  const [preferred, setPreferred] = useState("");
 
   function addSkill() {
     const s = draft.trim().toLowerCase();
@@ -61,7 +71,20 @@ export default function NewOpeningPage() {
     if (Object.values(e).some(Boolean)) return focusFirst(e);
     setBusy(true);
     try {
-      const body: OpeningCreate = { title: title.trim(), description: description.trim(), required_skills: skills };
+      const body: OpeningCreate = {
+        title: title.trim(),
+        description: description.trim(),
+        required_skills: skills,
+        positions: Number(positions) || 1,
+        deadline: deadline || null,
+        eligible_years: years,
+        min_cgpa: minCgpa === "" ? null : Number(minCgpa),
+        eligibility_mode: strict ? "strict" : "advisory",
+        mode: (mode || undefined) as OpeningCreate["mode"],
+        duration_weeks: weeks === "" ? null : Number(weeks),
+        hours_per_week: hours === "" ? null : Number(hours),
+        preferred_skills: preferred.split(",").map((x) => x.trim()).filter(Boolean),
+      };
       const { data } = await api.post<Opening>("/openings", body);
       toast.success("Opening created.");
       router.push(`/faculty/openings/${data.id}`);
@@ -158,6 +181,63 @@ export default function NewOpeningPage() {
             </ul>
           ) : null}
         </div>
+        <fieldset className="space-y-4 rounded-2xl border border-gray-200 p-4">
+          <legend className="px-1 text-xs font-black uppercase tracking-widest text-gray-600">Who can apply (optional)</legend>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <label htmlFor="op-positions" className="label">Positions</label>
+              <input id="op-positions" className="input" inputMode="numeric" value={positions} onChange={(e) => setPositions(e.target.value)} />
+              <p className="mt-1 text-xs text-gray-600">The opening closes by itself when they are filled.</p>
+            </div>
+            <div>
+              <label htmlFor="op-deadline" className="label">Apply by</label>
+              <input id="op-deadline" type="date" className="input" value={deadline} onChange={(e) => setDeadline(e.target.value)} />
+            </div>
+            <fieldset>
+              <legend className="label">Years of study (none ticked = any)</legend>
+              <div className="flex flex-wrap gap-3">
+                {[1, 2, 3, 4, 5].map((y) => (
+                  <label key={y} className="flex min-h-[44px] items-center gap-2 text-sm font-bold text-gray-900">
+                    <input type="checkbox" className="h-5 w-5 accent-[#8c1515]" checked={years.includes(y)} onChange={(e) => setYears(e.target.checked ? [...years, y].sort() : years.filter((x) => x !== y))} />
+                    Year {y}
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+            <div>
+              <label htmlFor="op-mincgpa" className="label">Minimum CGPA</label>
+              <input id="op-mincgpa" className="input" inputMode="decimal" value={minCgpa} onChange={(e) => setMinCgpa(e.target.value)} placeholder="none" />
+              <p className="mt-1 text-xs text-gray-600">Students see this rule openly. It is never part of the fit score.</p>
+            </div>
+            <label className="flex min-h-[44px] items-center gap-3 text-sm font-bold text-gray-900 md:col-span-2">
+              <input type="checkbox" className="h-5 w-5 accent-[#8c1515]" checked={strict} onChange={(e) => setStrict(e.target.checked)} />
+              Strict: refuse applications from students who do not meet the year, department or CGPA rules (otherwise they only see a warning)
+            </label>
+            <div>
+              <label htmlFor="op-mode" className="label">Mode</label>
+              <select id="op-mode" className="input" value={mode} onChange={(e) => setMode(e.target.value)}>
+                <option value="">Not specified</option>
+                <option value="on_campus">On campus</option>
+                <option value="hybrid">Hybrid</option>
+                <option value="remote">Remote</option>
+              </select>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label htmlFor="op-weeks" className="label">Weeks</label>
+                <input id="op-weeks" className="input" inputMode="numeric" value={weeks} onChange={(e) => setWeeks(e.target.value)} />
+              </div>
+              <div>
+                <label htmlFor="op-hours" className="label">Hours a week</label>
+                <input id="op-hours" className="input" inputMode="numeric" value={hours} onChange={(e) => setHours(e.target.value)} />
+              </div>
+            </div>
+            <div className="md:col-span-2">
+              <label htmlFor="op-preferred" className="label">Nice-to-have skills</label>
+              <input id="op-preferred" className="input" value={preferred} onChange={(e) => setPreferred(e.target.value)} placeholder="separated by commas" />
+            </div>
+          </div>
+        </fieldset>
         <div className="flex justify-end gap-2">
           <button type="button" className="btn-ghost" onClick={() => router.push("/faculty/openings")}>
             Cancel

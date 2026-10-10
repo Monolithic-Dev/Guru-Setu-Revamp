@@ -15,6 +15,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 
+import { EligibilityChecklist } from "@/components/profile/EligibilityChecklist";
 import { FitPanel } from "@/components/fit/FitPanel";
 import type { ApplicationStatus, Fit } from "@/components/fit/types";
 import WhyGraph from "@/components/why/WhyGraph";
@@ -68,7 +69,9 @@ export default function OpeningFitPage() {
         // so show the pill rather than a toast (FLOW-03 failure branch).
         setApplied("pending");
       } else if (isApiError(err) && err.code === "OPENING_CLOSED") {
-        setApplyError("This opening is closed.");
+        setApplyError(err.detail ?? "This opening is closed.");
+      } else if (isApiError(err) && err.code === "NOT_ELIGIBLE") {
+        setApplyError(`You can't apply yet. ${err.errors.map((e) => e.message).join(" ")}`);
       } else {
         setApplyError("We couldn't send your application. Please try again.");
       }
@@ -128,6 +131,8 @@ export default function OpeningFitPage() {
           <p className="mt-3 text-sm text-gray-700">{opening.data.description}</p>
         )}
       </header>
+
+      <EligibilityChecklist openingId={opening.data.id} />
 
       <div className="card">
         <FitPanel fit={fit.data} />
