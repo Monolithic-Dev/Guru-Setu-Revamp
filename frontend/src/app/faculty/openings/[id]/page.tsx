@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { useState } from "react";
 import { ChevronDown, Users } from "lucide-react";
 import { CandidateFit } from "@/components/mentor/CandidateFit";
+import { CompleteWorkDialog } from "@/components/mentor/CompleteWorkDialog";
 import { Avatar, EmptyState, ErrorState, LoadingRegion, PageHeader, Skeleton, StatusPill, useToast } from "@/components/ui";
 import { useApi } from "@/hooks/useApi";
 import { api } from "@/lib/api";
@@ -45,6 +46,7 @@ export default function CandidatesPage() {
   const cands = useApi<Candidate[]>(`/openings/${id}/candidates`);
   const [open, setOpen] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
+  const [completing, setCompleting] = useState<Candidate | null>(null); // REQ-040: completing needs a project record
 
   async function move(c: Candidate, to: Next) {
     setBusy(c.application.id);
@@ -146,7 +148,7 @@ export default function CandidatesPage() {
                         type="button"
                         disabled={busy === c.application.id}
                         className={a.primary ? "btn-primary" : "btn-secondary"}
-                        onClick={() => void move(c, a.to)}
+                        onClick={() => (a.to === "completed" ? setCompleting(c) : void move(c, a.to))}
                       >
                         {a.label}
                         <span className="sr-only"> {c.student.name}</span>
@@ -164,6 +166,19 @@ export default function CandidatesPage() {
           })}
         </ol>
       )}
+      <CompleteWorkDialog
+        open={completing !== null}
+        onClose={() => setCompleting(null)}
+        applicationId={completing?.application.id ?? ""}
+        studentName={completing?.student.name ?? ""}
+        openingTitle={opening.data?.title ?? "this opening"}
+        skills={opening.data?.required_skills ?? []}
+        onDone={() => {
+          toast.success(`${completing?.student.name ?? "Student"}'s work recorded and completed.`);
+          setCompleting(null);
+          void cands.reload();
+        }}
+      />
     </>
   );
 }

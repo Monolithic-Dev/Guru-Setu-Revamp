@@ -19,7 +19,7 @@ def apply_to_opening(opening_id: str, user: CurrentUser = Depends(require_role("
 def decide_application(
     application_id: str, body: ApplicationPatch, user: CurrentUser = Depends(require_role("faculty"))
 ) -> dict:
-    return applications.decide(user, application_id, body.status.value)
+    return applications.decide(user, application_id, body.status.value, body.completion)
 
 
 @router.get("/me/applications", response_model=list[Application], operation_id="listMyApplications")

@@ -1,5 +1,5 @@
 // One certificate and its status (FLOW-02 step 3). Status is text first; colour only reinforces it.
-import { BadgeCheck, Clock, FileText, Loader2 } from "lucide-react";
+import { BadgeCheck, Clock, FileText, Loader2, Star } from "lucide-react";
 import { StatusPill } from "@/components/ui";
 import { formatDate } from "@/lib/format";
 import type { components } from "@/lib/types";
@@ -23,7 +23,52 @@ const ACCENT: Record<Certificate["status"], string> = {
   rejected: "border-l-red-600",
 };
 
+const OUTPUT_LABEL: Record<NonNullable<Certificate["output_type"]>, string> = {
+  report: "Report", prototype: "Prototype", paper: "Paper", dataset: "Dataset", other: "Other output",
+};
+
+/** A project record (REQ-040): written by the guide who vouches for the work, so there is no file and no confidence. */
+function ProjectRecordCard({ certificate: c }: { certificate: Certificate }) {
+  return (
+    <article className="card border-l-4 border-l-blue-600" aria-labelledby={`cert-${c.id}`}>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="flex min-w-0 items-start gap-3">
+          <span aria-hidden className="mt-0.5 rounded-xl bg-blue-50 p-2 text-blue-800">
+            <Star size={20} />
+          </span>
+          <div className="min-w-0">
+            <h3 id={`cert-${c.id}`} className="font-black text-gray-900">
+              Project: {c.title ?? "Guided work"}
+            </h3>
+            <p className="text-sm text-gray-600">
+              Guided by {c.recorded_by ?? "your guide"}
+              {c.issue_date ? ` · ${formatDate(c.issue_date)}` : ""}
+              {c.output_type ? ` · ${OUTPUT_LABEL[c.output_type]}` : ""}
+            </p>
+          </div>
+        </div>
+        <span className="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-blue-50 px-2.5 py-0.5 text-[11px] font-bold text-blue-800">
+          <Star aria-hidden size={12} /> Faculty-verified
+        </span>
+      </div>
+      {c.summary ? <p className="mt-3 whitespace-pre-wrap text-sm text-gray-800">{c.summary}</p> : null}
+      {c.skills.length > 0 ? (
+        <ul className="mt-3 flex flex-wrap gap-2" aria-label="Skills vouched for">
+          {c.skills.map((s) => (
+            <li key={s} className="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-blue-50 px-2.5 py-1 text-xs font-bold text-blue-900">
+              <Star aria-hidden size={12} />
+              {s}
+              <span className="sr-only"> (Faculty-verified)</span>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </article>
+  );
+}
+
 export function CertificateCard({ certificate: c, stillWorking = false, onManual }: CertificateCardProps) {
+  if (c.kind === "project_record") return <ProjectRecordCard certificate={c} />;
   const meta = [c.issuer, c.issue_date ? formatDate(c.issue_date) : null, c.level && c.level !== "unknown" ? capitalise(c.level) : null]
     .filter(Boolean)
     .join(" · ");
