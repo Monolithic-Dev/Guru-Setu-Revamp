@@ -1,0 +1,330 @@
+[
+  {
+    "application": {
+      "id": "app-aarav",
+      "opening_id": "op-edge-ai",
+      "opening_title": "Edge AI for Agriculture",
+      "student_id": "u-aarav",
+      "status": "pending",
+      "applied_at": "2026-10-10T08:30:00Z",
+      "updated_at": "2026-10-10T08:30:00Z",
+      "history": [
+        {
+          "from_status": null,
+          "to_status": "pending",
+          "actor_name": "Aarav Menon",
+          "note": null,
+          "at": "2026-10-10T08:30:00Z"
+        }
+      ]
+    },
+    "student": {
+      "user_id": "u-aarav",
+      "name": "Aarav Menon",
+      "roll_no": "CB.EN.U4CSE24001",
+      "year": 2
+    },
+    "fit": {
+      "opening_id": "op-edge-ai",
+      "student_id": "u-aarav",
+      "score": 68.5,
+      "components": {
+        "semantic": 17.5,
+        "skill": 51.0,
+        "concept": 0.0
+      },
+      "weights": {
+        "semantic": 0.25,
+        "skill": 0.6,
+        "concept": 0.15
+      },
+      "verdict": "ready",
+      "verdict_text": "Ready to apply",
+      "chips": [
+        {
+          "concept": "python",
+          "kind": "matched",
+          "trust_level": 1,
+          "via": null,
+          "similarity": null,
+          "source": {
+            "evidence_id": "ev-aarav-python",
+            "title": "Python for Everybody"
+          }
+        },
+        {
+          "concept": "pytorch",
+          "kind": "matched",
+          "trust_level": 1,
+          "via": null,
+          "similarity": null,
+          "source": {
+            "evidence_id": "ev-aarav-dl",
+            "title": "Deep Learning with PyTorch"
+          }
+        },
+        {
+          "concept": "deep learning",
+          "kind": "matched",
+          "trust_level": 1,
+          "via": null,
+          "similarity": null,
+          "source": {
+            "evidence_id": "ev-aarav-dl",
+            "title": "Deep Learning with PyTorch"
+          }
+        },
+        {
+          "concept": "computer vision",
+          "kind": "matched",
+          "trust_level": 1,
+          "via": null,
+          "similarity": null,
+          "source": {
+            "evidence_id": "ev-aarav-cv",
+            "title": "Computer Vision Workshop"
+          }
+        }
+      ],
+      "gains": [],
+      "note": null
+    }
+  },
+  {
+    "application": {
+      "id": "app-priya",
+      "opening_id": "op-edge-ai",
+      "opening_title": "Edge AI for Agriculture",
+      "student_id": "u-priya",
+      "status": "pending",
+      "applied_at": "2026-10-02T08:30:00Z",
+      "updated_at": "2026-10-02T08:30:00Z",
+      "history": [
+        {
+          "from_status": null,
+          "to_status": "pending",
+          "actor_name": "Priya K",
+          "note": null,
+          "at": "2026-10-02T08:30:00Z"
+        }
+      ]
+    },
+    "student": {
+      "user_id": "u-priya",
+      "name": "Priya K",
+      "roll_no": "CB.EN.U4CSE24031",
+      "year": 2
+    },
+    "fit": {
+      "opening_id": "op-edge-ai",
+      "student_id": "u-priya",
+      "score": 52.0,
+      "components": {
+        "semantic": 16.0,
+        "skill": 33.2,
+        "concept": 2.8
+      },
+      "weights": {
+        "semantic": 0.25,
+        "skill": 0.6,
+        "concept": 0.15
+      },
+      "verdict": "close",
+      "verdict_text": "Close: certify the skills below to improve your fit",
+      "chips": [
+        {
+          "concept": "python",
+          "kind": "matched",
+          "trust_level": 1,
+          "via": null,
+          "similarity": null,
+          "source": null
+        },
+        {
+          "concept": "pytorch",
+          "kind": "claimed_only",
+          "trust_level": 0,
+          "via": null,
+          "similarity": null,
+          "source": null
+        },
+        {
+          "concept": "deep learning",
+          "kind": "claimed_only",
+          "trust_level": 0,
+          "via": null,
+          "similarity": null,
+          "source": null
+        },
+        {
+          "concept": "computer vision",
+          "kind": "near",
+          "trust_level": 0,
+          "via": "image processing",
+          "similarity": 0.7,
+          "source": null
+        }
+      ],
+      "gains": [],
+      "note": null
+    }
+  },
+  {
+    "application": {
+      "id": "app-vivek",
+      "opening_id": "op-edge-ai",
+      "opening_title": "Edge AI for Agriculture",
+      "student_id": "u-vivek",
+      "status": "shortlisted",
+      "applied_at": "2026-09-28T08:30:00Z",
+      "updated_at": "2026-09-28T08:30:00Z",
+      "history": [
+        {
+          "from_status": null,
+          "to_status": "pending",
+          "actor_name": "Vivek T",
+          "note": null,
+          "at": "2026-09-28T08:30:00Z"
+        }
+      ]
+    },
+    "student": {
+      "user_id": "u-vivek",
+      "name": "Vivek T",
+      "roll_no": "CB.EN.U4CSE24040",
+      "year": 2
+    },
+    "fit": {
+      "opening_id": "op-edge-ai",
+      "student_id": "u-vivek",
+      "score": 44.1,
+      "components": {
+        "semantic": 15.2,
+        "skill": 27.6,
+        "concept": 1.3
+      },
+      "weights": {
+        "semantic": 0.25,
+        "skill": 0.6,
+        "concept": 0.15
+      },
+      "verdict": "close",
+      "verdict_text": "Close: certify the skills below to improve your fit",
+      "chips": [
+        {
+          "concept": "python",
+          "kind": "matched",
+          "trust_level": 1,
+          "via": null,
+          "similarity": null,
+          "source": null
+        },
+        {
+          "concept": "pytorch",
+          "kind": "claimed_only",
+          "trust_level": 0,
+          "via": null,
+          "similarity": null,
+          "source": null
+        },
+        {
+          "concept": "deep learning",
+          "kind": "missing",
+          "trust_level": null,
+          "via": null,
+          "similarity": null,
+          "source": null
+        },
+        {
+          "concept": "computer vision",
+          "kind": "missing",
+          "trust_level": null,
+          "via": null,
+          "similarity": null,
+          "source": null
+        }
+      ],
+      "gains": [],
+      "note": null
+    }
+  },
+  {
+    "application": {
+      "id": "app-sara",
+      "opening_id": "op-edge-ai",
+      "opening_title": "Edge AI for Agriculture",
+      "student_id": "u-sara",
+      "status": "pending",
+      "applied_at": "2026-09-25T08:30:00Z",
+      "updated_at": "2026-09-25T08:30:00Z",
+      "history": [
+        {
+          "from_status": null,
+          "to_status": "pending",
+          "actor_name": "Sara M",
+          "note": null,
+          "at": "2026-09-25T08:30:00Z"
+        }
+      ]
+    },
+    "student": {
+      "user_id": "u-sara",
+      "name": "Sara M",
+      "roll_no": "CB.EN.U4CSE24045",
+      "year": 2
+    },
+    "fit": {
+      "opening_id": "op-edge-ai",
+      "student_id": "u-sara",
+      "score": 31.7,
+      "components": {
+        "semantic": 14.9,
+        "skill": 15.6,
+        "concept": 1.2
+      },
+      "weights": {
+        "semantic": 0.25,
+        "skill": 0.6,
+        "concept": 0.15
+      },
+      "verdict": "not_yet",
+      "verdict_text": "Not yet: see missing skills",
+      "chips": [
+        {
+          "concept": "python",
+          "kind": "claimed_only",
+          "trust_level": 0,
+          "via": null,
+          "similarity": null,
+          "source": null
+        },
+        {
+          "concept": "pytorch",
+          "kind": "missing",
+          "trust_level": null,
+          "via": null,
+          "similarity": null,
+          "source": null
+        },
+        {
+          "concept": "deep learning",
+          "kind": "missing",
+          "trust_level": null,
+          "via": null,
+          "similarity": null,
+          "source": null
+        },
+        {
+          "concept": "computer vision",
+          "kind": "missing",
+          "trust_level": null,
+          "via": null,
+          "similarity": null,
+          "source": null
+        }
+      ],
+      "gains": [],
+      "note": null
+    }
+  }
+]
