@@ -2,6 +2,17 @@
 from typing import Any
 
 
+def endorser_names(tx, rows: list[dict[str, Any]]) -> None:
+    """`endorsed_by` is stored as faculty ids; every read shows the name instead (AC-027.1). Edits the rows in place."""
+    ids = sorted({uid for row in rows for uid in row["endorsed_by"]})
+    if not ids:
+        return
+    found = tx.run("MATCH (u:User) WHERE u.user_id IN $ids RETURN u.user_id AS id, u.name AS name", ids=ids)
+    names = {r["id"]: r["name"] for r in found}
+    for row in rows:
+        row["endorsed_by"] = [names.get(uid, uid) for uid in row["endorsed_by"]]
+
+
 def get_profile(tx, student_id: str) -> dict[str, Any] | None:
     """Profile fields plus trust-marked skills with the titles of their source certificates."""
     head = tx.run(
@@ -27,6 +38,7 @@ def get_profile(tx, student_id: str) -> dict[str, Any] | None:
             sid=student_id,
         )
     ]
+    endorser_names(tx, skill_rows)
     evidence_ids = sorted({eid for row in skill_rows for eid in row["evidence_ids"]})
     titles = {}
     if evidence_ids:

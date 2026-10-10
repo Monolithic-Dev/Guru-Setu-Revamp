@@ -6,6 +6,7 @@ import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { Lock, Plus } from "lucide-react";
 import { ActionItemList } from "@/components/mentor/ActionItemList";
+import { EndorseButton } from "@/components/mentor/EndorseButton";
 import { IssueList } from "@/components/mentor/IssueList";
 import { LEVEL_LABEL, LearnerCard } from "@/components/mentor/LearnerCard";
 import { TermSummary } from "@/components/mentor/TermSummary";
@@ -242,7 +243,17 @@ export default function MenteeOverviewPage() {
                 {s.skills.map((k) => (
                   <li key={k.concept} className="flex flex-wrap items-center justify-between gap-2">
                     <span className="text-sm font-bold text-gray-900">{k.concept}</span>
-                    <TrustBadge level={k.trust_level} source={k.trust_level === 2 ? k.endorsed_by?.[0] : k.sources[0]?.title} />
+                    <span className="flex flex-wrap items-center gap-1">
+                      <TrustBadge level={k.trust_level} source={k.trust_level === 2 ? k.endorsed_by?.[0] : k.sources[0]?.title} />
+                      {isMentor && k.trust_level < 2 ? (
+                        <EndorseButton
+                          studentId={s.user_id}
+                          studentName={firstName(s.name)}
+                          concept={k.concept}
+                          onEndorsed={(profile) => setData({ ...data, student: profile })}
+                        />
+                      ) : null}
+                    </span>
                   </li>
                 ))}
               </ul>
