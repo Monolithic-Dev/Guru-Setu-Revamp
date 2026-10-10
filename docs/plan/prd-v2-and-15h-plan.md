@@ -1,3 +1,5 @@
+> **Scratch build (decision D-1).** The build starts from empty scaffolds; no old GuruSetu code or repos are used. Wherever this file says "repair", "the old repos are copied" or "fix audit …", read it as superseded by [docs/00-index.md](../00-index.md) (A-05) and [phase-0](../phases/phase-0-setup.md). The disclosure in §17 must say that no code is reused (see the README).
+>
 > **Requirements authority moved.** Requirements, IDs and numbers now live in the spec pack: start at [docs/00-index.md](../00-index.md). The detailed, task-level build plan is in [docs/phases/](../phases/README.md), which refines §13 below. This file is kept for the team's **15-hour build plan overview (§13), demo story (§14), disclosure (§17), judging map (§18) and roadmap slide (§19)**. Where it disagrees with the spec pack, the spec pack wins. FR-n here = REQ-0nn in [prd.md](../01-product/prd.md) (FR-22 and FR-28 were split; see the PRD's traceability note).
 
 # PRD v2: GuruSetu Verified Mentorship Graph
@@ -336,7 +338,7 @@ Status history is stored as an append-only list on the node/edge (`history`) for
 
 ### 13.1 Assumptions [ASSUMED, confirm at hour 0]
 - **4 people × 15 hours ≈ 60 person-hours.** Reserve ~10 for integration, demo and deck → ~50 for building.
-- The old repos (`Gurusetu-backend` FastAPI + Neo4j, `Gurusetu-frontend` Next.js 14) are copied into this repo at hour 0, if the rules allow reusing them (§17).
+- ~~The old repos are copied into this repo at hour 0~~ Superseded: the build is from scratch (D-1); backend and frontend are scaffolded at hour 0.
 - One LLM API with vision is allowed and a key is available. If not, extraction uses cached JSON + manual entry, and that's said openly.
 - Neo4j via local Docker (no Aura dependency on stage).
 

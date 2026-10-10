@@ -13,7 +13,7 @@ Status:       Draft v1 | assumptions in this document: A-05, A-06, A-22
 |---|---|---|---|---|
 | ENV-01 | Local dev | Each builder's laptop, Docker Compose | Build and test | `TODAY_OVERRIDE=2026-10-10`, `LLM_PROVIDER=anthropic` (key in `.env`) or `none` |
 | ENV-02 | Demo | The presenting laptop, Docker Compose | Stage demo and judging | Same images as ENV-01; `LLM_PROVIDER=none` unless venue Wi-Fi is tested; fresh `seed --reset` before each run |
-| ENV-03 | Hosted (optional) | The old deployment targets (Render backend, Netlify frontend) [A-22] | Only if the rules require a URL | Neo4j Aura; TLS at the platform edge; synthetic data only; not required for P0 |
+| ENV-03 | Hosted (optional) | Render (backend) and Netlify (frontend) on new accounts [A-22] | Only if the rules require a URL | Neo4j Aura; TLS at the platform edge; synthetic data only; not required for P0 |
 
 There is no staging and no production. Real data is out of scope (NG-03).
 

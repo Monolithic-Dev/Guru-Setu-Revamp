@@ -11,11 +11,11 @@ Status:       Draft v1. Facts come from the spec pack, read on 2026-10-10. Nothi
 | Part | Exists now | Created when |
 |---|---|---|
 | `docs/` spec pack, `AGENTS.md`, `CLAUDE.md`, `README.md`, `LICENSE`, `tools/` | Yes | — |
-| `backend/`, `frontend/` | **No** | Hour 0: P2 copies the old `Gurusetu-backend` and `Gurusetu-frontend` (import commit, [phase-0 T0.P2.0](phases/phase-0-setup.md)) |
+| `backend/`, `frontend/` | **No** | Hour 0: P2 scaffolds both from scratch (scaffold commit, [phase-0 T0.P2.0](phases/phase-0-setup.md)) |
 | `docker-compose.yml`, `.env.example` | **No** | Phase 0, P2 (T0.P2.1) |
 | `docs/general/` | Empty | — |
 
-The old repos are not in this workspace, so the plan depends on A-05 ("rules allow reuse and the code is available"). If not, build the same structure from empty scaffolds (+1 h, [decision D-1](phases/phase-0-setup.md)).
+**Build mode: from scratch** (A-05, decision D-1). The old GuruSetu repos are not needed, and no old code is copied. Phase 1 writes auth, core and the app shell instead of repairing them (about +2 h across P2 and P3 [I]).
 
 ## 2. Target tree (after Phase 0)
 
@@ -60,7 +60,7 @@ Import rules ([architecture §9](02-architecture/architecture.md)): `api/v1` →
 | **P4** | Data, coordinator UI, pitch | `backend/seed/`, `scripts/seed.py`, coordinator and student-home screens, README, docs, deck, demo script |
 
 The full map is `tools/ownership.txt`; the rules are in [parallel-work.md](phases/parallel-work.md).
-**Your team is 3 people, not 4.** See §7 flaw 1.
+Team size is 4 (confirmed by the team): 4 x 15 h = 60 person-hours.
 
 ## 4. How the three compulsory parts map to modules
 
@@ -92,7 +92,7 @@ The full map is `tools/ownership.txt`; the rules are in [parallel-work.md](phase
 | `JWT_SECRET_KEY` | **Yes** | Generate: `python -c "import secrets;print(secrets.token_urlsafe(48))"` (32+ characters; the app refuses to start otherwise) |
 | Docker Desktop (Compose v2) | **Yes** | Install; on Windows it uses WSL2 or Hyper-V. Allow about 5+ GB for images. |
 | Node 20 and Python 3.12 on each laptop | For running tools and tests outside Docker (`npx`, `ruff`, `ownership` checker) | Install if you will run those commands locally |
-| Git access to the old repos `Gurusetu-backend` and `Gurusetu-frontend` | **Yes** for the import commit | P2 needs read access at hour 0 |
+| Node 20 (for `npx create-next-app@14`) | **Yes** for the scaffold commit | Install on P2's and P3's laptops |
 
 ### 6.2 What you do NOT need
 - **No database account and no manual DB creation.** Neo4j runs in Docker (`neo4j:5.26-community`). The schema is applied automatically on API startup, and `seed --reset` fills it.
@@ -103,7 +103,7 @@ The full map is `tools/ownership.txt`; the rules are in [parallel-work.md](phase
 ### 6.3 Manual steps in order
 
 1. Decide D-1..D-6 and record them ([phase-0](phases/phase-0-setup.md)): reuse allowed? LLM allowed? who is P1-P4? start time?
-2. P2 copies the old backend and frontend into the repo and pushes the import commit (about 10 min). Others pull after it.
+2. P2 scaffolds `backend/` and `frontend/` and pushes the scaffold commit (about 20 min). Others pull after it.
 3. Each person: `cp docs/10-devops/env.example .env`; set `NEO4J_PASSWORD`, `JWT_SECRET_KEY`, and `ANTHROPIC_API_KEY` or `LLM_PROVIDER=none`.
 4. `docker compose up -d --build` (slow the first time: torch CPU wheel and model download; share the image by `docker save` if venue Wi-Fi is bad).
 5. `docker compose exec backend python -m scripts.seed --reset`.
@@ -121,9 +121,11 @@ The full map is `tools/ownership.txt`; the rules are in [parallel-work.md](phase
 
 **Also fixed (found while checking):** plan §14 said the HOD sees "one mentor overloaded", but the seed's highest load is 13 against a warning at 20. Now it says Vikram is highlighted for low compliance.
 
-**Still open (decisions for you):**
-1. **Team size.** Everything assumes 4 people with 15 hours each (60 person-hours). You have 3 (45). The plan's own cut for 3 drops tamper checks, the eval table and guide requests and pushes P4's UI onto P2 and P3, who are already on the critical path. That is the biggest schedule risk. I did not rewrite the phase docs; tell me and I will.
-2. **Old code is not in the workspace**, so the reuse assumption (A-05) and the audit findings it relies on (security holes) cannot be checked by me. The audit file itself is also outside the repo.
+**Scratch-build pass (decision D-1):** the docs no longer say to copy or repair old code. Changed: index (A-02, A-05, A-21, summary lines), README and AGENTS.md (disclosure now says no code is reused), architecture (ADR-01, 03, 11, 13 and the stack table: `bcrypt` + `PyJWT`, no `passlib`), PRD constraints and NG items, security (bcrypt, SEC-14), phase 0 (T0.P2.0 is now a scaffold commit), phase 1 (T1.P2.1 is now security helpers plus the ADR-03 negative test; no "delete old code" steps), parallel-work §7-§8, status board, and a banner on the plan file. The old audit references (for example "audit H6") remain as lessons and are explained in the index.
+
+**Still open:**
+1. **Time cost of scratch.** The docs estimate about +2 h across P2 and P3 for writing auth, core and the shell instead of repairing them [I]. Phase 1 had no slack on the P2 critical path, so P2's Phase 1 may overrun; use the cut order early.
+2. **Genesis rules:** whether reusing the earlier project's concept and name is allowed is unconfirmed [VERIFY]. The README has a bracketed note to confirm.
 3. **Scope is large for 15 hours:** 45 endpoints, 16 screens, Neo4j with vectors, an LLM pipeline, XLSX exports. The docs' own cut order is sensible; use it early.
 4. **Unchecked external facts** the docs mark [VERIFY]: Genesis rules on prior code and AI, the model ID `claude-opus-5-5` and cost, the Anthropic SDK version, the `neo4j:5.26-community` tag, the CPU torch wheel URL, and NAAC criterion codes.
 5. **Vision input on stage:** the offline demo works only for files in the cache. Any new certificate needs a key and network.

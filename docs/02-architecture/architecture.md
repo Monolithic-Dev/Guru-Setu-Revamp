@@ -2,7 +2,7 @@
 Purpose:      Fix the components, their boundaries, the stack and the key decisions, so backend, frontend and AI work can proceed in parallel against one contract.
 Audience:     All four builders and coding agents.
 Depends on:   docs/01-product/prd.md
-Inputs used:  PRD (REQ-, NFR-, NG-), audit §2 (existing code structure), audit §5 (defects), audit §12 (reuse vs change)
+Inputs used:  PRD (REQ-, NFR-, NG-); lessons from the earlier prototype's audit (kept outside this repo; the build is from scratch, D-1)
 Status:       Draft v1 | assumptions in this document: A-02, A-04, A-05, A-06, A-13, A-14
 
 Decision records (§8) and project structure (§9) are sections of this document. Security has its own document: [security-and-privacy.md](../08-security/security-and-privacy.md).
@@ -134,19 +134,19 @@ If any step fails, the transaction rolls back and nothing is saved (FM-06).
 
 | Layer | Choice | Version | Reason | Rejected alternative |
 |---|---|---|---|---|
-| Backend language | Python | 3.12 | Existing code compiles on 3.12 (audit §1) | — |
-| API framework | FastAPI + Pydantic v2 | as pinned in existing `requirements.txt` [VERIFY: old repo] | Existing; response models fix C1 | Flask (rewrite cost) |
+| Backend language | Python | 3.12 | Current, supported by every dependency below [VERIFY: wheels for torch and sentence-transformers on 3.12] | — |
+| API framework | FastAPI + Pydantic v2 | pin at hour 0 [VERIFY: pypi.org/project/fastapi] | Response models on every route (SEC-01); the team knows it | Flask (no built-in response models) |
 | Database | Neo4j Community | 5.26 LTS [VERIFY: hub.docker.com/_/neo4j] | Existing graph model; native vector index; no APOC needed | Postgres + pgvector (rewrite) |
 | DB driver | `neo4j` (Python) | 5.x | Official | — |
-| Embeddings (MDL-02) | `sentence-transformers` + `all-MiniLM-L6-v2` | 384-d | Matches existing 384-d indexes (audit H1) | paraphrase-albert-small-v2 (768-d mismatch) |
+| Embeddings (MDL-02) | `sentence-transformers` + `all-MiniLM-L6-v2` | 384-d | Small and fast on CPU; the vector indexes in schema.cypher are 384-d | paraphrase-albert-small-v2 (768-d would need different indexes) |
 | LLM (MDL-01) | Anthropic Python SDK, `claude-opus-5-5` | SDK pinned at hour 0 [VERIFY: pypi.org/project/anthropic] | Vision + PDF input + structured outputs | Self-hosted OCR (accuracy, time) |
 | Image hashing | Pillow, `imagehash` | 4.3.x | Perceptual hash for duplicates | — |
 | PDF rendering | `pypdfium2` | 4.x | Renders page 1 to PNG for pHash; no system deps | pdf2image (needs poppler) |
 | Fuzzy match | `rapidfuzz` | 3.x | Name match `token_set_ratio` | — |
 | XLSX export | `openpyxl` | 3.1.x | REQ-017 | PDF (layout time) |
-| Auth | Existing bcrypt (passlib) + HS256 JWT | existing | Reuse (audit §12) | OAuth (NG-07) |
-| Frontend | Next.js App Router, TypeScript, Tailwind | 14.1 (existing) | Reuse existing UI | — |
-| HTTP client | axios (existing), one instance in `src/lib/api.ts` | existing | Reuse | — |
+| Auth | `bcrypt` (used directly, cost 12) + `PyJWT`, HS256 | pin at hour 0 [VERIFY: pypi] | Seeded accounts only (NG-01); no extra wrapper layer | OAuth (NG-07) |
+| Frontend | Next.js App Router, TypeScript, Tailwind | 14.x (pin at hour 0) [VERIFY: create-next-app flags] | Team knows it; scaffolded fresh in T0.P3.1 | — |
+| HTTP client | axios, one instance in `src/lib/api.ts` | pin at hour 0 | Interceptors for the token and problem+json | `fetch` (more code for the same interceptors) |
 | Charts | `recharts` | 2.x | HOD dashboard bars | Chart.js |
 | Graph view (P1) | `react-force-graph-2d` | 1.x | REQ-020 | Cytoscape (heavier) |
 | Runtime | Docker Compose v2 | — | One command for the demo (NFR-08) | — |
@@ -186,9 +186,9 @@ If any step fails, the transaction rolls back and nothing is saved (FM-06).
 
 | ID | Context | Decision | Alternatives | Consequences |
 |---|---|---|---|---|
-| ADR-01 | Existing GuruSetu code: FastAPI ~3k LOC, Next.js ~4.9k LOC; 15 h budget | Repair and extend in this repo: copy old `main` into `backend/` and `frontend/` (A-05) | Rewrite from scratch | Keeps login, graph model and UI shells; requires P0 security repair first |
+| ADR-01 | The earlier GuruSetu prototype exists, but its repos are not available here and its Genesis reuse status is unconfirmed; 15 h budget, 4 people | **Build from scratch** in this repo: scaffold `backend/` and `frontend/` at hour 0 (A-05, D-1) | Copy and repair the old code | No dependency on old repos or the prior-code rule; Phase 1 writes auth, core and the app shell instead of repairing them (about +2 h across P2 and P3 [I]) |
 | ADR-02 | Graph relationships are central (mentors, skills, similar concepts) and vector search is needed | Neo4j is the only datastore | Add Postgres for mentoring records | One query language; no joins across stores; no SQL DDL (schema is `schema.cypher` plus Pydantic models) |
-| ADR-03 | Audit found duplicate routers with IDOR holes (C3, M1) | Delete `recommendations.py`, `faculty_projects.py`, `student_projects.py`, `openings.py` POST, `notifications.py` duplicate, the collaboration routes, `/users/upload-profile-picture`, `/auth/register`, `/auth/verify-identity` and `/auth/reset-password`; rebuild the rest under `/api/v1` | Patch each | Closes C2/C3/H7 in about 1 h; NG-01, NG-02 and NG-10 follow |
+| ADR-03 | The earlier prototype had duplicate routers with IDOR holes (C3, M1) and open registration and password reset | Never build: recommender, faculty and student portfolio routers, collaboration routes, `/users/upload-profile-picture`, `/auth/register`, `/auth/verify-identity`, `/auth/reset-password`. Every route lives under `/api/v1/<area>` | Copy the old routers and patch each | Avoids those holes by construction (C2/C3/H7); NG-01, NG-02 and NG-10 follow |
 | ADR-04 | Extraction takes 3–20 s | FastAPI `BackgroundTasks` plus client polling (JOB-01) | Celery + Redis queue | No new infrastructure; work is lost if the process restarts mid-job, so on startup any certificate still `processing` for > 60 s is set to `failed` (FM-02) |
 | ADR-05 | Reminders and flags depend on dates | Compute at read time | APScheduler cron | No background process; flags always reflect current data |
 | ADR-06 | Audit trail is needed on 5 object types (REQ-018) | `StatusEvent` nodes keyed by `entity_id` | A list property on each node | One timeline query; Neo4j cannot store lists of maps |
@@ -196,9 +196,9 @@ If any step fails, the transaction rolls back and nothing is saved (FM-06).
 | ADR-08 | Need vision extraction to a fixed schema | `claude-opus-5-5`, structured output, `effort: "low"`, SHA-256 cache, `LLM_PROVIDER=none` switch | Smaller model; OCR + regex | Small cost per call (NFR-09); the switch covers venues without network |
 | ADR-09 | Existing frontend keeps the JWT in localStorage | Keep it for the demo; expiry 480 min; strict output encoding | httpOnly cookie + CSRF | XSS would expose the token; accepted residual risk (security §9) |
 | ADR-10 | Evidence must be editable by IQAC | XLSX via openpyxl | PDF | Coordinators can edit drafts; no PDF layout work |
-| ADR-11 | Old routes are inconsistent (`/dashboard/...`, double prefixes) | All kept and new routes go under `/api/v1/<area>`, one router file per area | Keep old paths | Frontend API calls are rewritten once (P0 frontend repair) |
+| ADR-11 | Routes need one consistent shape from the start | All routes go under `/api/v1/<area>`, one router file per area | Ad-hoc paths per feature | The frontend uses one client (`src/lib/api.ts`) and generated types |
 | ADR-12 | HOD and IQAC need overlapping views | One Coordinator area; content by role | Two apps | Less UI work; role checks on the server decide fields |
-| ADR-13 | Cloudinary is required by old config and is an unauthenticated upload target (H6, H7) | Local volume `UPLOAD_DIR`; Cloudinary removed | Keep Cloudinary | No external account needed; files are served only through API-011 |
+| ADR-13 | A third-party image host would need an external account and would expose uploads by public URL | Local volume `UPLOAD_DIR`; no Cloudinary | Cloudinary | No external account needed; files are served only through API-011 |
 
 ## 9. Project structure
 
@@ -252,7 +252,7 @@ If any step fails, the transaction rolls back and nothing is saved (FM-06).
 - `repos` import only `core.database`.
 - No Cypher outside `repos/` (and `scripts/seed.py`).
 - Frontend pages call the API only through `src/lib/api.ts`.
-- Delete the old `uploads/` directory and its committed photos (audit M7).
+- `uploads/` is a Docker volume and is gitignored; never commit uploaded files (SEC-14).
 
 **Naming:** Python `snake_case`; JSON fields `snake_case`; Neo4j labels `PascalCase`, relationships `UPPER_SNAKE`, properties `snake_case`; React components `PascalCase.tsx`.
 

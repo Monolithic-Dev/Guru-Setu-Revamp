@@ -1,6 +1,6 @@
 # AGENTS.md: GuruSetu Verified Mentorship Graph
 
-You are building a 15-hour hackathon product. Students prove skills with verified certificates and use them to find research guides. Faculty mentors log and track sessions, action items and issues. HOD and IQAC see live mentoring compliance and export draft accreditation evidence. The stack is FastAPI + Neo4j 5 + Next.js 14, repaired and extended from the old GuruSetu code.
+You are building a 15-hour hackathon product. Students prove skills with verified certificates and use them to find research guides. Faculty mentors log and track sessions, action items and issues. HOD and IQAC see live mentoring compliance and export draft accreditation evidence. The stack is FastAPI + Neo4j 5 + Next.js 14, **built from scratch** (no old GuruSetu code is copied; decision D-1).
 
 ## Read before writing code (in this order)
 1. [docs/00-index.md](docs/00-index.md): document map, ID registry, assumptions, end-to-end scenario

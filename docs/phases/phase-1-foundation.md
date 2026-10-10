@@ -1,5 +1,5 @@
 # Phase 1: Foundation (1:00–4:00)
-Purpose:      Close the old code's security holes, rebuild the API skeleton under `/api/v1`, load the full synthetic dataset, and give every role a working login and shell.
+Purpose:      Build the secure API skeleton under `/api/v1` (auth, access checks, errors), load the full synthetic dataset, and give every role a working login and shell. The build is from scratch (D-1).
 Audience:     P1–P4.
 Depends on:   phase-0-setup.md (G0 passed); architecture §5, §8 (ADR-03), §9; backend §2–§5, §6.3, §8, §10; security §2–§5; ai-system §5; ux-flows §2, §4, §7, §8
 Status:       Draft v1
@@ -8,7 +8,7 @@ Status:       Draft v1
 
 ## 1. Goal and exit gate
 
-**Goal:** by 4:00 the system is safe to build on. No old hole remains open, every request goes through the new auth/deps/error stack, the seed builds the whole demo world, and each persona logs in to its own shell.
+**Goal:** by 4:00 the system is safe to build on. The security tests pass, every request goes through the auth/deps/error stack, the seed builds the whole demo world, and each persona logs in to its own shell.
 
 **G1 gate (on `main`, one machine, `TODAY_OVERRIDE=2026-10-10`):**
 - [ ] `pytest -q tests/test_security.py -k "test_01 or test_02 or test_03 or test_04 or test_11"` is green (TEST-01, 02, 03, 04, 11 against the routes that exist)
@@ -16,13 +16,13 @@ Status:       Draft v1
 - [ ] `python -m scripts.seed --reset` takes ≤ 60 s; `MATCH (s:Student) RETURN count(s)` = 50; Meera has 13 active assigned mentees; 12 openings; ≥ 40 sessions
 - [ ] Every Student and Opening has a 384-d `embedding`, and `SIMILAR_TO (deep learning)–(computer vision)` has score 0.70
 - [ ] UI: `aarav@`, `meera@`, `suresh@` and `kavya@demo.gurusetu` each log in and land on their role home with the right nav; a garbage token in localStorage redirects to `/login?expired=1`
-- [ ] `ls backend/app/api/v1` matches architecture §9; no `dashboard.py`, `recommendations.py`, `faculty_projects.py`, `student_projects.py` or `notifications.py` at the old path
+- [ ] `ls backend/app/api/v1` shows only files named in architecture §9; none of the routes in ADR-03 exist (TEST-02)
 
 ## 2. Task board
 
 | ID | Owner | Est | Depends on | Task |
 |---|---|---|---|---|
-| T1.P2.1 | P2 | 0:30 | T0.P2.1 | Delete dead and duplicate code (ADR-03) |
+| T1.P2.1 | P2 | 0:30 | T0.P2.1 | Password and token helpers (`core/security.py`) and the ADR-03 negative test |
 | T1.P2.2 | P2 | 0:40 | T1.P2.1 | Core: repository, errors, logging middleware |
 | T1.P2.3 | P2 | 0:50 | T1.P2.2 | Auth and access deps; API-001/002 |
 | T1.P2.4 | P2 | 0:30 | T1.P2.2 | Notify + status history services; API-037/038 |
@@ -32,7 +32,7 @@ Status:       Draft v1
 | T1.P1.3 | P1 | 1:00 | T0.P1.1 | Extraction contract: schema, prompt, adapter skeleton with cache and switch |
 | T1.P1.4 | P1 | 0:30 | T1.P1.2, T1.P4.2 | Seed hooks: embeddings + SIMILAR_TO in `seed.py`; IDF query helper |
 | T1.P3.1 | P3 | 0:30 | T0.P3.1 | Single API client + problem parsing + 401 handling |
-| T1.P3.2 | P3 | 1:00 | T1.P3.1 | AuthGuard, AppShell, role layouts; delete mock/dead code |
+| T1.P3.2 | P3 | 1:00 | T1.P3.1 | AuthGuard, AppShell, role layouts |
 | T1.P3.3 | P3 | 0:20 | T1.P3.2 | SCR-01 Login (FLOW-01) |
 | T1.P3.4 | P3 | 0:50 | T1.P3.2 | Shared components + `useApi` + toasts |
 | T1.P3.5 | P3 | 0:20 | T1.P3.2 | Route stubs for every P0 SCR, with fixtures |
@@ -42,16 +42,14 @@ Status:       Draft v1
 
 ## 3. Task details
 
-### T1.P2.1 Delete dead and duplicate code (0:30)
-- **Spec:** ADR-03, SEC-02, NG-01, NG-02, NG-10, audit §5 (C2, C3, H7, M1)
-- **Delete:**
-  - `routers/recommendations.py`, `faculty_projects.py`, `student_projects.py`, `openings.py`, `notifications.py`;
-  - from `auth.py`: `/register`, `/verify-identity`, `/reset-password`;
-  - from `users.py`: `/upload-profile-picture`;
-  - the `/uploads` StaticFiles mount in `main.py`;
-  - `services/rag_service.py` commented code, `graph_service.py`, `sync_db.py`.
-- **Move** what is reused (login logic in `auth_service.py`, the bcrypt and JWT helpers in `core/security.py`) into the new layout (architecture §9). `dashboard.py` is not kept; its useful Cypher is copied into `repos/` as needed in later tasks.
-- **Done when:** the app starts, `curl -X POST localhost:8000/auth/reset-password` returns 404, and `grep -rn "cloudinary\|reset_password\|upload-profile-picture" backend/app` is empty.
+### T1.P2.1 Security helpers and the ADR-03 negative test (0:30)
+- **Spec:** ADR-03, SEC-02, SEC-03, A-21, NG-01, NG-02, NG-10
+- **Files:** `core/security.py`, `tests/test_security.py` (TEST-02 case)
+- **Steps:**
+  1. `hash_password(plain)` and `verify_password(plain, hashed)` using `bcrypt` directly with cost 12. Reject passwords longer than 72 bytes (bcrypt's limit). `create_token(sub, role)` and `decode_token(token)` using `PyJWT`, HS256, with `JWT_SECRET_KEY` and `JWT_EXPIRE_MINUTES`.
+  2. A fixed dummy bcrypt hash constant, used by login to equalise timing for unknown emails (SEC-20, T1.P2.3).
+  3. Write TEST-02 exactly as in test-strategy: POST `/auth/register`, `/auth/verify-identity`, `/auth/reset-password`, `/users/upload-profile-picture` and GET `/dashboard/student/home`, `/recommend/recommendations/student/openings` return 404 each. They pass trivially now and guard against someone adding them later.
+- **Done when:** a unit test hashes and verifies a password, rejects a 73-byte password, and round-trips a token; TEST-02 passes.
 
 ### T1.P2.2 Core: repository, errors, logging (0:40)
 - **Spec:** CMP-12, architecture §5, backend §3.1, §11, SEC-15, SEC-21
@@ -144,7 +142,7 @@ Status:       Draft v1
   3. The response interceptor:
      - on 401, clears `token`, `role` and `user_id` and routes to `/login?expired=1`;
      - on any problem+json, rejects with `{status, code, detail, errors, requestId}`.
-  4. Delete the old service modules and replace their calls as screens are rebuilt.
+  4. All screens call the API only through this client (no per-feature service modules).
 - **Done when:** calling API-002 with a bad token lands on `/login?expired=1`.
 
 ### T1.P3.2 Shell, guard, layouts (1:00)
@@ -153,7 +151,7 @@ Status:       Draft v1
 - **Steps:**
   1. `AuthGuard allowedRoles` checks localStorage; no token or the wrong role redirects to `/login`.
   2. `AppShell` renders the sidebar (≥ 768 px) or bottom nav (< 768 px) with the role items from ux-flows §2, a header with name, role label, `NotificationBell` (polls API-037 `unread` every 30 s while visible) and Log out.
-  3. **Delete:** `AuthContext.tsx`, `hooks/useAuth.ts`, empty `types/*.ts`, `facultyProjectService`, `userService`, the mock pages (`student/applications`, `student/faculty`, `student/faculty/[id]`), the collaboration pages, the support pages (fictional contacts), and the old `dashboard/*` routes once their replacements exist (keep them until T1.P3.5 stubs are in).
+  3. Remove the generator's sample page and styles that the shell replaces. Do not create mock, collaboration or support pages (NG-10).
 - **Done when:** each role sees exactly its nav items, and visiting another role's route redirects.
 
 ### T1.P3.3 SCR-01 Login (0:20)

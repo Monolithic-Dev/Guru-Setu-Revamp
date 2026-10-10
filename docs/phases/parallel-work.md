@@ -110,8 +110,8 @@ A stub must compile and keep the final signature. If the signature has to change
 
 | Phase | P1 files | P2 files | P3 files | P4 files | Overlap |
 |---|---|---|---|---|---|
-| 0 | `requirements.txt`, `Dockerfile`, `ml/__init__.py` | import commit (first), `docker-compose.yml`, `.env.example`, `main.py`, `config.py`, `schema/`, `api/v1/health.py`, `schemas/generated.py` (first run) | `frontend/**` cleanup, `package.json`, `lib/{types,nav,features}.ts`, frontend `Dockerfile` | `backend/seed/**` skeleton, `scripts/seed.py` stub, `tools/certgen/` | None after the import commit (§8) |
-| 1 | `ml/embedding.py`, `ml/concepts.py`, `repos/ml_repo.py`, `ml/extraction.py`, `ml/seed_hooks.py`, `ml/schemas/`, `ml/prompts/`, `seed/aliases.json`, `seed/similar_overrides.json`, `seed/fit_tuning.json`, P1 tests | deletions in `app/`, `core/*`, `api/deps.py`, `api/v1/{auth,students,applications,notifications}.py`, `services/{notify,status_history,applications}.py`, `repos/{users,students,applications,notifications}_repo.py`, `tests/conftest.py`, `tests/test_security.py`, `tests/test_applications.py` | `lib/api.ts`, `lib/problem.ts`, `hooks/`, `components/ui/**`, `components/why/WhyGraph.tsx` (stub), `components/mentor/RemindersPanel.tsx` (stub), layouts, `app/login`, P3 route stubs, `fixtures/p3/` | `seed/*.json` (except P1's three), `seed/labels/`, `seed/certificates/`, `seed/demo_uploads/`, `scripts/seed.py`, `scripts/check_seed.py` | None |
+| 0 | `requirements.txt`, `Dockerfile`, `ml/__init__.py` | scaffold commit (first), `docker-compose.yml`, `.env.example`, `main.py`, `config.py`, `schema/`, `api/v1/health.py`, `schemas/generated.py` (first run) | `frontend/**` cleanup, `package.json`, `lib/{types,nav,features}.ts`, frontend `Dockerfile` | `backend/seed/**` skeleton, `scripts/seed.py` stub, `tools/certgen/` | None after the scaffold commit (§8) |
+| 1 | `ml/embedding.py`, `ml/concepts.py`, `repos/ml_repo.py`, `ml/extraction.py`, `ml/seed_hooks.py`, `ml/schemas/`, `ml/prompts/`, `seed/aliases.json`, `seed/similar_overrides.json`, `seed/fit_tuning.json`, P1 tests | `core/*`, `api/deps.py`, `api/v1/{auth,students,applications,notifications}.py`, `services/{notify,status_history,applications}.py`, `repos/{users,students,applications,notifications}_repo.py`, `tests/conftest.py`, `tests/test_security.py`, `tests/test_applications.py` | `lib/api.ts`, `lib/problem.ts`, `hooks/`, `components/ui/**`, `components/why/WhyGraph.tsx` (stub), `components/mentor/RemindersPanel.tsx` (stub), layouts, `app/login`, P3 route stubs, `fixtures/p3/` | `seed/*.json` (except P1's three), `seed/labels/`, `seed/certificates/`, `seed/demo_uploads/`, `scripts/seed.py`, `scripts/check_seed.py` | None |
 | 2 | `ml/extraction.py`, `ml/verification.py`, `ml/trust.py`, `repos/ml_repo.py`, `extraction_cache/`, `scripts/build_extraction_cache.py`, `test_verification.py`, `test_extraction.py` | `api/v1/{certificates,mentorship}.py`, `services/{certificates,jobs,mentorship}.py`, `repos/{certificates,mentorship}_repo.py`, `tests/test_certificates.py`, `tests/test_mentorship.py` | `app/student/certificates/`, `app/reviews/`, `app/faculty/sessions/`, `components/mentor/*` (form parts) | `seed/certificates_index.json`, `scripts/seed.py` (step 5), P4 route stubs, `app/coordinator/allotment/`, `app/student/mentorship/`, `fixtures/p4/` | None |
 | 3 | `ml/scorer.py`, `api/v1/match.py`, `repos/match_repo.py`, `seed/fit_tuning.json`, `components/fit/**`, `app/student/openings/**`, `test_scorer.py`, `test_matching.py` | `api/v1/{tracking,dept,evidence}.py`, `services/{tracking,metrics,evidence_export}.py`, `repos/{tracking,metrics}_repo.py`, `tests/test_{tracking,metrics}.py` | `app/faculty/page.tsx`, `app/faculty/mentees/`, `app/faculty/openings/[id]/` | `app/coordinator/page.tsx`, `components/coordinator/`, `app/student/page.tsx`, `app/notifications/`, `app/faculty/openings/page.tsx` | None |
 | 4 | `api/v1/match.py` (API-020/021), `repos/match_repo.py`, `ml/verification.py` (rule 6), `scripts/eval_match.py`, `components/fit/SkillGapCard.tsx`, `features.ts` line `skillGap`, `plan/eval-results.md` | `api/v1/dept.py` (API-034, `escalated_issues`), `api/v1/tracking.py` (API-039), `api/v1/mentorship.py` (issues, API-045), `api/v1/openings_write.py` (API-014), related services and tests | `components/why/WhyGraph.tsx`, `components/mentor/RemindersPanel.tsx`, `app/faculty/page.tsx` (reminder link), `app/faculty/mentees/` (issue actions), `app/faculty/sessions/` (confidential), `app/faculty/openings/new/`, `features.ts` lines `whyGraph`/`reminders`/`createOpening` | `app/coordinator/metrics/`, `components/coordinator/` (clickable tiles, escalated list), `app/student/mentorship/` (dialogs), deck | `features.ts` (separate lines, §3) |
@@ -119,14 +119,14 @@ A stub must compile and keep the final signature. If the signature has to change
 
 Bug fixes in Phase 6 go to the **file owner**, even if someone else found the bug.
 
-## 8. The one sequential moment: the import commit (0:00–0:15)
+## 8. The one sequential moment: the scaffold commit (0:00–0:20)
 
-The old repos are copied once, by P2 during the decision gate:
-1. Copy `Gurusetu-backend` into `backend/` and `Gurusetu-frontend` into `frontend/`, without their `.git` folders.
-2. Delete `backend/uploads/`.
-3. Commit `chore: import old GuruSetu (backend + frontend)` and push.
+The scaffold is committed once, by P2 during the decision gate (T0.P2.0; the build is from scratch, no old repos):
+1. Create the `backend/` skeleton and generate `frontend/` with `create-next-app@14`.
+2. Confirm the root `.gitignore` covers `uploads/`.
+3. Commit `chore: scaffold backend and frontend` and push.
 
-Everyone else pulls **after** this commit before creating a branch. This is the only point where one person's commit blocks the others, and it takes about 5 minutes.
+Everyone else pulls **after** this commit before creating a branch. This is the only point where one person's commit blocks the others, and it takes about 20 minutes.
 
 ## 9. If a conflict happens anyway
 

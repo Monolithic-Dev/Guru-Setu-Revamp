@@ -29,16 +29,16 @@ College mentoring runs on signed paper registers. Nobody can see which mentee ha
 
 | ID | Non-goal (this build will not…) |
 |---|---|
-| NG-01 | Allow self-signup. Demo accounts are seeded; the old registration and photo-upload routes are deleted (A-04). |
+| NG-01 | Allow self-signup. Demo accounts are seeded; there are no registration or photo-upload routes (A-04). |
 | NG-02 | Offer password reset or recovery in any form. |
-| NG-03 | Store or display real student data, or migrate data from the old GuruSetu database. |
+| NG-03 | Store or display real student data, or import data from the earlier GuruSetu database. |
 | NG-04 | Provide a chatbot, Graph-RAG copilot, or any free-form LLM chat. |
 | NG-05 | Run skill vivas, issue Open Badges / verifiable credentials, or provide QR verification pages. |
 | NG-06 | Provide an auditor portal, hash-chained evidence vault, CO-PO attainment, NIRF simulator or SSR/AQAR drafting. |
 | NG-07 | Integrate APAAR, DigiLocker, ABC, AUMS, ORCID/Scopus, IRINS/VIDWAN or any SSO. Academic snapshots are seeded `[MOCK]`. |
 | NG-08 | Send email, SMS, WhatsApp or push notifications. Only in-app notifications exist. |
 | NG-09 | Support multiple campuses or departments in the UI. The data model carries `dept_code`, but the seed holds one department. |
-| NG-10 | Keep the old faculty collaboration hub, express-interest, student/faculty portfolio routers, AI recommender routes or mock pages. They are deleted. |
+| NG-10 | Build a faculty collaboration hub, express-interest, student/faculty portfolio routers, AI recommender routes or mock pages (the earlier prototype had them). |
 | NG-11 | Rank students or faculty globally, or show leaderboards or ratings of faculty. Scores are fit-to-one-opening only. |
 | NG-12 | Build a native mobile app. The web UI must work at 360 px width. |
 | NG-13 | Provide parent/guardian contact logs, counsellor referral, or peer/alumni mentors. |
@@ -293,8 +293,8 @@ Targeted judging criteria are mapped in the team plan (docs/plan, §18). Every f
 
 ## 10. Constraints
 
-- Time box: 15 hours, team of 4 (A-01). The stack is fixed by the existing GuruSetu code: FastAPI, Neo4j, Next.js 14 (A-02). Details are in [architecture.md](../02-architecture/architecture.md).
-- Genesis rules on pre-existing code must permit reuse, with a disclosure statement [VERIFY: Genesis rules document].
+- Time box: 15 hours, team of 4 (A-01). The stack is FastAPI, Neo4j, Next.js 14, chosen because the team knows it (A-02). The build is from scratch (A-05). Details are in [architecture.md](../02-architecture/architecture.md).
+- No old code is reused. The README discloses that the concept comes from the earlier GuruSetu prototype [VERIFY: Genesis rules on reusing an earlier project's idea].
 - LLM use must be permitted by the rules [VERIFY: Genesis rules]. If it is not, run with `LLM_PROVIDER=none` and the manual and cached path (REQ-037).
 - Synthetic data only (NG-03).
 

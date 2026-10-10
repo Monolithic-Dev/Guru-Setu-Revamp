@@ -2,9 +2,9 @@
 
 **Mentoring built on proof.** A student's verified achievements find the right research guide. Every mentoring session is recorded and tracked in about two minutes. The college gets its accreditation evidence as a by-product.
 
-Built for the **Genesis Hackathon, Campus Problems track**. This extends GuruSetu, an earlier prototype by members of our team (see [Disclosure](#disclosure)).
+Built for the **Genesis Hackathon, Campus Problems track**. The concept builds on GuruSetu, an earlier prototype by members of our team; all code here is new (see [Disclosure](#disclosure)).
 
-> **Status:** specification complete, implementation starting. The `backend/` and `frontend/` folders are added at hour 0 of the build. All data is synthetic.
+> **Status:** specification complete, implementation starting. The `backend/` and `frontend/` folders are scaffolded from scratch at hour 0 of the build. All data is synthetic.
 
 ---
 
@@ -79,16 +79,15 @@ The specification pack is the source of truth for the build:
 
 ## Disclosure
 
-This project extends **GuruSetu**, an earlier prototype by members of our team, exhibited at TechFair 2026.
+The concept and name come from **GuruSetu**, an earlier prototype by members of our team, exhibited at TechFair 2026. **No code from that prototype is reused:** the backend, frontend and data were written from scratch for Genesis. [VERIFY: whether the Genesis rules also restrict reusing an earlier project's idea; confirm and adjust this text.]
 
-For Genesis we are building the following as new work:
+Built for Genesis:
 - certificate verification and the trust ladder;
 - explainable Fit Check matching;
 - the digital mentor-mentee system (allotment, session logs, action items, issues, tracking);
-- the coordinator dashboards and draft evidence export;
-- security fixes to the original code.
+- the coordinator dashboards and draft evidence export.
 
-The earlier prototype's matching was keyword-based.
+The earlier prototype's matching was keyword-based; the keyword method is used here only as the evaluation baseline.
 
 ## License
 

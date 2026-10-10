@@ -2,7 +2,7 @@
 Purpose:      Define every screen, flow, state, copy line and component that CMP-01 renders, mapped to REQ- and API- IDs.
 Audience:     P3 (student + mentor screens), P4 (coordinator screens), coding agents.
 Depends on:   docs/01-product/prd.md, docs/02-architecture/architecture.md, docs/04-backend/backend.md, docs/04-backend/openapi.yaml
-Inputs used:  REQ-001..038, NFR-03, 05, 06; existing Next.js 14 + Tailwind frontend (audit §2.2)
+Inputs used:  REQ-001..038, NFR-03, 05, 06; a new Next.js 14 + Tailwind frontend scaffolded at hour 0
 Status:       Draft v1 | assumptions in this document: A-03, A-20
 
 Screens and components (§6, §7) and client state (§8) are sections of this document.
@@ -294,7 +294,7 @@ SCR-15 /faculty/openings: list of own openings with applicant counts; (P1) [New 
 
 ## 7. Components
 
-Custom components use Tailwind. There is no component library (the existing frontend has none), plus `recharts` and (P1) `react-force-graph-2d` (architecture §4).
+Custom components use Tailwind. There is no component library (small custom UI kit in `components/ui`), plus `recharts` and (P1) `react-force-graph-2d` (architecture §4).
 
 | Component | Props | Variants / states | Events | A11y |
 |---|---|---|---|---|

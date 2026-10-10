@@ -101,7 +101,7 @@ P4 starts the deck at 10:00 while P2 builds API-034, then switches to SCR-13 at 
 ### A6 Evaluation table (REQ-026)
 - **Steps:**
   1. Read `seed/labels/match_labels.csv` (10 students × 12 openings, relevance 0/1/2, labelled by P4 before seeing scores; do the labelling in Phase 2's buffer if possible).
-  2. For each student, rank the openings by hybrid `score()` and by the baseline (Jaccard of claimed + certified skill names vs required names, the old GuruSetu method).
+  2. For each student, rank the openings by hybrid `score()` and by the baseline (Jaccard of claimed + certified skill names vs required names, the earlier prototype's keyword method).
   3. Compute nDCG@10 (gains 2^rel − 1, log2 discount) and P@5 (rel ≥ 1 counts as relevant), averaged over students.
   4. Print a Markdown table, and also write it to `docs/plan/eval-results.md` together with the EVAL-01 raw accuracy from T2.P1.3.
 - **Honesty rule:** the slide shows exactly these numbers, with n = 10 students stated. If the hybrid doesn't beat the baseline, say so; don't re-tune on the test labels.

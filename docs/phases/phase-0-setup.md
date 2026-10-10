@@ -17,7 +17,7 @@ Status:       Draft v1
 - [ ] `npm --prefix frontend run build` succeeds; `frontend/src/lib/types.ts` generated from `openapi.yaml`
 - [ ] `python -c "…SentenceTransformer…"` inside the backend container prints `384`
 - [ ] `backend/seed/` has the file skeleton from T0.P4.1, and `scripts/seed.py --reset` runs (it may load only departments, terms and users)
-- [ ] `uploads/` from the old repo is not in the tree (`git ls-files uploads` is empty)
+- [ ] No uploaded files are tracked (`git ls-files uploads` is empty)
 - [ ] `python tools/check_ownership.py --who backend/app/main.py` prints `P2`; every builder ran it once on their branch
 - [ ] Shared files exist in final form: `main.py` (auto-discovery), `config.py` (all settings), `requirements.txt`, `package.json` (all deps), `lib/nav.ts`, `lib/features.ts`, `schemas/generated.py`, `lib/types.ts`
 
@@ -27,7 +27,7 @@ Decide, and write the answers in `docs/plan/decisions-log.md`:
 
 | ID | Decision | Default if nobody knows | Changes |
 |---|---|---|---|
-| D-1 | Do the Genesis rules allow reusing the GuruSetu code (with disclosure), and do the original owners agree? (A-05, RISK-01) | Yes, and disclose | If no: build fresh on the same stack from the spec. Phase 1 P2 work becomes "scaffold", not "repair" (about +1 h) |
+| D-1 | Reuse the old GuruSetu code? **Decided: no, build from scratch** (A-05). Still confirm that the Genesis rules allow reusing the earlier project's concept and name. | Scratch build; disclose the concept origin | Phase 1 P2 and P3 write auth, core and the shell instead of repairing them (about +2 h across P2 and P3 [I]) |
 | D-2 | Is LLM use allowed? Is an Anthropic key available? (A-09) | Yes; key in `.env` | If no: `LLM_PROVIDER=none`, and T2.P1.1 becomes cache-building by hand-labelling JSON |
 | D-3 | Who is P1/P2/P3/P4? How many people? (A-01) | 4 people as in the README | 3 or 2 people: apply the [CUT-3]/[CUT-2] marks |
 | D-4 | Local Docker Neo4j for the demo? (A-06) | Yes | Aura: set `NEO4J_URI`, skip the neo4j service |
@@ -38,12 +38,13 @@ Decide, and write the answers in `docs/plan/decisions-log.md`:
 
 File ownership follows [parallel-work.md](parallel-work.md). Every task below touches only its owner's files.
 
-### T0.P2.0 Import commit (P2, during the decision gate, about 10 min)
-- **Spec:** ADR-01, parallel-work §8, SEC-14
+### T0.P2.0 Scaffold commit (P2, during the decision gate, about 20 min)
+- **Spec:** ADR-01, parallel-work §8, SEC-14. The build is from scratch (D-1): no old repos are needed.
 - **Steps:**
-  1. Copy the old `Gurusetu-backend` `main` into `backend/` and `Gurusetu-frontend` `main` into `frontend/`, without their `.git` folders.
-  2. Delete `backend/uploads/` and any committed photos.
-  3. Commit `chore: import old GuruSetu (backend + frontend)` and push.
+  1. Create the backend skeleton: `backend/app/main.py` (a FastAPI app with a stub `GET /api/v1/health`), empty packages `backend/app/{core,api/v1,schemas,services,repos,ml}/__init__.py`, and `.gitkeep` files in `backend/{scripts,seed,tests}/`.
+  2. Create the frontend with the official generator: `npx create-next-app@14 frontend --typescript --tailwind --eslint --app --src-dir --import-alias "@/*"` [VERIFY: current flags], then clear the sample page.
+  3. Confirm the root `.gitignore` covers `.env`, `uploads/`, `node_modules/`, `.next/`, `__pycache__/` and exports.
+  4. Commit `chore: scaffold backend and frontend` and push.
 - **Done when:** the commit is on `main`. **Everyone else pulls before creating a branch.** This is the only sequential step of the build.
 
 ### T0.P2.1 Compose, config, app entry, schema, generated models (45 min)
@@ -66,20 +67,20 @@ File ownership follows [parallel-work.md](parallel-work.md). Every task below to
 - **Spec:** architecture §9, ux-flows §2, §8, parallel-work §3
 - **Files (P3):** `frontend/**` (except P1/P4 folders and GEN), `frontend/package.json` + lockfile, `frontend/Dockerfile`, `src/lib/nav.ts`, `src/lib/features.ts`, `src/lib/types.ts` (GEN, first run)
 - **Steps:**
-  1. After pulling the import commit: `npm ci && npx tsc --noEmit && npm run build`. The audit could not run these, so note any failures in `status.md` and fix only build blockers now.
+  1. After pulling the scaffold commit: `npm ci && npx tsc --noEmit && npm run build` to confirm the generated app builds.
   2. Add **every** frontend dependency for all phases now, so the lockfile never changes again: `recharts`, `react-force-graph-2d`, dev `openapi-typescript`, dev `@playwright/test`. Add the scripts `gen:types` and `e2e`.
   3. Write `frontend/Dockerfile` (node:20-alpine, build arg `NEXT_PUBLIC_API_BASE`, `next build` then `next start -p 3000`).
   4. `npm run gen:types` → `src/lib/types.ts`.
   5. `src/lib/nav.ts`: the full route list per role from ux-flows §2 and §6, including the P1/P2 add-on routes (`/coordinator/metrics/[metric]`, `/faculty/openings/new`, `/faculty-profile/[id]`).
   6. `src/lib/features.ts`, exactly 4 flags, one per line: `whyGraph: false`, `skillGap: false`, `reminders: false`, `createOpening: false`.
   7. Create empty owner folders with a `.gitkeep`: `src/fixtures/{p1,p3,p4}/`, `src/components/{ui,fit,mentor,why,coordinator,student}/`.
-- **Done when:** `npm run build` passes, and the frontend container serves `/login` (the old page is fine for now).
+- **Done when:** `npm run build` passes, and the frontend container serves `/login` (the generated placeholder page is fine for now).
 
 ### T0.P1.1 Backend dependencies, Dockerfile, model bake, ML startup stub (45 min)
 - **Spec:** architecture §4, ai-system §2.1 and §5, environments §2, parallel-work §3
 - **Files (P1):** `backend/requirements.txt`, `backend/Dockerfile`, `backend/app/ml/__init__.py`
 - **Steps:**
-  1. Pin **every** backend dependency for all phases now: `fastapi`, `uvicorn`, `neo4j`, `pydantic-settings`, `python-multipart`, `passlib[bcrypt]`, the existing JWT library, `sentence-transformers`, `anthropic` (latest at hour 0), `Pillow`, `imagehash`, `pypdfium2`, `rapidfuzz`, `openpyxl`, and dev tools `pytest`, `httpx`, `ruff`, `datamodel-code-generator`, `pip-audit`. Remove `cloudinary` and `openai`.
+  1. Pin **every** backend dependency for all phases now: `fastapi`, `uvicorn`, `neo4j`, `pydantic-settings`, `python-multipart`, `bcrypt`, `PyJWT`, `sentence-transformers`, `anthropic` (latest at hour 0), `Pillow`, `imagehash`, `pypdfium2`, `rapidfuzz`, `openpyxl`, and dev tools `pytest`, `httpx`, `ruff`, `datamodel-code-generator`, `pip-audit`. Do not add `cloudinary`, `openai` or `passlib`.
   2. Dockerfile:
      - `CMD ["uvicorn","app.main:app","--host","0.0.0.0","--port","8000","--workers","1"]` (audit H6);
      - CPU torch wheel installed before the requirements;
@@ -103,7 +104,7 @@ File ownership follows [parallel-work.md](parallel-work.md). Every task below to
 
 | Risk | Response |
 |---|---|
-| The old frontend doesn't build (never verified, audit §1) | Fix only build blockers. Delete broken mock pages now (they are deleted in Phase 1 anyway). |
+| The scaffold command or its flags differ from what is written here | Run `npx create-next-app@14 --help` and adapt; the goal is only a TypeScript + Tailwind app-router project with `src/` |
 | Torch wheel download is slow at the venue | One person builds the backend image first and shares it with `docker save \| docker load` via USB |
 | No Anthropic key | `LLM_PROVIDER=none`; P1 hand-writes cache JSON in Phase 2 (`source:"cache"`) |
-| D-1 is "no" | Start from empty FastAPI/Next.js scaffolds with the same structure (architecture §9); the spec is unchanged |
+| Genesis rules forbid reusing the earlier project's idea or name | Rename the product in the README and UI (a text change only); the spec is unchanged |

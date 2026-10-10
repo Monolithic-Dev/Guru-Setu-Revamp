@@ -7,7 +7,7 @@ Edit this file only in its own small commit straight to `main` after `git pull -
 ## 0. Decisions (T0.ALL.1) → details in `docs/plan/decisions-log.md`
 | ID | Decision | Answer |
 |---|---|---|
-| D-1 | Prior code allowed + owners agree | |
+| D-1 | Build from scratch (decided); concept reuse allowed by Genesis rules? | Scratch: yes. Rules: ☐ confirm |
 | D-2 | LLM allowed + key available | |
 | D-3 | People → P1/P2/P3/P4 | |
 | D-4 | Local Docker Neo4j | |
@@ -17,7 +17,7 @@ Edit this file only in its own small commit straight to `main` after `git pull -
 ## 1. Phase 0: Setup (gate G0 at 1:00)
 | Task | Owner | Status | Note |
 |---|---|---|---|
-| T0.P2.0 Import commit (everyone pulls after) | P2 | ☐ | |
+| T0.P2.0 Scaffold commit (everyone pulls after) | P2 | ☐ | |
 | T0.P2.1 Compose + config + main.py + generated models | P2 | ☐ | |
 | (all) Ran `check_ownership.py` once | all | ☐ | |
 | T0.P3.1 Frontend clean-up + all deps + nav/features/types | P3 | ☐ | |
@@ -28,7 +28,7 @@ Edit this file only in its own small commit straight to `main` after `git pull -
 ## 2. Phase 1: Foundation (gate G1 at 4:00)
 | Task | Owner | Status | Note |
 |---|---|---|---|
-| T1.P2.1 Delete dead code | P2 | ☐ | |
+| T1.P2.1 Security helpers + ADR-03 negative test | P2 | ☐ | |
 | T1.P2.2 Core repo/errors/logging | P2 | ☐ | |
 | T1.P2.3 Auth + deps + API-001/002 | P2 | ☐ | |
 | T1.P2.4 Notify + status history + API-037/038 | P2 | ☐ | |

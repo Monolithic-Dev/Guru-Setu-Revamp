@@ -9,7 +9,7 @@ Status:       Draft v1 | assumptions log: §5
 
 ## 1. Brief as understood
 
-- **Project:** a web app (FastAPI + Neo4j + Next.js 14) extending the old GuruSetu prototype for the Genesis hackathon, Campus Problems track.
+- **Project:** a web app (FastAPI + Neo4j + Next.js 14) built from scratch for the Genesis hackathon, Campus Problems track (the concept comes from the earlier GuruSetu prototype; no old code is reused, D-1).
 - **Users:** students, faculty (as assigned mentors and as research guides), HOD and IQAC in one department.
 - **Core:**
   - certificate upload → LLM extraction → deterministic verification → trust-weighted skills;
@@ -17,7 +17,7 @@ Status:       Draft v1 | assumptions log: §5
   - the digital mentor-mentee system: allotment, sessions, confirmation, action items, issues;
   - tracking: mentor home flags and Mentee 360;
   - a coordinator dashboard and draft XLSX evidence exports with no private notes.
-- **Constraints:** a 15-hour time box, 4 people (A-01), synthetic data only, the old code's critical security holes fixed first.
+- **Constraints:** a 15-hour time box, 4 people (A-01), synthetic data only, security requirements (SEC-) built in from the first commit.
 - **Mocked:** academics, accounts, certificates, criterion codes (PRD §13).
 - **Out of scope:** everything on the enterprise roadmap (PRD NG-01..15).
 
@@ -54,7 +54,7 @@ The spec pack itself holds no schedules. The hour-by-hour build plan lives in [p
 | 8 | Data science and analytics | merge into #4 §7 | 04-backend/backend.md | Dashboard metrics only (MET-); no experiments or pipelines |
 | 9 | Security, privacy and compliance | include (threat model + compliance as sections) | 08-security/security-and-privacy.md | Personal and sensitive mentoring data, uploads, untrusted text into an LLM, audit criticals C1–C3 |
 | 10 | Integrations | merge into #6 (Anthropic) and #7 (none else) | — | The only third party is the Anthropic API; Cloudinary removed (ADR-13) |
-| 11 | DevOps, environments, release | include (short) | 10-devops/environments-and-deployment.md | Always; broken Dockerfile/env in the old code |
+| 11 | DevOps, environments, release | include (short) | 10-devops/environments-and-deployment.md | Always; a working Dockerfile and env from hour 0 |
 | 12 | Testing and quality | include (failure modes + manual QA as sections) | 11-quality/test-strategy.md | Always |
 | 13 | Project-type specials | skip | — | No library API, game, contract or hardware |
 | 14–15 | Agent entry file + index | include | AGENTS.md, CLAUDE.md, 00-index.md | Always |
@@ -91,10 +91,10 @@ The three with the largest effect if wrong are marked ★. Correct these first.
 | ID | Assumption | Where used | If wrong |
 |---|---|---|---|
 | A-01 ★ | Team of 4, about 15 working hours each | PRD §10, test strategy | Use the 2–3-person cut in the team plan §13.4 |
-| A-02 | Stack is fixed by the old code: FastAPI, Neo4j 5, Next.js 14 | Architecture §4 | Re-plan ADR-01/02 |
+| A-02 | Stack chosen: FastAPI, Neo4j 5, Next.js 14 (kept from the earlier prototype's stack because the team knows it) | Architecture §4 | Re-plan ADR-01/02 |
 | A-03 | HOD and IQAC share one Coordinator area | PRD §3, ux-flows | Split SCR-11 by role |
 | A-04 | No self-signup; seeded accounts only | NG-01, ADR-03 | Rebuild a secured registration flow (not specced) |
-| A-05 ★ | Genesis rules allow reusing the old GuruSetu code (with disclosure), and its `main` is copied into `backend/` and `frontend/` at hour 0 | ADR-01, project structure | Rebuild from this spec on the same stack; P0 effort rises |
+| A-05 ★ | **Decided: build from scratch.** No old code is copied; `backend/` and `frontend/` are scaffolded at hour 0. The old repos are not needed. | ADR-01, project structure | If the team later wants old code, reuse is allowed only after the Genesis rules are confirmed |
 | A-06 | The demo runs locally via Docker Compose; no hosted URL required | ENV-02 | Use ENV-03 (Render/Netlify + Aura) |
 | A-07 | One department (CSE) in the seed | NG-09, seed | Add departments to the seed; the model already supports it |
 | A-08 | The current term comes from seeded Term dates or `CURRENT_TERM_ID` | ENT-07, MET- | Set `CURRENT_TERM_ID` |
@@ -110,9 +110,11 @@ The three with the largest effect if wrong are marked ★. Correct these first.
 | A-18 | Relationship property indexes work in Neo4j 5.26 Community | schema.cypher | Drop those two indexes (performance only) |
 | A-19 | Idempotency keys checked for a 24 h age on read need no cleanup job | ENT-21 | Delete old keys in the seed reset |
 | A-20 | Frontend copy uses default threshold numbers rather than fetching config | ux-flows §4.3 | Add the thresholds to API-002 |
-| A-21 | The existing passlib bcrypt and laptop disk encryption are acceptable for a synthetic-data demo | Security §2, §7 | Swap to `bcrypt` directly |
-| A-22 | The old Render/Netlify targets are usable for an optional hosted demo | ENV-03 | Local demo only |
+| A-21 | `bcrypt` (used directly, cost 12) and laptop disk encryption are acceptable for a synthetic-data demo | Security §2, §7 | Use a managed identity provider (out of scope) |
+| A-22 | Render/Netlify (new accounts) are usable for an optional hosted demo | ENV-03 | Local demo only |
 | A-23 | Tests run against the compose Neo4j and reseed per test session | Test strategy §1 | Add a separate test Neo4j service on port 7688 |
+
+**Scratch build and the "audit" references:** with a from-scratch build, the old-code audit (kept outside this repo) is not a task list. References such as "audit H6" or "fixes audit C3" in the docs name lessons already built into the spec, so there is nothing to repair. Phase tasks about deleting or moving old code were rewritten as scaffold tasks.
 
 **External facts to confirm ([VERIFY] in the docs):**
 - Genesis rules on prior code and AI use
@@ -120,7 +122,8 @@ The three with the largest effect if wrong are marked ★. Correct these first.
 - Anthropic SDK version
 - `neo4j:5.26-community` tag
 - PyTorch CPU wheel URL
-- FastAPI version in the old repo
+- FastAPI, Pydantic, PyJWT and bcrypt versions (pin at hour 0)
+- Next.js 14 scaffold command and version
 - NAAC criterion codes
 - DPDP Rules
 

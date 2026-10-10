@@ -23,7 +23,7 @@ All data in this build is synthetic (SEC-14). This classification also governs a
 
 ## 2. Authentication
 
-- **Method:** seeded email and password (NG-01). Hashing uses bcrypt via passlib with cost 12 (existing code; A-21).
+- **Method:** seeded email and password (NG-01). Hashing uses `bcrypt` directly with cost 12 (A-21); passwords longer than 72 bytes are rejected at login and in the seed (bcrypt's limit).
 - **Token:** JWT HS256 with claims `{sub: user_id, role, exp, iat}`; lifetime `JWT_EXPIRE_MINUTES` (480).
 - **Verification:** signature and `exp` are checked on every request. The user is re-read from Neo4j by `sub`, and the `role` comes from the database, not the token. A token whose user no longer exists returns 401.
 - No refresh tokens. No password reset or recovery (NG-02). No MFA, because the seeded demo accounts carry synthetic data only.
@@ -88,7 +88,7 @@ Implementation rule: response models declare the optional fields (`notes`, `text
 | SEC-11 | Rate limits: API-001 10/min/IP; API-005 20/hour/user; exceeded → 429 with `Retry-After` | THR-02, THR-11 | TEST-09 |
 | SEC-12 | CORS allows only `CORS_ORIGINS`; a preflight from another origin gets no `Access-Control-Allow-Origin` | THR-03 | TEST-10 |
 | SEC-13 | Every status change writes a StatusEvent (REQ-018); 401/403/404-on-scoped-route/429 are logged at WARNING with user_id and route | Repudiation, THR-12 | TEST-34 |
-| SEC-14 | Synthetic data only. The old `uploads/` directory and its 11 committed photos are deleted from the repo; no import from the old database. | Audit M7, NG-03 | `git ls-files uploads` is empty |
+| SEC-14 | Synthetic data only. `uploads/` is gitignored and holds only synthetic files; no import from the earlier database. | Audit M7, NG-03 | `git ls-files uploads` is empty |
 | SEC-15 | Never logged: passwords, tokens, the `Authorization` header, session notes, issue/action/resolution text, file bytes or base64, extracted holder names, API keys | THR-08 | TEST-21 (log grep) |
 | SEC-16 | `pip-audit` and `npm audit --audit-level=high` report no high or critical findings, or each one is listed with a reason in §9 | Supply chain | CI / manual run |
 | SEC-17 | Cypher uses parameters only. No query string is built from user input (no f-strings or `%`/`+` into `run()`). | Injection, THR-05 | TEST-07 + grep |

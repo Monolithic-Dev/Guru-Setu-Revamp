@@ -77,7 +77,7 @@ Own backend fixes from the bug list. Every fix is re-tested with its TEST-xx bef
 - **Done when:** it passes headless once. If it doesn't by 13:15, drop it.
 
 ### T6.P3.3 Cleanup (0:15)
-Remove `/dev/components`, any leftover fixtures from P0 routes, `console.log` calls and the old `dashboard/*` routes. Run `npm run lint` and `tsc --noEmit`.
+Remove `/dev/components`, any leftover fixtures from P0 routes and `console.log` calls. Run `npm run lint` and `tsc --noEmit`.
 
 ### T6.P4.1 Deck (1:00 total across the slots)
 Content order:
