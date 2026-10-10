@@ -23,7 +23,7 @@ test("index §7 primary flow", async ({ browser }) => {
   const aarav = await login(browser, "aarav@demo.gurusetu", /\/student$/);
   await aarav.getByRole("link", { name: /Edge AI for Agriculture/ }).first().click();
   await expect(aarav).toHaveURL(/\/student\/openings\/op-edge-ai/);
-  await expect(aarav.getByText(/^Close/).first()).toBeVisible();
+  await expect(aarav.getByText(/Close: /).first()).toBeVisible();
 
   // Step 3 (without uploads): apply → "Applied · Pending"; applying again shows "Applied" (AC-006.1).
   await aarav.getByRole("button", { name: /^Apply/ }).click();
@@ -46,7 +46,7 @@ test("index §7 primary flow", async ({ browser }) => {
   await meera.getByRole("link", { name: /^Log session$/ }).click();
   await expect(meera).toHaveURL(/\/faculty\/sessions\/new$/);
   await meera.getByLabel(/Select all mentees/).check();
-  await meera.locator("fieldset:has(legend:text('Attendance for Diya Ramesh')) label:text('Absent')").click();
+  await meera.locator("fieldset:has(legend:text('Attendance for Diya Raghavan')) label:text('Absent')").click();
   await meera.getByRole("button", { name: "Academic", exact: true }).click();
   await meera.getByRole("button", { name: "Attendance", exact: true }).click();
   const actions = ["Finish DL assignment 3", "Read the CNN chapter"];
@@ -57,7 +57,7 @@ test("index §7 primary flow", async ({ browser }) => {
     await meera.locator(`#sf-actions-${i}-text`).fill(text);
   }
   await meera.getByRole("button", { name: "Add issue" }).click();
-  await meera.locator("#sf-issues-0-student_id").selectOption({ label: "Diya Ramesh" });
+  await meera.locator("#sf-issues-0-student_id").selectOption({ label: "Diya Raghavan" });
   await meera.locator("#sf-issues-0-category").selectOption("attendance");
   await meera.locator("#sf-issues-0-text").fill("Attendance below 75% in two courses");
   await meera.getByRole("button", { name: "Save session" }).click();
@@ -68,16 +68,18 @@ test("index §7 primary flow", async ({ browser }) => {
   await aarav.goto("/student/mentorship");
   await aarav.getByRole("button", { name: /Confirm I attended/ }).first().click();
   await expect(aarav.getByText(/Confirmed/).first()).toBeVisible();
-  await aarav.getByRole("checkbox", { name: /Mark done/ }).first().check();
+  // The list reloads after the PATCH and the item leaves the open list, so assert on the toast, not on the box.
+  await aarav.getByRole("checkbox", { name: /mark done/i }).first().click();
+  await expect(aarav.getByText("Marked done. Your mentor will verify it.")).toBeVisible();
 
   // Step 9: Suresh's dashboard shows 48/50 allotted and a needs-attention list with names (REQ-016).
   const suresh = await login(browser, "suresh@demo.gurusetu", /\/coordinator$/);
   await expect(suresh.getByText("48/50").first()).toBeVisible();
-  await expect(suresh.getByText(/Karthik S/).first()).toBeVisible();
+  await expect(suresh.getByText(/Karthik Subramanian/).first()).toBeVisible();
 
   // Step 10: Kavya sees no student names; both exports are available (REQ-016 AC-016.2, REQ-017).
   const kavya = await login(browser, "kavya@demo.gurusetu", /\/coordinator$/);
-  await expect(kavya.getByText(/Karthik S|Aarav Menon|Diya Ramesh/)).toHaveCount(0);
+  await expect(kavya.getByText(/Karthik Subramanian|Aarav Menon|Diya Raghavan/)).toHaveCount(0);
   await expect(kavya.getByRole("button", { name: /Export mentoring pack/ })).toBeVisible();
   await expect(kavya.getByRole("button", { name: /Export achievements/ })).toBeVisible();
 });
