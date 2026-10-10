@@ -56,7 +56,7 @@ def _ensure_stand_in_graph() -> None:
             MATCH (a:Student {user_id: 'u-aarav'})
             SET a.roll_no = coalesce(a.roll_no, 'CB.EN.U4CSE24001'), a.year = 3
             WITH a MATCH (d:Student {user_id: 'u-diya'})
-            SET d.roll_no = coalesce(d.roll_no, 'CB.EN.U4CSE24002'), d.year = 3
+            SET d.roll_no = coalesce(d.roll_no, 'CB.EN.U4CSE24902'), d.year = 3
             WITH a, d MATCH (m:Faculty {user_id: 'u-meera'}) SET m.employee_id = coalesce(m.employee_id, 'E-MEERA')
             WITH a, d, m MATCH (j:Faculty {user_id: 'u-arjun'}) SET j.employee_id = coalesce(j.employee_id, 'E-ARJUN')
             WITH a, d, m, j
@@ -78,6 +78,28 @@ def client() -> TestClient:
 
     with TestClient(app) as test_client:  # runs the lifespan: schema applied, Neo4j reachable
         yield test_client
+
+
+# P1's test modules run against the full seed, so they go first. P2's modules rebuild a small stand-in graph of their
+# own (below) and edit it freely, so they go last and cannot disturb the seed P1's tests read.
+P1_MODULES = {"test_embedding", "test_extraction", "test_matching", "test_scorer", "test_verification"}
+
+
+def pytest_collection_modifyitems(items):
+    items.sort(key=lambda item: 0 if item.module.__name__.rsplit(".", 1)[-1] in P1_MODULES else 1)  # stable
+
+
+@pytest.fixture(scope="module", autouse=True)
+def _p2_stand_in_graph(request, fresh_seed):
+    """Every P2 module starts from the same small graph: wipe everything, then the personas (plain names, one
+    mentor link each, one opening). The module's own `world` fixture then adds what it needs."""
+    if request.module.__name__.rsplit(".", 1)[-1] in P1_MODULES:
+        return
+    from app.core.database import get_driver
+
+    with get_driver().session() as session:
+        session.run("MATCH (n) DETACH DELETE n").consume()
+    _ensure_stand_in_graph()
 
 
 @pytest.fixture(scope="session")
