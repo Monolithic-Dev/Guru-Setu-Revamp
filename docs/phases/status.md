@@ -20,7 +20,7 @@ Edit this file only in its own small commit on your own feature branch (CONTRIBU
 | T0.P2.0 Scaffold commit (everyone pulls after) | P2 | ☑ | pushed to main (4ecfe76) |
 | T0.P2.1 Compose + config + main.py + generated models | P2 | ☑ | health 200 against Neo4j; spectral clean |
 | (all) Ran `check_ownership.py` once | all | ☐ | |
-| T0.P3.1 Frontend clean-up + all deps + nav/features/types | P3 | ☐ | |
+| T0.P3.1 Frontend clean-up + all deps + nav/features/types | P3 | ☑ | build + container OK; npm audit: 12 findings in Next 14 scaffold (fix needs major upgrade) → P2 for SEC-16 |
 | T0.P1.1 All backend deps + Dockerfile + model bake + ml startup stub | P1 | ☐ | |
 | T0.P4.1 Seed skeleton + certificate template | P4 | ☐ | |
 | **G0** | all | ☐ | |
