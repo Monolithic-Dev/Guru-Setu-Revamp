@@ -1416,6 +1416,7 @@ components:
               title: {type: string}
         endorsed_by:
           type: array
+          description: Display names of the faculty who endorsed this skill (trust level 2)
           items: {type: string}
     StudentProfile:
       type: object
@@ -2340,6 +2341,7 @@ components:
               title: {type: string}
         endorsed_by:
           type: array
+          description: Display names of the faculty who endorsed this skill (trust level 2)
           items: {type: string}
     CompletenessItem:
       type: object
