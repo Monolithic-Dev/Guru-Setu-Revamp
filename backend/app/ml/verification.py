@@ -209,12 +209,18 @@ def tamper_signal(file_bytes: bytes, media_type: str) -> bool:
 
     Only consulted when tamper_check_enabled is true, because ELA is noisy and a
     false positive sends a legitimate certificate to review (A-17).
+
+    ela_threshold <= 0 turns the ELA branch off. Tuned on the 25-file set plus
+    the planted edit (A8): the planted file's whole-image ELA mean (0.185) sits
+    inside the range of the genuine files (0.045 to 1.088), so no threshold
+    separates them and the shipped value is 0 - the EXIF Software tag alone.
     """
     if media_type == "application/pdf":
         return False
-    return _exif_editor(file_bytes) or _ela_mean(file_bytes) > float(
-        get_settings().ela_threshold
-    )
+    if _exif_editor(file_bytes):
+        return True
+    threshold = float(get_settings().ela_threshold)
+    return threshold > 0 and _ela_mean(file_bytes) > threshold
 
 
 def _exif_editor(file_bytes: bytes) -> bool:

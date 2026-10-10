@@ -332,19 +332,43 @@ def test_injection_never_auto_certifies_even_when_every_field_is_perfect():
 # -- Rule 6: tamper (A8) ------------------------------------------------------
 
 
+def _edited_jpeg() -> bytes:
+    from PIL import Image
+
+    buf = io.BytesIO()
+    img = Image.new("RGB", (40, 40), "white")
+    exif = img.getexif()
+    exif[0x0131] = "Adobe Photoshop 2026"
+    img.save(buf, format="JPEG", exif=exif)
+    return buf.getvalue()
+
+
 def test_tamper_check_is_skipped_when_disabled(_patch):
     _patch.tamper_check_enabled = False
-    _patch.ela_threshold = -1.0  # would flag everything if consulted
-    result = verify(AARAV, png_bytes(), "image/png", good_extraction(), FakeTx())
+    _patch.ela_threshold = 0.0
+    result = verify(AARAV, _edited_jpeg(), "image/jpeg", good_extraction(), FakeTx())
     assert result.status == "certified"
 
 
 def test_tamper_signal_goes_to_review_when_enabled(_patch):
+    """TEST-17: the planted Photoshop-EXIF image routes to review."""
     _patch.tamper_check_enabled = True
-    _patch.ela_threshold = -1.0  # force the ELA branch to trip
-    result = verify(AARAV, png_bytes(), "image/png", good_extraction(), FakeTx())
+    _patch.ela_threshold = 0.0  # shipped value: EXIF only
+    result = verify(AARAV, _edited_jpeg(), "image/jpeg", good_extraction(), FakeTx())
     assert result.status == "needs_review"
     assert result.reasons == ["tamper_signal"]
+
+
+def test_ela_is_off_when_threshold_is_zero(_patch, monkeypatch):
+    _patch.ela_threshold = 0.0
+    monkeypatch.setattr(verification, "_ela_mean", lambda b: 1e9)
+    assert verification.tamper_signal(png_bytes(), "image/png") is False
+
+
+def test_ela_still_trips_above_a_positive_threshold(_patch, monkeypatch):
+    _patch.ela_threshold = 0.5
+    monkeypatch.setattr(verification, "_ela_mean", lambda b: 1.0)
+    assert verification.tamper_signal(png_bytes(), "image/png") is True
 
 
 def test_exif_editor_marker_is_detected():
