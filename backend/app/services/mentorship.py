@@ -440,3 +440,26 @@ def patch_issue(user: CurrentUser, issue_id: str, body: IssuePatch) -> dict[str,
         return shape_issue(user, updated, history_for(tx, [issue_id])[issue_id])
 
     return run_write(work)
+
+
+# ============================== meeting request (API-045, REQ-024) ==============================
+
+
+def request_meeting(user: CurrentUser, message: str) -> None:
+    """Tell the assigned mentor the student wants to meet. The body of the notification is the student's own
+    message, the one place the catalogue (backend 6.9) allows free text. 404 when the student has no mentor."""
+    if not message:
+        raise ApiError(
+            "VALIDATION_FAILED", 422, "Write a short message.", errors=[{"field": "message", "message": "Required"}]
+        )
+
+    def work(tx):
+        mentor = mentorship_repo.assigned_mentor_id(tx, user.user_id)
+        if mentor is None:
+            raise ApiError("NOT_FOUND", 404, "You do not have an assigned mentor yet.")
+        notify(
+            tx, mentor, "meeting_request", render_title("meeting_request", student=user.name),
+            link=f"/faculty/mentees/{user.user_id}", body=message,
+        )
+
+    run_write(work)

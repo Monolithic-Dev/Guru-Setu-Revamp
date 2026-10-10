@@ -17,7 +17,7 @@ from app.schemas.generated import ProfilePatch
 from app.services.access import assert_self_or_scope
 
 
-def _ml(name: str) -> ModuleType | None:
+def ml_module(name: str) -> ModuleType | None:
     """P1's module `app.ml.<name>`, or None while it is missing or its dependencies are not installed."""
     try:
         return importlib.import_module(f"app.ml.{name}")
@@ -27,7 +27,7 @@ def _ml(name: str) -> ModuleType | None:
 
 def normalise_skill(name: str) -> str:
     """Lower-case, trim, collapse spaces. P1's `ml.concepts.normalise` (which also applies aliases) wins if present."""
-    concepts = _ml("concepts")
+    concepts = ml_module("concepts")
     if concepts is not None and hasattr(concepts, "normalise"):
         return concepts.normalise(name)
     return re.sub(r"\s+", " ", name.strip().lower())
@@ -62,20 +62,20 @@ def update_profile(user: CurrentUser, patch: ProfilePatch) -> dict[str, Any]:
         if "claimed_skills" in provided and patch.claimed_skills is not None:
             wanted = sorted({normalise_skill(skill.root) for skill in patch.claimed_skills if skill.root.strip()})
             current = set(students_repo.claimed_skill_names(tx, user.user_id))
-            concepts = _ml("concepts")
+            concepts = ml_module("concepts")
             for name in wanted:
                 if concepts is not None and hasattr(concepts, "get_or_create_concept"):
                     concepts.get_or_create_concept(tx, name, "claimed")
                 else:
                     students_repo.ensure_concept(tx, name)
                 students_repo.upsert_claim(tx, user.user_id, name, now)
-            trust = _ml("trust")
+            trust = ml_module("trust")
             for name in sorted(current - set(wanted)):
                 students_repo.unclaim(tx, user.user_id, name, now)
                 if trust is not None and hasattr(trust, "recompute_skill"):
                     trust.recompute_skill(tx, user.user_id, name)  # full trust ladder (P1)
         if provided & {"bio", "interests", "claimed_skills"}:
-            embedding = _ml("embedding")
+            embedding = ml_module("embedding")
             if embedding is not None and hasattr(embedding, "recompute_student_embedding"):
                 embedding.recompute_student_embedding(tx, user.user_id)
         return students_repo.get_profile(tx, user.user_id)
