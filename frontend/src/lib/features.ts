@@ -2,6 +2,6 @@
 export const features = {
   whyGraph: true,
   skillGap: false,
-  reminders: false,
+  reminders: true,
   createOpening: false,
 };
