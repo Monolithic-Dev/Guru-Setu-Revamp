@@ -87,6 +87,14 @@ export default function AllotmentPage() {
                     <span className="text-sm font-bold text-gray-900">{s.name}</span>
                     <span className="text-xs text-gray-600">{s.roll_no} · Year {s.year}</span>
                   </label>
+                  {s.suggested_mentor ? (
+                    <p className="ml-10 flex flex-wrap items-center gap-2 pb-1 text-xs text-gray-600">
+                      Suggested: <strong className="text-gray-800">{s.suggested_mentor.name}</strong> ({s.suggested_mentor.reason})
+                      <button type="button" className="font-bold text-brand underline" onClick={() => { setMentorId(s.suggested_mentor?.mentor_id ?? ""); setPicked(new Set([s.user_id])); }}>
+                        Use this
+                      </button>
+                    </p>
+                  ) : null}
                 </li>
               ))}
             </ul>
