@@ -1,0 +1,53 @@
+# GuruSetu backend dependencies. Owner: P1 (tools/ownership.txt).
+# Pinned once in T0.P1.1 for every phase, so this file never changes again
+# (docs/phases/parallel-work.md §3 "hotspots"). Adding a dependency later needs
+# a request to P1. Versions checked on PyPI at hour 0 [VERIFIED 2026-10-10].
+#
+# torch is NOT listed here: the CPU-only wheel comes from PyTorch's own index and
+# is installed before this file in backend/Dockerfile (torch==2.14.1+cpu).
+# Installing it from PyPI would pull the multi-GB CUDA build.
+
+# --- Web framework (architecture §4) ---
+fastapi==0.143.0
+uvicorn==0.54.0
+python-multipart==0.0.32
+pydantic==2.14.0
+pydantic-settings==2.15.0
+
+# pydantic's EmailStr needs this at runtime; P2's auth schemas use it. It is a
+# runtime dependency of a pydantic feature, not an import, so it does not show
+# up in an import scan - it surfaces as an ImportError at app startup.
+email-validator==2.3.0
+
+# --- Database (ADR-02; driver major matches the neo4j:5.26-community server) ---
+neo4j==5.28.7
+
+# --- Auth (ADR-03, A-21: bcrypt used directly at cost 12; passlib is not used) ---
+bcrypt==5.0.0
+PyJWT==2.15.1
+
+# --- ML: embeddings (MDL-02, ai-system §5) ---
+sentence-transformers==6.1.0
+
+# --- ML: certificate extraction (MDL-01, ai-system §2) ---
+# Groq, not Anthropic: the team's only available key is a Groq key (D-2,
+# 2026-10-10). qwen/qwen3.8-27b is the one model on the account that accepts an
+# image AND honours strict json_schema output, both of which MDL-01 needs.
+# The SDK is OpenAI-shaped; `openai` itself stays forbidden.
+groq==1.7.0
+
+# --- Verification: hashing, rendering, fuzzy matching (ai-system §3) ---
+Pillow==12.3.0
+ImageHash==4.3.2
+pypdfium2==5.14.0
+rapidfuzz==3.14.6
+
+# --- Evidence exports (REQ-017, API-035/036) ---
+openpyxl==3.1.5
+
+# --- Dev and tooling (test-strategy §1) ---
+pytest==9.1.1
+httpx==0.28.1
+ruff==0.17.0
+datamodel-code-generator==0.83.0
+pip-audit==2.10.1
