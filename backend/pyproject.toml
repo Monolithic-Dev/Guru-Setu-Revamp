@@ -12,6 +12,7 @@ ignore = ["B008"]  # FastAPI Depends() in argument defaults
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = ["S101", "S105", "S106", "E501"]  # asserts, fixture passwords and long literals are fine in tests
 "scripts/*" = ["S101"]
+"scripts/seed_mentoring.py" = ["E501"]  # synthetic fixture data reads better in long rows
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
