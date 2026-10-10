@@ -20,12 +20,12 @@ Status:       Draft v1
 | A1 | Click-to-source drill-down | 019 | P2: API-034 | P4: SCR-13 + clickable KpiTiles | TEST-37 | 0:40 + 0:45 |
 | A2 | "Why this match?" graph | 020 | P1: API-020 | P3: WhyGraph on SCR-03 | TEST-24 | 0:30 + 1:15 |
 | A3 | Reminders | 023 | P2: API-039 | P3: reminders on SCR-14 + SCR-06 badge | TEST-36 | 0:30 + 0:20 |
-| A4 | Full issue lifecycle, escalation, confidential | 022, 036 | P2: API-032 transitions, escalation notify, confidential filtering | P3: SCR-07 issue actions; SCR-08 confidential toggle | TEST-38, TEST-26 | 0:40 + 0:30 |
-| A5 | Skill-gap panel | 021 | P1: API-021 | P1: panel on SCR-02 | TEST-25 | 0:30 + 0:20 |
+| A4 | Full issue lifecycle, escalation, confidential | 022, 036 | P2: API-032 transitions, escalation notify, confidential filtering, API-033 `escalated_issues` | P3: SCR-07 issue actions; SCR-08 confidential toggle. P4: SCR-11 escalated list (0:15) | TEST-38, TEST-26 | 0:40 + 0:45 |
+| A5 | Skill-gap panel | 021 | P1: API-021 | P1: fills `SkillGapCard` (rendered on P4's SCR-02) | TEST-25 | 0:30 + 0:20 |
 | A6 | Evaluation table | 026 | P1: `scripts/eval_match.py` + EVAL-01 raw run summary | P4: slide | EVAL-03 | 0:45 |
 | A7 | Mentee request meeting / raise issue | 024 | P2: API-045 + student path of API-031 | P4: SCR-05 dialogs | TEST-44 | 0:20 + 0:20 |
 | A8 | Tamper signals | 025 | P1: rule 6 | — (copy already exists) | TEST-17 | 0:30 |
-| A9 | Create opening | 030 | P2: API-014 | P3: form on SCR-15 | TEST-47 | 0:15 + 0:20 |
+| A9 | Create opening | 030 | P2: API-014 (`openings_write.py`) | P3: route `/faculty/openings/new`; P4's SCR-15 link appears via flag | TEST-47 | 0:15 + 0:20 |
 
 **Per-person sequence (2.5 h each):**
 
@@ -34,7 +34,7 @@ Status:       Draft v1
 | P1 | A2 backend (0:30) → A5 (0:50) → A6 (0:45) → A8 (0:30) | 2:35 |
 | P2 | A1 backend (0:40) → A3 backend (0:30) → A4 backend (0:40) → A7 backend (0:20) → A9 backend (0:15) | 2:25 |
 | P3 | A2 frontend (1:15) → A3 frontend (0:20) → A4 frontend (0:30) → A9 frontend (0:20) | 2:25 |
-| P4 | A1 frontend (0:45, after P2's A1 at ~10:40) → A7 frontend (0:20) → deck build (1:25) | 2:30 |
+| P4 | A1 frontend (0:45, after P2's A1 at ~10:40) → A4 SCR-11 escalated list (0:15) → A7 frontend (0:20) → deck build (1:10) | 2:30 |
 
 P4 starts the deck at 10:00 while P2 builds API-034, then switches to SCR-13 at about 10:40.
 
@@ -61,7 +61,7 @@ P4 starts the deck at 10:00 while P2 builds API-034, then switches to SCR-13 at 
     - node ids are `student:<id>`, `concept:<name>`, `opening:<id>`;
     - edges are HAS_SKILL (student → concept, with trust in the label), SIMILAR_TO (with score) and REQUIRES (opening → concept).
   - Only matched, claimed_only and near chips produce paths. Missing concepts appear as isolated concept nodes connected to the opening only.
-- **Frontend (P3):** `react-force-graph-2d` in a panel or dialog opened by "Why?":
+- **Frontend (P3):** replace the stub in `components/why/WhyGraph.tsx` and set `whyGraph: true` in `lib/features.ts` (your line only). P1's SCR-03 already renders the button and the component behind the flag (T3.P1.4). The component uses `react-force-graph-2d` in a panel or dialog:
   - node colour by kind, plus a text label (not colour only);
   - edge labels for the SIMILAR_TO score;
   - a fixed height of 360 px.
@@ -74,7 +74,7 @@ P4 starts the deck at 10:00 while P2 builds API-034, then switches to SCR-13 at 
   - Compute the 4 kinds from backend §6.10, reusing the T3.P2.1 rule data. Mentor reminders cover each mentee; student reminders cover their own items.
   - `message` examples: "Karthik S has 2 of 2 meetings but an action is overdue since 7 Oct", "Confirm your session on 10 Oct".
   - Sort by due date.
-- **Frontend (P3):** a "Reminders" section at the top of SCR-14. On SCR-06, show a small "N reminders" link in the header.
+- **Frontend (P3):** fill `components/mentor/RemindersPanel.tsx` (P4's SCR-14 already renders it at the top) and set `reminders: true` in `lib/features.ts`. On SCR-06 (your page), show a small "N reminders" link in the header.
 - **Done when:** TEST-36 passes.
 
 ### A4 Issue lifecycle, escalation, confidential (REQ-022, REQ-036)
@@ -89,12 +89,13 @@ P4 starts the deck at 10:00 while P2 builds API-034, then switches to SCR-13 at 
 - **Frontend (P3):**
   - SCR-07 issue row: [Acknowledge] [In progress] [Resolve] [Escalate to HOD] (confirm dialog "The HOD will be able to read this issue."), and a "Confidential" toggle with an explanatory tooltip.
   - SCR-08 issue repeater: a confidential checkbox.
-  - SCR-11 needs-attention list (HOD): escalated issues get an "Escalated" badge, linking to SCR-07.
+- **Backend (P2), dashboard:** fill `escalated_issues` in API-033 (HOD only; schema already in `openapi.yaml`).
+- **Frontend (P4, SCR-11):** render an "Escalated issues" list (HOD only) from `escalated_issues`, each linking to SCR-07, where the HOD resolves it.
 - **Done when:** TEST-38 and TEST-26 pass.
 
 ### A5 Skill-gap panel (REQ-021)
 - **Backend (P1), API-021:** for each concept c that is required by any open opening and that the student lacks (or holds at trust 0), compute for each opening whether `score(with c at trust 1) ≥ FIT_READY_MIN` while the current score is below it. Return the top 5 by `openings_unlocked`, then by `total_gain`. This is at most about 40 concepts × 12 openings of pure scorer calls.
-- **Frontend (P1):** a card on SCR-02: "Learn docker → unlocks 2 openings", with a "Prove it" link to SCR-04. It is hidden when the list is empty.
+- **Frontend (P1):** fill `components/fit/SkillGapCard.tsx` (P4's SCR-02 already renders it) and set `skillGap: true` in `lib/features.ts`. The card: "Learn docker → unlocks 2 openings", with a "Prove it" link to SCR-04. It is hidden when the list is empty.
 - **Done when:** TEST-25 passes.
 
 ### A6 Evaluation table (REQ-026)
@@ -122,8 +123,8 @@ P4 starts the deck at 10:00 while P2 builds API-034, then switches to SCR-13 at 
 - **Done when:** TEST-17 passes, and a full seed reset produces no new `tamper_signal` on non-planted files.
 
 ### A9 Create opening (REQ-030)
-- **Backend (P2):** API-014 validation per the `OpeningCreate` schema. Normalise skills via `get_or_create_concept`, create `POSTED` and `REQUIRES`, and compute the embedding. IDF changes automatically, since it is computed per request.
-- **Frontend (P3):** a "New opening" button on SCR-15 that opens a form (title, description, skills as a chip input), with the validation copy from ux-flows §6. On success, go to SCR-09 for the new opening.
+- **Backend (P2):** API-014 in its own router file `api/v1/openings_write.py` (P1's `match.py` keeps the read routes). Validation per the `OpeningCreate` schema. Normalise skills via `get_or_create_concept`, create `POSTED` and `REQUIRES`, and compute the embedding. IDF changes automatically, since it is computed per request.
+- **Frontend (P3):** the page `src/app/faculty/openings/new/` (your route) with a form (title, description, skills as a chip input) and the validation copy from ux-flows §6. On success, go to SCR-09 for the new opening. Then set `createOpening: true` in `lib/features.ts`, which makes P4's existing link on SCR-15 appear.
 - **Done when:** TEST-47 passes.
 
 ## 4. 12:15 check

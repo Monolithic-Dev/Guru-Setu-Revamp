@@ -8,7 +8,7 @@ Status:       Draft v1
 
 ## 1. Goal and exit gate
 
-**Goal:** by 1:00, every person can run `docker compose up -d --build`, sees a healthy API and a building frontend, and the decisions that would change the plan are recorded.
+**Goal:** by 1:00, every shared file exists in its final form (parallel-work §3), every person can run `docker compose up -d --build`, sees a healthy API and a building frontend, and the decisions that would change the plan are recorded.
 
 **G0 gate (all on `main`):**
 - [ ] `docs/plan/decisions-log.md` exists with answers to D-1..D-6 (§2)
@@ -18,6 +18,8 @@ Status:       Draft v1
 - [ ] `python -c "…SentenceTransformer…"` inside the backend container prints `384`
 - [ ] `backend/seed/` has the file skeleton from T0.P4.1, and `scripts/seed.py --reset` runs (it may load only departments, terms and users)
 - [ ] `uploads/` from the old repo is not in the tree (`git ls-files uploads` is empty)
+- [ ] `python tools/check_ownership.py --who backend/app/main.py` prints `P2`; every builder ran it once on their branch
+- [ ] Shared files exist in final form: `main.py` (auto-discovery), `config.py` (all settings), `requirements.txt`, `package.json` (all deps), `lib/nav.ts`, `lib/features.ts`, `schemas/generated.py`, `lib/types.ts`
 
 ## 2. First 15 minutes: decision gate (everyone, T0.ALL.1)
 
@@ -32,41 +34,61 @@ Decide, and write the answers in `docs/plan/decisions-log.md`:
 | D-5 | Is a submission URL required? | No | Yes: P2 adds ENV-03 in Phase 6 (+30 min) |
 | D-6 | Real start time `0:00 = ____`, plus gate wall-clock times | — | Fill the README §1 note |
 
-## 3. Tasks (45 minutes after the decision gate)
+## 3. Tasks
 
-### T0.P2.1 Import backend and wire Compose (45 min)
-- **Spec:** ADR-01, ADR-13, architecture §9, environments §2, backend §8
-- **Files:** `backend/**`, `docker-compose.yml`, `backend/Dockerfile`, `backend/app/core/config.py`, `backend/app/main.py`, `backend/schema/schema.cypher`, `backend/app/api/v1/health.py`
+File ownership follows [parallel-work.md](parallel-work.md). Every task below touches only its owner's files.
+
+### T0.P2.0 Import commit (P2, during the decision gate, about 10 min)
+- **Spec:** ADR-01, parallel-work §8, SEC-14
 - **Steps:**
-  1. Copy the old `Gurusetu-backend` `main` into `backend/` without its `.git` folder. Delete `backend/uploads/` and any committed photos (SEC-14).
-  2. Fix the Dockerfile: `CMD ["uvicorn","app.main:app","--host","0.0.0.0","--port","8000","--workers","1"]` (audit H6).
-  3. Rewrite `config.py` with pydantic-settings fields for every variable in backend §8. Remove `CLOUDINARY_*` and `OPENAI_API_KEY`. At startup, check `len(JWT_SECRET_KEY) >= 32` and `len(NEO4J_PASSWORD) >= 12`, and raise with a clear message otherwise (SEC-10).
-  4. Copy `docs/04-backend/schema.cypher` to `backend/schema/schema.cypher`. In the app lifespan, split it on `;` and run each statement. It is idempotent (`IF NOT EXISTS`).
-  5. Add `api/v1/health.py` (API-040): run `RETURN 1` against Neo4j and return `{status, neo4j, llm_provider}`; 503 on failure.
+  1. Copy the old `Gurusetu-backend` `main` into `backend/` and `Gurusetu-frontend` `main` into `frontend/`, without their `.git` folders.
+  2. Delete `backend/uploads/` and any committed photos.
+  3. Commit `chore: import old GuruSetu (backend + frontend)` and push.
+- **Done when:** the commit is on `main`. **Everyone else pulls before creating a branch.** This is the only sequential step of the build.
+
+### T0.P2.1 Compose, config, app entry, schema, generated models (45 min)
+- **Spec:** ADR-13, architecture §9, environments §2, backend §8, parallel-work §3
+- **Files (P2):** `docker-compose.yml`, `.env.example`, `backend/app/main.py`, `backend/app/core/config.py`, `backend/schema/schema.cypher`, `backend/app/api/v1/health.py`, `backend/app/services/jobs.py`, `backend/app/schemas/generated.py` (GEN, first run)
+- **Steps:**
+  1. Rewrite `config.py` with pydantic-settings fields for **every** variable in backend §8, so nobody adds settings later. Remove `CLOUDINARY_*` and `OPENAI_API_KEY`. At startup, check `len(JWT_SECRET_KEY) >= 32` and `len(NEO4J_PASSWORD) >= 12`, and raise with a clear message otherwise (SEC-10).
+  2. Write `main.py` once, in final form:
+     - **router auto-discovery:** `for m in pkgutil.iter_modules(app.api.v1.__path__): include importlib.import_module(...).router` when the module has a `router`, all under prefix `/api/v1`;
+     - a lifespan that applies the schema (split `schema.cypher` on `;`, run each statement; idempotent), then calls `app.ml.startup()` (P1's stub) and `app.services.jobs.startup()` (your stub, filled with JOB-02 in Phase 2);
+     - placeholder lines for the middleware and error handlers, filled in T1.P2.2. Keep them in `core/` modules that `main.py` imports, so `main.py` itself never changes again.
+  3. Copy `docs/04-backend/schema.cypher` to `backend/schema/schema.cypher`.
+  4. Add `api/v1/health.py` (API-040): run `RETURN 1` against Neo4j and return `{status, neo4j, llm_provider}`; 503 on failure.
+  5. Run `datamodel-codegen --input docs/04-backend/openapi.yaml --input-file-type openapi --output backend/app/schemas/generated.py --output-model-type pydantic_v2.BaseModel`. The tool comes from P1's requirements; if T0.P1.1 isn't merged yet, run it from a local venv.
   6. Write `docker-compose.yml` per environments §2: neo4j `5.26-community` with healthcheck, backend depending on healthy neo4j, frontend depending on healthy backend; volumes `neo4j_data` and `uploads`; `env_file: .env`.
-  7. `cp docs/10-devops/env.example .env.example` at the root (the README and AGENTS.md reference it).
+  7. `cp docs/10-devops/env.example .env.example` at the root.
 - **Done when:** the G0 health check passes on your machine, and on one teammate's machine after `git pull`.
 
-### T0.P3.1 Import frontend and generate types (45 min)
-- **Spec:** architecture §9, ux-flows §8
-- **Files:** `frontend/**`, `frontend/Dockerfile`, `frontend/src/lib/types.ts`
+### T0.P3.1 Frontend clean-up, dependencies, shared frontend files (45 min)
+- **Spec:** architecture §9, ux-flows §2, §8, parallel-work §3
+- **Files (P3):** `frontend/**` (except P1/P4 folders and GEN), `frontend/package.json` + lockfile, `frontend/Dockerfile`, `src/lib/nav.ts`, `src/lib/features.ts`, `src/lib/types.ts` (GEN, first run)
 - **Steps:**
-  1. Copy the old `Gurusetu-frontend` `main` into `frontend/` without its `.git` folder.
-  2. `npm ci && npx tsc --noEmit && npm run build`. The audit could not run these, so note any failures in `status.md` and fix only build blockers now.
+  1. After pulling the import commit: `npm ci && npx tsc --noEmit && npm run build`. The audit could not run these, so note any failures in `status.md` and fix only build blockers now.
+  2. Add **every** frontend dependency for all phases now, so the lockfile never changes again: `recharts`, `react-force-graph-2d`, dev `openapi-typescript`, dev `@playwright/test`. Add the scripts `gen:types` and `e2e`.
   3. Write `frontend/Dockerfile` (node:20-alpine, build arg `NEXT_PUBLIC_API_BASE`, `next build` then `next start -p 3000`).
-  4. `npx openapi-typescript docs/04-backend/openapi.yaml -o frontend/src/lib/types.ts`, and add the same command as `npm run gen:types`.
-  5. Add `recharts` now (used in Phase 3) to avoid a lockfile conflict later.
+  4. `npm run gen:types` → `src/lib/types.ts`.
+  5. `src/lib/nav.ts`: the full route list per role from ux-flows §2 and §6, including the P1/P2 add-on routes (`/coordinator/metrics/[metric]`, `/faculty/openings/new`, `/faculty-profile/[id]`).
+  6. `src/lib/features.ts`, exactly 4 flags, one per line: `whyGraph: false`, `skillGap: false`, `reminders: false`, `createOpening: false`.
+  7. Create empty owner folders with a `.gitkeep`: `src/fixtures/{p1,p3,p4}/`, `src/components/{ui,fit,mentor,why,coordinator,student}/`.
 - **Done when:** `npm run build` passes, and the frontend container serves `/login` (the old page is fine for now).
 
-### T0.P1.1 Backend ML dependencies and model bake (45 min)
-- **Spec:** architecture §4, ai-system §2.1 and §5, environments §2
-- **Files:** `backend/requirements.txt`, `backend/Dockerfile`
+### T0.P1.1 Backend dependencies, Dockerfile, model bake, ML startup stub (45 min)
+- **Spec:** architecture §4, ai-system §2.1 and §5, environments §2, parallel-work §3
+- **Files (P1):** `backend/requirements.txt`, `backend/Dockerfile`, `backend/app/ml/__init__.py`
 - **Steps:**
-  1. Add pinned versions of `sentence-transformers`, `anthropic` (latest at hour 0), `Pillow`, `imagehash`, `pypdfium2`, `rapidfuzz`, `openpyxl`, `python-multipart`, `pydantic-settings`. Remove `cloudinary` and `openai`.
-  2. In the Dockerfile, install the CPU torch wheel before the requirements, then bake the model into `/models` (environments §2). Set `ENV HF_HOME=/models`.
-  3. Verify inside the container: `python -c "from sentence_transformers import SentenceTransformer as S;m=S('sentence-transformers/all-MiniLM-L6-v2');print(m.get_sentence_embedding_dimension())"` prints `384`.
-  4. If D-2 is yes, send one tiny Messages API call with `claude-opus-5-5` to confirm the key and model ID. Record the outcome in the decisions log. **Do not commit the key.**
-- **Done when:** `384` is printed with the network off (the model was baked), and the key check is recorded.
+  1. Pin **every** backend dependency for all phases now: `fastapi`, `uvicorn`, `neo4j`, `pydantic-settings`, `python-multipart`, `passlib[bcrypt]`, the existing JWT library, `sentence-transformers`, `anthropic` (latest at hour 0), `Pillow`, `imagehash`, `pypdfium2`, `rapidfuzz`, `openpyxl`, and dev tools `pytest`, `httpx`, `ruff`, `datamodel-code-generator`, `pip-audit`. Remove `cloudinary` and `openai`.
+  2. Dockerfile:
+     - `CMD ["uvicorn","app.main:app","--host","0.0.0.0","--port","8000","--workers","1"]` (audit H6);
+     - CPU torch wheel installed before the requirements;
+     - bake the model into `/models`, with `ENV HF_HOME=/models` (environments §2);
+     - copy `seed/` and `extraction_cache/`.
+  3. `app/ml/__init__.py` with `def startup() -> None: pass`. You fill it in T1.P1.1 (model load).
+  4. Verify inside the container: `python -c "from sentence_transformers import SentenceTransformer as S;m=S('sentence-transformers/all-MiniLM-L6-v2');print(m.get_sentence_embedding_dimension())"` prints `384`.
+  5. If D-2 is yes, send one tiny Messages API call with `claude-opus-5-5` to confirm the key and model ID. Record the outcome in the decisions log via P2. **Do not commit the key.**
+- **Done when:** `384` is printed with the network off (the model was baked), `app.ml.startup` imports, and the key check is recorded.
 
 ### T0.P4.1 Seed skeleton and certificate template (45 min)
 - **Spec:** backend §10, ai-system §2.4 and §10

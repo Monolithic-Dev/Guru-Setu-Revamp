@@ -1,6 +1,7 @@
 # Build Status Board
 
-Legend: ☐ todo · ◐ doing · ☑ done · ✂ cut. Update your own rows when you start or finish a task. Bugs go in §8 with an owner.
+Legend: ☐ todo · ◐ doing · ☑ done · ✂ cut. Update your own rows when you start or finish a task. Bugs go in §8 with an owner (the **file owner** from `tools/ownership.txt`).
+Edit this file only in its own small commit straight to `main` after `git pull --rebase`. On a conflict, keep both sides ([parallel-work.md](parallel-work.md) §1).
 `0:00 = ____` (real start time)
 
 ## 0. Decisions (T0.ALL.1) → details in `docs/plan/decisions-log.md`
@@ -16,9 +17,11 @@ Legend: ☐ todo · ◐ doing · ☑ done · ✂ cut. Update your own rows when 
 ## 1. Phase 0: Setup (gate G0 at 1:00)
 | Task | Owner | Status | Note |
 |---|---|---|---|
-| T0.P2.1 Backend import + compose + health | P2 | ☐ | |
-| T0.P3.1 Frontend import + types | P3 | ☐ | |
-| T0.P1.1 ML deps + model bake + key check | P1 | ☐ | |
+| T0.P2.0 Import commit (everyone pulls after) | P2 | ☐ | |
+| T0.P2.1 Compose + config + main.py + generated models | P2 | ☐ | |
+| (all) Ran `check_ownership.py` once | all | ☐ | |
+| T0.P3.1 Frontend clean-up + all deps + nav/features/types | P3 | ☐ | |
+| T0.P1.1 All backend deps + Dockerfile + model bake + ml startup stub | P1 | ☐ | |
 | T0.P4.1 Seed skeleton + certificate template | P4 | ☐ | |
 | **G0** | all | ☐ | |
 

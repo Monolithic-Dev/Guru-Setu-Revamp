@@ -55,7 +55,8 @@ Status:       Draft v1
 
 ### T1.P2.2 Core: repository, errors, logging (0:40)
 - **Spec:** CMP-12, architecture §5, backend §3.1, §11, SEC-15, SEC-21
-- **Files:** `core/database.py`, `core/errors.py`, `main.py` (middleware, handlers)
+- **Files:** `core/database.py`, `core/errors.py`, `core/middleware.py`, `tests/conftest.py` (`main.py` already imports these from T0.P2.1 and is not edited)
+- **First (10 min):** write `tests/conftest.py`: the `fresh_seed` session fixture (runs `scripts.seed --reset` with `TODAY_OVERRIDE=2026-10-10`) and persona token fixtures `aarav`, `meera`, `arjun`, `suresh`, `kavya`. Push it alone so others can write tests against it. Nobody else edits `conftest.py`; extra fixtures live in each owner's own test files.
 - **Steps:**
   1. `database.py`: one driver created at startup (remove the per-request `verify_connectivity`, audit M4); `run_read(fn, **params)` and `run_write(fn, **params)` wrap `session.execute_read/write`; `ServiceUnavailable` becomes `ApiError("DB_UNAVAILABLE", 503)`.
   2. `errors.py`: `ApiError(code, status, detail, errors=None)` plus handlers that return `application/problem+json` with `type`, `title`, `status`, `detail`, `instance`, `code` and `request_id`. Pydantic `RequestValidationError` becomes 422 `VALIDATION_FAILED` with `errors[]`. The generic `Exception` handler returns 500 `INTERNAL` and never wraps `HTTPException` (audit H5).
@@ -130,7 +131,7 @@ Status:       Draft v1
 ### T1.P1.4 Seed hooks (0:30)
 - **Spec:** backend §10 (steps 4–5), ai-system §4 (IDF)
 - **Steps:**
-  1. Give P4 the functions `seed_embeddings(tx)` (all Students and Openings) and `rebuild_similarity(tx)`, and call them from `seed.py`.
+  1. Provide `ml/seed_hooks.py::seed_embeddings(tx)` (all Students and Openings) and `ml/concepts.py::rebuild_similarity(tx)`, with stubs pushed by 2:00 (parallel-work §4). **P4 adds the calls in `seed.py`; P1 never edits `seed.py`.** Also commit `seed/fit_tuning.json` as `{}` (P1-owned text overrides, applied by `seed.py` before embeddings).
   2. Write `repos/match_repo.py::idf_table(tx)`, which returns `{concept: idf}` over open openings. The scorer uses it in Phase 3.
 - **Done when:** the G1 embedding and SIMILAR_TO checks pass.
 
@@ -164,13 +165,14 @@ Status:       Draft v1
 
 ### T1.P3.4 Shared components and data hook (0:50)
 - **Spec:** ux-flows §4.1, §7
-- **Build:** `useApi(path)` → `{data, error, loading, reload}`; `EmptyState`, `ErrorState` (shows `requestId`), `Skeleton`, `StatusPill`, `TrustBadge`, `SkillChip`, `AttentionBadge`, `Toast` (`role="status"`), `KpiTile`, and a `Dialog` with a focus trap.
+- **Build in `components/ui/`:** `useApi(path)` (in `hooks/`) → `{data, error, loading, reload}`; `EmptyState`, `ErrorState` (shows `requestId`), `Skeleton`, `StatusPill`, `TrustBadge`, `SkillChip`, `AttentionBadge`, `Toast` (`role="status"`), `KpiTile` (with an optional `href` prop from the start, for A1), and a `Dialog` with a focus trap.
+- **Seam stubs (push by 2:30, parallel-work §4):** `components/why/WhyGraph.tsx` and `components/mentor/RemindersPanel.tsx`, each exporting a component with its final props (`{openingId}` and `{}`) that returns `null`.
 - **Done when:** a `/dev/components` page (removed in Phase 6) renders every component in every variant.
 
 ### T1.P3.5 Route stubs with fixtures (0:20)
 - **Spec:** README rule 2, ux-flows §6
-- Create every P0 route from the SCR table. Each renders its title plus data from `src/fixtures/API-0xx.json`, copied from the backend §4.1 examples or hand-written to the `openapi.yaml` schema, using the shared states.
-- **Done when:** all P0 routes render without errors for the right role.
+- Create only the P0 routes P3 owns: SCR-04, 06, 07, 08, 09, 10 (SCR-01 is real already). P1 creates SCR-03, and P4 creates SCR-02, 05, 11, 12, 14, 15 in their first frontend task (parallel-work §2). Each renders its title plus data from `src/fixtures/p3/API-0xx.json`, copied from the backend §4.1 examples or hand-written to the `openapi.yaml` schema, using the shared states.
+- **Done when:** all P3-owned P0 routes render without errors for the right role.
 
 ### T1.P4.1 Seed content (1:30)
 - **Spec:** backend §10 (all constraints), §6.4 (flag rules), ENT- field names, A-16
@@ -195,7 +197,7 @@ Status:       Draft v1
 - **Steps:**
   1. Parse `--reset` and `--anchor-date` (default 2026-10-10). Convert every `"±Nd"` offset to a date.
   2. Delete all nodes, apply the schema, and load in dependency order: departments → terms → users → concepts → issuers → criteria → openings + REQUIRES → mentorships → sessions + ATTENDED_BY → action items → issues → academics → applications.
-  3. Call P1's `seed_embeddings` and `rebuild_similarity`.
+  3. Apply `seed/fit_tuning.json` (P1-owned overrides: `{"students": {id: {bio, interests}}, "openings": {id: {description}}}`), then call P1's `seed_embeddings` and `rebuild_similarity`.
   4. Certificates are loaded in T2.P4.2, once the pipeline exists. Leave a `TODO(T2.P4.2)` hook.
   5. Print counts.
 - **Done when:** the G1 seed checks pass, and a second run gives identical counts.
@@ -216,10 +218,10 @@ Status:       Draft v1
 
 | From | To | Artifact |
 |---|---|---|
-| P2 | P1, P3, P4 | `run_write`, deps, `notify`, `record_status` usable; API-001/002/003/004/017–019/037/038 live |
-| P1 | P2 | `ml/extraction.extract()` with cache; `ml/concepts.get_or_create_concept()`; `recompute_student_embedding()` |
+| P2 | P1, P3, P4 | `run_write`, deps, `notify`, `record_status` usable; `conftest.py` fixtures; API-001/002/003/004/017–019/037/038 live |
+| P1 | P2, P4 | `ml/extraction.extract()` with cache; `ml/concepts.get_or_create_concept()`; `recompute_student_embedding()`; `ml/seed_hooks.seed_embeddings()`; stubs of `ml/verification.verify` and `ml/trust.*` with final signatures (by 4:15) |
 | P4 | all | A seeded DB that matches backend §10; persona logins |
-| P3 | P4 | Shell, components and fixtures pattern, so P4 can start SCR-12 and SCR-05 in Phase 2 |
+| P3 | P1, P4 | Shell, `components/ui/*`, the WhyGraph and RemindersPanel stubs, `lib/features.ts`, and the fixtures pattern, so P1 and P4 can build their screens in their own folders |
 
 ## 5. If behind at 3:30
 

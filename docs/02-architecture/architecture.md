@@ -209,6 +209,7 @@ If any step fails, the transaction rolls back and nothing is saved (FM-06).
   docker-compose.yml      neo4j, backend, frontend (environments doc §2)
   .env.example            copy of docs/10-devops/env.example
   docs/                   this spec pack
+  tools/                  ownership.txt + check_ownership.py (one owner per file; docs/phases/parallel-work.md)
   backend/
     Dockerfile            CMD uvicorn app.main:app (fixes audit H6)
     requirements.txt      pinned
@@ -216,12 +217,14 @@ If any step fails, the transaction rolls back and nothing is saved (FM-06).
       main.py             app factory, CORS, routers, error handlers, startup (schema, stale-job sweep)
       core/               config.py, database.py (CMP-12), security.py (hash, JWT), errors.py
       api/deps.py         current_user, require_role, scope assertions (CMP-03)
-      api/v1/             auth.py, students.py, certificates.py, openings.py, applications.py,
-                          mentorship.py, tracking.py, dept.py, evidence.py, notifications.py, health.py
-      schemas/            Pydantic request/response models mirroring openapi.yaml components
-      services/           certificates.py, applications.py, mentorship.py, tracking.py,
+      api/v1/             auto-discovered by main.py (no registration edits): auth.py, students.py, certificates.py,
+                          match.py (P1: API-012/013/015/016/020/021), openings_write.py (API-014), applications.py,
+                          mentorship.py, tracking.py, dept.py, evidence.py, notifications.py, health.py,
+                          endorsements.py (P1: API-041)
+      schemas/            generated.py (datamodel-codegen from openapi.yaml; never hand-edited) + thin per-area wrappers
+      services/           certificates.py, applications.py, mentorship.py, tracking.py, jobs.py (startup hook, JOB-02),
                           metrics.py, evidence_export.py, notify.py, status_history.py
-      ml/                 embedding.py (MDL-02), concepts.py, scorer.py, extraction.py (MDL-01 adapter),
+      ml/                 __init__.py (startup hook), embedding.py (MDL-02), concepts.py, seed_hooks.py, scorer.py, extraction.py (MDL-01 adapter),
                           verification.py (checks + confidence), trust.py (PROVES + trust recompute, backend §6.2),
                           prompts/extract_certificate_v1.md, schemas/certificate_extraction.schema.json
       repos/              Cypher per area: certificates_repo.py, mentorship_repo.py, ... (CMP-12 users)
@@ -258,3 +261,4 @@ If any step fails, the transaction rolls back and nothing is saved (FM-06).
 1. Run `docker compose up -d --build`; then `curl -s localhost:8000/api/v1/health` returns `{"status":"ok","neo4j":"up","llm_provider":"anthropic"}` (or `"none"`).
 2. Run `grep -rn "run(" backend/app --include=*.py | grep -v repos/ | grep -v core/database.py`: no Cypher calls outside `repos/`.
 3. Run `ls backend/app/api/v1`: only the files listed in §9 exist, with no `dashboard.py` and no `recommendations.py`.
+4. Run `python tools/check_ownership.py --who backend/app/api/v1/match.py`: it prints `P1` (file ownership: docs/phases/parallel-work.md).

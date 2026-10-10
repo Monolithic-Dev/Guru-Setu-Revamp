@@ -16,6 +16,7 @@ Status:       Draft v1. This refines team plan §13.2–13.3. Where hours differ
 | 3 | 7:00–10:00 | [phase-3-core-match-track-evidence.md](phase-3-core-match-track-evidence.md) | Fit Check, candidates, mentor home, Mentee 360, mentorship page, dashboard, exports | **G3 CORE FREEZE (10:00)**: index §7 scenario passes twice; P0 tests green |
 | 4 | 10:00–12:30 | [phase-4-addon-a.md](phase-4-addon-a.md) | ADD-ON A (P1 requirements) in priority order | Each item merges only with the scenario still green |
 | 5 | (stretch, inside 10:00–12:00) | [phase-5-addon-b.md](phase-5-addon-b.md) | ADD-ON B (P2 requirements), only by someone whose A items are merged | Same per-item rule; expected to be mostly roadmap |
+| — | all | [parallel-work.md](parallel-work.md) | File ownership, seams and git workflow for conflict-free parallel work | `check_ownership.py` passes on every push |
 | 6 | 12:30–15:00 | [phase-6-freeze-demo.md](phase-6-freeze-demo.md) | **FEATURE FREEZE 12:30**: bug bash, QA, rehearsals, video, deck, submission tag | Submission tagged; 2 clean rehearsals; video saved |
 
 ```mermaid
@@ -73,6 +74,8 @@ Hours are relative to the start of the build ("0:00"). Write the real start time
 - Keep live status in [status.md](status.md): one line per task. The status is ☐ todo / ◐ doing / ☑ done / ✂ cut.
 
 ## 5. Working rules for all phases
+
+0. **One owner per file.** Read [parallel-work.md](parallel-work.md) before your first commit. Run `python tools/check_ownership.py P<n>` before every push.
 
 1. **Contracts first.** `docs/04-backend/openapi.yaml` and `schema.cypher` are frozen at G0. Changing them needs a 1-line message to the team, and a contract edit plus regenerated TS types (`npx openapi-typescript …`) in the same commit.
 2. **Frontend never waits for the backend.** Until the real endpoint lands, a screen renders the `example` payloads from `docs/04-backend/backend.md §4.1`, or a fixture in `frontend/src/fixtures/<API-id>.json`. Swap to live calls at the gate.

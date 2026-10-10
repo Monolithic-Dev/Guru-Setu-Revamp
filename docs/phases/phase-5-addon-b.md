@@ -32,7 +32,7 @@ Status:       Draft v1
   - In the T3.P2.1 rule evaluation, enable `suggested_at_risk` when the current-term AcademicRecord has `attendance_pct < 75`, or CGPA dropped by ≥ 1.0 against the previous term. Return a detail string for the UI ("attendance 68%").
   - Fill `attention_details` on the row (already in the `MenteeRow` schema), for example `{"suggested_at_risk": "attendance 68%"}`.
   - API-043 `marked_at_risk` (assigned mentor only) gives `marked_at_risk`.
-- **Frontend:** the badge copy "Suggested at risk: {detail}" (ux-flows §4.3), plus a "Mark at risk" toggle on SCR-07.
+- **Frontend (P3):** the badge copy "Suggested at risk: {detail}" in `AttentionBadge` (ux-flows §4.3), plus a "Mark at risk" toggle on SCR-07.
 - **Done when:** TEST-46 passes. The 3 seeded low-attendance students appear flagged, which raises the needs-attention count. Re-check that TEST-33's "exactly 3 flagged for Meera" still holds; seed the low-attendance students outside Meera's group to keep it.
 
 ### B2 Semester summary (REQ-032)
@@ -47,13 +47,14 @@ Status:       Draft v1
 - **Done when:** TEST-49 passes.
 
 ### B4 Endorsement (REQ-027)
-- **Backend:** API-041, where the caller must be `mentor_of` the student (assigned or guide). The concept must already be on the student's profile (422 otherwise). Append the caller to `HAS_SKILL.endorsed_by`, then `recompute_skill` → trust 2. Fit weight 1.0 applies automatically.
+- **Backend (P1, in its own router file `api/v1/endorsements.py`):** API-041, where the caller must be `mentor_of` the student (assigned or guide). The concept must already be on the student's profile (422 otherwise). Append the caller to `HAS_SKILL.endorsed_by`, then `recompute_skill` → trust 2. Fit weight 1.0 applies automatically.
 - **Frontend:** an "Endorse" button next to each skill on SCR-07 (P3) and a ★ Faculty-verified `TrustBadge` variant (already built).
 - **Done when:** TEST-45 passes. On stage, Aarav's pytorch shows "Faculty-verified · Dr. Meera Raman", and his fit rises (0.85 → 1.0 on that skill).
 
 ### B5 Handover view (REQ-028)
 - **Backend:** already correct if T2.P2.2 and the API-025 notes rule hold. Add a check in TEST-27 that the new mentor's API-025 shows earlier sessions with `logged_by` set to the old mentor and no `notes`.
-- **Frontend (P4):** on SCR-12, a "Change mentor" action per allotted student (a dialog with a mentor select → API-023). On SCR-07, the timeline shows "Logged by Dr. X" for sessions by others.
+- **Frontend (P4):** on SCR-12, a "Change mentor" action per allotted student (a dialog with a mentor select → API-023).
+- **Frontend (P3):** on SCR-07, the timeline shows "Logged by Dr. X" for sessions by others.
 - **Done when:** the extended TEST-27 passes.
 
 ### B6 Session feedback (REQ-034)
@@ -68,7 +69,8 @@ Status:       Draft v1
   - guide MENTORS ended with `completed`;
   - the median of (first StatusEvent after `pending` minus `applied_at`) in days over the faculty's applications, or null when there are none.
   - No ratings, ever (NG-11).
-- **Frontend (P4):** SCR-16 `/faculty-profile/[id]` with four stat tiles, linked from the faculty name on SCR-03.
+- **Frontend (P4):** SCR-16 `/faculty-profile/[id]` with four stat tiles.
+- **Frontend (P1):** link the faculty name on SCR-03 (your page) to SCR-16.
 - **Done when:** TEST-57 passes.
 
 ## 4. Roadmap slide content for unbuilt B items

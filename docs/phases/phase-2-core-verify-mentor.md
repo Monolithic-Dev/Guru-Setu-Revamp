@@ -107,7 +107,7 @@ def recompute_skill(tx, student_id: str, concept: str) -> None
      - `extract()` → `verify()`;
      - one write tx: set fields, status, confidence, reasons and source; if certified, `apply_certified`; `record_status`; notify (`certificate_result` to the student; `review_needed` to the assigned mentor if `needs_review`).
      - Any exception → `failed`.
-  3. **JOB-02** in lifespan startup: Evidence `processing` older than 60 s → `failed` with reason `interrupted`.
+  3. **JOB-02** in `services/jobs.py::startup()` (already called by `main.py`): Evidence `processing` older than 60 s → `failed` with reason `interrupted`.
   4. **API-006/007:** student scope; omit `duplicate_of` for students. **API-008:** only from `failed`, set fields, `source:'manual'`, confidence = min(computed, 0.50), reason `manual_entry`, → `needs_review`.
   5. **API-009/010:** faculty sees its assigned mentees; HOD sees the department. Review only from `needs_review` (409 `ALREADY_REVIEWED` otherwise); `reject` requires a reason of 3–300 characters; approve → `apply_certified`.
   6. **API-011:** `FileResponse` with `X-Content-Type-Options: nosniff` and `Content-Disposition: inline`; scope as API-006 plus reviewers.
@@ -172,14 +172,15 @@ Complete the T1.P4.3 deliverables if they're behind. Verify the pHash distance a
 - **Done when:** after a reset, Aarav's python skill is trust 1 with source `aarav_python_basics`, and `MATCH (e:Evidence) RETURN e.status, count(*)` matches the index's expectations.
 
 ### T2.P4.3 SCR-12 Allotment (0:50)
-- **Spec:** FLOW-06, REQ-007, components `MentorTable` (load) and `Dialog`
+- **First (10 min):** create your own route stubs: SCR-02 `student/page.tsx`, SCR-05 `student/mentorship/`, SCR-11 `coordinator/page.tsx`, SCR-12 `coordinator/allotment/`, SCR-14 `notifications/`, SCR-15 `faculty/openings/page.tsx`, with fixtures in `src/fixtures/p4/` (parallel-work §2). Never edit P3's layouts; ask P3 if a layout needs a change.
+- **Spec:** FLOW-06, REQ-007, components `MentorTable` (load, in `components/coordinator/`) and `Dialog` (P3's `components/ui/`)
 - Left: the unallotted list with checkboxes. Right: mentor cards with "13 / 20" and the Overloaded badge. A mentor select plus "Assign N students to <name>" → API-023 → refresh.
 - **Done when:** assigning the 2 unallotted students updates both lists live, and the student gets the `allotted` notification.
 
 ### T2.P4.4 SCR-05 My mentorship (0:50)
 - **Spec:** FLOW-08, REQ-014, schema `MyMentorship`
 - Sections: assigned mentor card, guides, next follow-up, sessions to confirm (API-028 button), action items (checkbox → API-030 `done`, optimistic with rollback), issues (text only when present), and applications with status pills and history.
-- Build against the `MyMentorship` fixture now. API-028 and API-030 are live already.
+- Build against `src/fixtures/p4/API-029.json` now. API-028 and API-030 are live already.
 - **Done when:** confirming a session and marking an item done work against the live API. The list data switches to API-029 in T3.P4.4.
 
 ## 4. Risks and fallbacks

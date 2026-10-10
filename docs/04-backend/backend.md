@@ -302,7 +302,7 @@ Response 201: `SessionDetail` with `id`, the same fields, `attendees[].confirmed
  "attention_reasons":["no_recent_session","overdue_action"]}
 ```
 
-**API-033** (HOD; the IQAC response omits `needs_attention_list`):
+**API-033** (HOD; the IQAC response omits `needs_attention_list` and `escalated_issues`; `escalated_issues` is filled from P1 REQ-022 and is `[]` before that):
 ```json
 {"term":{"id":"2026-ODD","name":"Odd semester 2026"},"students_total":50,"students_allotted":48,"unallotted":2,
  "ratio":"1:12","compliance_pct":91.7,"overdue_actions":8,"pending_reviews":1,
@@ -391,7 +391,7 @@ Computed per active MENTORS link for the mentor's home (API-024) and for the HOD
 
 ### 6.7 Issue rules
 - **P0:** `raised → resolved` with a resolution of 1–1000 characters. **P1** adds `raised → acknowledged → in_progress → resolved`, and `escalated: true` from any unresolved state.
-- Escalation notifies the department's HOD (`issue_escalated`). From then on the HOD may read the text and resolve it.
+- Escalation notifies the department's HOD (`issue_escalated`). From then on the HOD may read the text and resolve it. Unresolved escalated issues are listed in API-033 `escalated_issues` (HOD only; omitted for IQAC).
 - `confidential` (P1) may be set by the mentor at creation or later. Visibility is in security §4. A confidential issue cannot be escalated (409 `INVALID_TRANSITION`, detail "Confidential issues cannot be escalated").
 - A student-raised issue (P1) notifies the assigned mentor (`issue_raised_by_mentee`).
 

@@ -1825,6 +1825,21 @@ components:
             properties:
               type: {type: string}
               count: {type: integer}
+        escalated_issues:
+          description: HOD only (P1 REQ-022). Unresolved escalated, non-confidential issues of the department, oldest first.
+          type: array
+          items:
+            type: object
+            required: [issue_id, student_id, student_name, mentor_name, category, text, status, raised_at]
+            properties:
+              issue_id: {type: string}
+              student_id: {type: string}
+              student_name: {type: string}
+              mentor_name: {type: string}
+              category: {$ref: '#/components/schemas/TopicCategory'}
+              text: {type: string}
+              status: {type: string, enum: [raised, acknowledged, in_progress]}
+              raised_at: {type: string, format: date-time}
         needs_attention_list:
           description: HOD only
           type: array

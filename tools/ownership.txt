@@ -1,0 +1,84 @@
+# File ownership map: who may edit what (docs/phases/parallel-work.md).
+# Format: <pattern> <OWNER>. The LAST matching line wins (like CODEOWNERS).
+# Patterns: exact path, directory prefix ending in "/", or a glob where * matches any characters (including "/").
+# Brackets in Next.js routes like [id] are literal.
+# Owners: P1 P2 P3 P4 | ALL (anyone, append/own-rows only) | GEN (generated: change only by re-running the generator)
+
+# ── Default ──────────────────────────────────────────────────
+*                                               P2
+
+# ── Root, tooling, devops (P2) ───────────────────────────────
+docker-compose.yml                              P2
+.env.example                                    P2
+.gitignore                                      P2
+tools/                                          P2
+README.md                                       P4
+AGENTS.md                                       P4
+CLAUDE.md                                       P4
+
+# ── Backend: P2 owns the app by default ──────────────────────
+backend/                                        P2
+backend/requirements.txt                        P1
+backend/Dockerfile                              P1
+backend/app/schemas/generated.py                GEN
+
+# P1: ML package, match routes, endorsement route, match repo
+backend/app/ml/                                 P1
+backend/app/api/v1/match.py                     P1
+backend/app/api/v1/endorsements.py              P1
+backend/app/repos/match_repo.py                 P1
+backend/app/schemas/match.py                    P1
+backend/scripts/eval_match.py                   P1
+backend/scripts/eval_extraction.py              P1
+backend/scripts/build_extraction_cache.py       P1
+backend/extraction_cache/                       P1
+backend/tests/test_verification.py              P1
+backend/tests/test_scorer.py                    P1
+backend/tests/test_matching.py                  P1
+backend/tests/test_embedding.py                 P1
+backend/tests/test_extraction.py                P1
+
+# P4: seed data and loader (P1 keeps its tuning files inside seed/)
+backend/scripts/seed.py                         P4
+backend/scripts/check_seed.py                   P4
+backend/seed/                                   P4
+backend/seed/aliases.json                       P1
+backend/seed/similar_overrides.json             P1
+backend/seed/fit_tuning.json                    P1
+
+# ── Frontend: P3 owns by default ─────────────────────────────
+frontend/                                       P3
+frontend/src/lib/types.ts                       GEN
+
+# P1: Fit Check screen + fit components
+frontend/src/app/student/openings/              P1
+frontend/src/components/fit/                    P1
+frontend/src/fixtures/p1/                       P1
+
+# P4: student home, mentorship, coordinator, notifications, openings list, faculty profile
+frontend/src/app/student/page.tsx               P4
+frontend/src/app/student/mentorship/            P4
+frontend/src/app/coordinator/                   P4
+frontend/src/app/notifications/                 P4
+frontend/src/app/faculty/openings/page.tsx      P4
+frontend/src/app/faculty-profile/               P4
+frontend/src/components/coordinator/            P4
+frontend/src/components/student/                P4
+frontend/src/fixtures/p4/                       P4
+
+# Layouts always stay with P3 (shell), even inside P4 folders
+frontend/src/app/*/layout.tsx                   P3
+
+# ── Docs ─────────────────────────────────────────────────────
+docs/                                           P4
+docs/02-architecture/                           P2
+docs/04-backend/                                P2
+docs/08-security/                               P2
+docs/10-devops/                                 P2
+docs/11-quality/                                P2
+docs/05-frontend/                               P3
+docs/06-ai/                                     P1
+docs/plan/decisions-log.md                      P2
+docs/plan/eval-results.md                       P1
+docs/plan/qa-log.md                             P4
+docs/phases/status.md                           ALL

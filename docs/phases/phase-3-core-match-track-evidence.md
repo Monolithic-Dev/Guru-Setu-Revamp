@@ -60,6 +60,7 @@ Status:       Draft v1
 
 ### T3.P1.2 Fit APIs (0:45)
 - **Spec:** API-012, 013, 015, 016; backend §4.1 example; security §4 (applicants only)
+- **Files (all P1):** `api/v1/match.py` (API-012, 013, 015, 016 now; 020, 021 in Phase 4), `repos/match_repo.py`, `schemas/match.py` if wrappers are needed, `tests/test_matching.py`.
 - `repos/match_repo.py`: one read query per call that returns the required concepts, the student's HAS_SKILL trust levels plus the `evidence_ids` of the first source, the SIMILAR_TO pairs among the relevant concepts, and both embeddings. IDF comes from `idf_table` (cache it per request).
 - API-015: as a student, self only. As faculty, `student_id` must be an applicant of the faculty's own opening (404 otherwise). Chips carry `source` from the first certified evidence.
 - API-016: owner only. Score every applicant; tie-break by more matched chips, then `applied_at`.
@@ -69,7 +70,7 @@ Status:       Draft v1
 ### T3.P1.3 Seed tuning for A-16 (0:30)
 - **Spec:** AC-004.1, TEST-19, A-16
 - Measure the real cosine for Aarav ↔ op-edge-ai, and check the before score falls in 38–50 and the after score is ≥ 65.
-- If not, adjust **seed content only** (Aarav's bio and interests, the opening description), never the formula or thresholds. If you change the formula anyway, update AC-004.x, TEST-18/19 and ai-system §4 in the same commit.
+- If not, adjust **seed text only, through your own `seed/fit_tuning.json`** (Aarav's bio and interests, the opening description). Never edit P4's seed JSON, and never change the formula or thresholds. If you change the formula anyway, update AC-004.x, TEST-18/19 and ai-system §4 in the same commit.
 - Also check that `op-edge-ai`'s 3 seeded applicants score in different bands, so the ranked list looks credible.
 - **Done when:** TEST-19 passes on a fresh seed, after running the TEST-13 uploads.
 
@@ -79,7 +80,9 @@ Status:       Draft v1
   1. Build `FitScoreRing` (score + verdict text, `aria-label`, reduced-motion aware) and `ScoreBreakdownBar` (3 segments, values also as text).
   2. Chips are grouped Matched / Claimed only / Near (with "via X") / Missing. Gains are shown as "Certify X → N". "Prove it" links go to `/student/certificates`.
   3. The Apply button calls API-017: 201 → pill "Applied · Pending"; 409 `ALREADY_APPLIED` → pill "Applied"; `OPENING_CLOSED` → copy.
-  4. Export the components so P3 can reuse them read-only on SCR-09.
+  4. Put the components in `components/fit/` and export them so P3 can reuse them read-only on SCR-09. Push stubs with final props by 7:30 (parallel-work §4).
+  5. The page lives in your own route folder `src/app/student/openings/[id]/` (create it as your first step). Add the "Why?" button and `<WhyGraph openingId={id} />` (P3's stub) rendered only when `features.whyGraph` is true; nothing shows until A2.
+  6. Also commit `components/fit/SkillGapCard.tsx` as a stub returning `null`. P4 places it on SCR-02, and you fill it in A5.
 - **Done when:** index §7 steps 1 and 3 render correctly against the live API.
 
 ### T3.P2.1 Needs-attention and mentor home (0:50)
@@ -170,14 +173,15 @@ Replace the fixture with API-024 rows. "Select all mentees" selects the assigned
 - **Spec:** REQ-004, REQ-014 (summary), wireframe
 - A summary strip from API-029 ("My mentor: Dr. Meera · 1 to confirm ▸"), plus opening cards from API-012 with the fit score and verdict pill, and an application status pill when applied. Cards link to SCR-03.
 - Empty state per FLOW-11.
+- Place `<SkillGapCard />` (P1's stub) under the openings, rendered when `features.skillGap` is true. It shows nothing until A5.
 - **Done when:** step 1 of the scenario starts here.
 
 ### T3.P4.3 SCR-14 and SCR-15 (0:30)
-- **SCR-14:** API-037 list with unread items in bold, [Mark read] → API-038, a link per `link`, and "Load more" via `next_cursor`.
-- **SCR-15:** own openings from API-012 (filtered by `faculty.user_id == me`) with `applicant_count` from API-013, linking to SCR-09. The create button is hidden until A9 (Phase 4).
+- **SCR-14:** `<RemindersPanel />` (P3's stub) at the top, rendered when `features.reminders` is true; then the API-037 list with unread items in bold, [Mark read] → API-038, a link per `link`, and "Load more" via `next_cursor`.
+- **SCR-15:** own openings from API-012 (filtered by `faculty.user_id == me`) with `applicant_count` from API-013, linking to SCR-09. Render a "New opening" link to `/faculty/openings/new` only when `features.createOpening` is true. P3 builds that route and flips the flag in A9.
 
 ### T3.P4.4 SCR-05 live (0:15)
-Replace the `MyMentorship` fixture with API-029.
+Replace `src/fixtures/p4/API-029.json` with the live API-029.
 
 ### T3.P4.5 Dry run (0:30)
 Run the index §7 scenario at 9:15 and file numbered bugs in `status.md`. At 9:45, reseed and run it once more to warm up for G3.
