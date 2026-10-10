@@ -134,3 +134,68 @@ def test_08_achievements_export(client, suresh):
         "'" + EVIL, "Smart India Hackathon", "national", "hackathon", "certified", "Meera", "NAAC-5.3.1",
     )
     assert list(wb["By type"].iter_rows(min_row=2, values_only=True)) == [("hackathon", "national", 1)]
+
+
+# ---- API-034 click-to-source ------------------------------------------------------------------------------------------
+
+
+def _records(client, headers, metric, **params):
+    r = client.get(f"/api/v1/dept/metrics/{metric}/records", headers=headers, params=params)
+    assert r.status_code == 200, r.text
+    return r.json()
+
+
+def test_a1_totals_equal_the_dashboard(client, suresh):
+    d = client.get("/api/v1/dept/dashboard", headers=suresh).json()
+    assert _records(client, suresh, "needs_attention")["total"] == d["needs_attention_count"] == 4
+    assert _records(client, suresh, "overdue_actions")["total"] == d["overdue_actions"] == 1
+    assert _records(client, suresh, "pending_reviews")["total"] == d["pending_reviews"] == 1
+    assert _records(client, suresh, "achievements")["total"] == sum(a["count"] for a in d["achievements_by_type"])
+    assert _records(client, suresh, "issues_raised")["total"] == sum(c["raised"] for c in d["issues_by_category"])
+    assert _records(client, suresh, "issues_resolved")["total"] == sum(c["resolved"] for c in d["issues_by_category"])
+    compliance = _records(client, suresh, "compliance")
+    assert compliance["total"] == d["students_allotted"]
+    assert sum(r["compliant"] for r in compliance["items"]) / compliance["total"] * 100 == d["compliance_pct"]
+
+
+def test_a1_rows_for_hod_have_no_text(client, suresh):
+    raised = _records(client, suresh, "issues_raised")
+    assert {r["category"] for r in raised["items"]} == {"personal", "academic", "confidential"}
+    row = next(r for r in raised["items"] if r["category"] == "academic")
+    assert row["student"] == "Omar Old" and row["roll_no"] and row["student_id"] == "u-t-old" and row["mentor"] == "Meera"
+    overdue = _records(client, suresh, "overdue_actions")["items"][0]
+    assert overdue["days_overdue"] == 39 and overdue["mentor"] == "Meera"  # 2026-09-01 -> 2026-10-10
+    for metric in ("issues_raised", "overdue_actions", "needs_attention", "pending_reviews", "compliance"):
+        text = client.get(f"/api/v1/dept/metrics/{metric}/records", headers=suresh).text
+        for secret in (ISSUE_TEXT, "RESOLUTION-SECRET", NOTE, "Do the thing"):
+            assert secret not in text
+
+
+def test_a1_iqac_gets_pseudonyms_only(client, kavya):
+    for metric in ("compliance", "issues_raised", "overdue_actions", "needs_attention", "pending_reviews"):
+        r = client.get(f"/api/v1/dept/metrics/{metric}/records", headers=kavya)
+        assert r.status_code == 200
+        for forbidden in ("Aarav", "Diya", "Omar", "Sana", "HYPERLINK", "CB.EN.", "u-t-", "u-aarav"):
+            assert forbidden not in r.text, (metric, forbidden)
+    rows = _records(client, kavya, "needs_attention")["items"]
+    assert sorted(r["student"] for r in rows) == ["Student 01", "Student 02", "Student 03", "Student 04"]
+    assert all(set(r) == {"student", "mentor", "reasons"} for r in rows)
+
+
+def test_a1_cursor_pagination_is_stable(client, kavya):
+    first = _records(client, kavya, "compliance", limit=2)
+    assert len(first["items"]) == 2 and first["next_cursor"] and first["total"] == 5
+    second = _records(client, kavya, "compliance", limit=2, cursor=first["next_cursor"])
+    third = _records(client, kavya, "compliance", limit=2, cursor=second["next_cursor"])
+    assert third["next_cursor"] is None and len(third["items"]) == 1
+    labels = [r["student"] for page in (first, second, third) for r in page["items"]]
+    assert len(set(labels)) == 5  # no repeats, no gaps, same pseudonyms on every page
+    bad = client.get("/api/v1/dept/metrics/compliance/records", headers=kavya, params={"cursor": "***"})
+    assert bad.status_code == 422
+
+
+def test_a1_unknown_metric_and_roles(client, suresh, meera, aarav):
+    assert client.get("/api/v1/dept/metrics/nope/records", headers=suresh).status_code == 404
+    assert client.get("/api/v1/dept/metrics/compliance/records", headers=meera).status_code == 403
+    assert client.get("/api/v1/dept/metrics/compliance/records", headers=aarav).status_code == 403
+    assert client.get("/api/v1/dept/metrics/compliance/records").status_code == 401
