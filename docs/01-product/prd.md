@@ -2,7 +2,7 @@
 Purpose:      Define what this build must do, for whom, and how each behaviour is accepted; every other document traces to the IDs here.
 Audience:     The 4-person team and coding agents building the backend, frontend and AI pipeline.
 Depends on:   none
-Inputs used:  docs/plan/prd-v2-and-15h-plan.md (PRD v2), Ideas/gurusetu-pramaan-concept.md, Ideas/gurusetu-enterprise-vision.md, Ideas/GENESIS-GuruSetu-Audit-and-Proposal.md
+Inputs used:  docs/plan/prd-v2-and-15h-plan.md (PRD v2), gurusetu-pramaan-concept.md, gurusetu-enterprise-vision.md, GENESIS-GuruSetu-Audit-and-Proposal.md (these three are kept outside this repo)
 Status:       Draft v1 | assumptions in this document: A-01, A-02, A-03, A-04, A-05, A-06, A-07, A-08, A-09, A-10, A-11, A-12, A-15
 
 Personas and the glossary are sections of this document (small project).

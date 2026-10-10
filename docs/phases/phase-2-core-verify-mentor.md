@@ -70,7 +70,7 @@ def recompute_skill(tx, student_id: str, concept: str) -> None
 - **Spec:** ai-system §3 (the rule table is the spec; implement it in order)
 - **Steps:**
   1. `sha256` of the raw bytes. `phash`: images via `imagehash.phash(PIL)`; PDFs by rendering page 1 at 150 dpi with `pypdfium2`.
-  2. Duplicate rules 1–3 against existing Evidence: query by sha256 and by `(issuer, certificate_id)`; pHash by loading all `(id, phash)` and computing Hamming distance in Python.
+  2. Duplicate rules 1–3 against existing Evidence: query by sha256 and by `(issuer, certificate_id)`; pHash by loading all `(id, phash)` and computing Hamming distance in Python. These queries live in `repos/ml_repo.py` (P1-owned), called from `ml/verification.py`.
   3. Rules 4–5, then 6 only if `TAMPER_CHECK_ENABLED` (stub returns False until Phase 4).
   4. Confidence: `0.40·name_ok + 0.25·issuer_known + 0.20·date_ok + 0.15·complete`, using `rapidfuzz.fuzz.token_set_ratio`; honorific stripping per ai-system §3; `date_ok` uses `enrolled_on − 730 d`.
   5. Routing: ≥ `CERT_AUTO_CERTIFY_MIN` → certified; otherwise needs_review with one reason per failed check. `ExtractionFailed` → `failed`, with reason `extraction_failed`.
@@ -88,7 +88,7 @@ def recompute_skill(tx, student_id: str, concept: str) -> None
 
 ### T2.P1.4 Trust recompute (0:20)
 - **Spec:** backend §6.2, REQ-003, AC-003.2
-- Implement `apply_certified` (normalise skills → concepts → `PROVES` → recompute each) and the full `recompute_skill` (trust 2 > 1 > 0 > delete). Recompute the student embedding at the end.
+- Implement `apply_certified` (normalise skills → concepts → `PROVES` → recompute each) and the full `recompute_skill` (trust 2 > 1 > 0 > delete). Recompute the student embedding at the end. The Cypher for `apply_certified` and `recompute_skill` lives in `repos/ml_repo.py` (P1-owned).
 - **Done when:** TEST-15 passes.
 
 ### T2.P2.1 Certificates API and jobs (1:00)

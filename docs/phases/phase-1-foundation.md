@@ -98,7 +98,7 @@ Status:       Draft v1
 
 ### T1.P1.1 MDL-02 embedding module (0:45)
 - **Spec:** ai-system §5, MDL-02
-- **Files:** `ml/embedding.py`
+- **Files:** `ml/embedding.py`, `repos/ml_repo.py` (the Cypher behind `recompute_*`; `ml/` holds no Cypher)
 - **Steps:**
   1. Load once at startup from `EMBEDDING_MODEL`, with `HF_HOME` set. If loading fails, the API refuses to start with a log line naming `HF_HOME` (FM-08).
   2. `embed(texts) -> list[list[float]]` (normalised); `student_text(profile)` and `opening_text(opening)` exactly per ai-system §5.
@@ -107,7 +107,7 @@ Status:       Draft v1
 
 ### T1.P1.2 Concepts and SIMILAR_TO (0:45)
 - **Spec:** MDL-04, ai-system §3 (skill linking), §5
-- **Files:** `ml/concepts.py`
+- **Files:** `ml/concepts.py`, `repos/ml_repo.py` (the Cypher behind `get_or_create_concept` and `rebuild_similarity`)
 - **Steps:**
   1. `normalise(name)`: lower-case, trim, collapse spaces, then map through `seed/aliases.json`.
   2. `get_or_create_concept(tx, name, source)`: on creation, embed the name and compute its top-5 neighbours with cosine ≥ `SIM_MIN` → `SIMILAR_TO {score, source:'model'}`.

@@ -2,7 +2,7 @@
 Purpose:      Entry point to the specification pack: what exists, where each fact lives, what is assumed, and the one scenario that proves the build works.
 Audience:     The team, reviewers and coding agents (start at AGENTS.md, then here).
 Depends on:   all documents below
-Inputs used:  docs/plan/prd-v2-and-15h-plan.md (PRD v2 + 15-hour plan), Ideas/gurusetu-pramaan-concept.md, Ideas/gurusetu-enterprise-vision.md, Ideas/GENESIS-GuruSetu-Audit-and-Proposal.md
+Inputs used:  docs/plan/prd-v2-and-15h-plan.md (PRD v2 + 15-hour plan), gurusetu-pramaan-concept.md, gurusetu-enterprise-vision.md, GENESIS-GuruSetu-Audit-and-Proposal.md (these three are kept outside this repo)
 Status:       Draft v1 | assumptions log: §5
 
 ---
@@ -34,6 +34,7 @@ Status:       Draft v1 | assumptions log: §5
 | 7 | [10-devops/environments-and-deployment.md](10-devops/environments-and-deployment.md) + [env.example](10-devops/env.example) | Environments, compose, commands, demo runbook | ENV |
 | 8 | [11-quality/test-strategy.md](11-quality/test-strategy.md) | Test cases, failure modes, manual QA checklist | TEST, FM |
 | 9 | [../AGENTS.md](../AGENTS.md) (+ `CLAUDE.md` → `@AGENTS.md`) | Agent entry: read order, hard rules, commands, definition of done | — |
+| — | [project-structure.md](project-structure.md) | Target repo tree, ownership, end-to-end data flow, keys and manual setup, open flaws | — |
 | — | [plan/prd-v2-and-15h-plan.md](plan/prd-v2-and-15h-plan.md) | Demo story, disclosure, pitch material (not part of the spec pack) | — |
 | — | [phases/](phases/README.md) | Phase-wise build plan: tasks `T<phase>.<person>.<n>`, gates G0–G3, add-ons, freeze; [parallel-work.md](phases/parallel-work.md) + `tools/ownership.txt` for conflict-free work | Task IDs |
 
@@ -177,7 +178,7 @@ Run on ENV-02 after `seed --reset`, with `LLM_PROVIDER=none`, and the network of
 3. Reopen the opening. **Expect** a fit ≥ 65, "Ready to apply". Apply. **Expect** "Applied · Pending"; applying again shows "Applied".
 4. Log in as `meera@` and open the opening. **Expect** Aarav among 4 ranked applicants with Certified chips. Shortlist, then accept. **Expect** a toast that a guide link was created.
 5. Open Reviews and approve Aarav's Embedded C certificate. **Expect** it to leave the queue; Aarav's skill shows Certified.
-6. Open My mentees. **Expect** 13 rows with exactly 3 flagged. Log a group session with 12 mentees selected (Aarav present, Diya marked absent), 2 action items for Aarav, and an attendance issue for Diya. **Expect** "Session saved for 12 students".
+6. Open My mentees. **Expect** 13 assigned rows, 3 flagged (Aarav, now also Meera's guided student after step 4, is listed separately under "Guided students", not in the 13). Log a group session with 12 mentees selected (Aarav present, Diya marked absent), 2 action items for Aarav, and an attendance issue for Diya. **Expect** "Session saved for 12 students".
 7. Log in as Aarav and open My mentorship. **Expect** 1 session to confirm, 2 action items and Dr. Meera under guides. Confirm the session and mark one item done.
 8. As Meera, open a flagged mentee and resolve their open issue with a note. **Expect** status Resolved.
 9. Log in as `suresh@` and open the Coordinator dashboard. **Expect** 48/50 allotted, Vikram below 100% compliance (highlighted), issues resolved incremented, and a needs-attention list with names.

@@ -135,7 +135,7 @@ Walk backend §6.9: trigger each P0 notification type once and check the recipie
 - **Spec:** FLOW-09 step 1, ux-flows §4.3 reason labels, `MenteeRow`, `AttentionBadge`
 - Assigned mentees first (flagged ones on top, with reason badges), then a "Guided students" group. Each row shows meetings x/2, last session (relative date), open/overdue actions, open issues, unconfirmed count, and [Open] and [Log session] buttons.
 - A header button "Log session" goes to `/faculty/sessions/new` (group). Stacked cards below 768 px.
-- **Done when:** index §7 step 6's first expectation (13 rows, 3 flagged) shows against the live API.
+- **Done when:** index §7 step 6's first expectation (13 assigned rows, 3 flagged; guided students are listed separately) shows against the live API.
 
 ### T3.P3.2 SCR-07 Mentee 360 (1:10)
 - **Spec:** REQ-013, FLOW-09 steps 2–3, ux-flows wireframe, `Timeline`, `ActionItemList`, `IssueList`, security §4

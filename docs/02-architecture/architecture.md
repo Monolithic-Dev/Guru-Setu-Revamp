@@ -227,7 +227,8 @@ If any step fails, the transaction rolls back and nothing is saved (FM-06).
       ml/                 __init__.py (startup hook), embedding.py (MDL-02), concepts.py, seed_hooks.py, scorer.py, extraction.py (MDL-01 adapter),
                           verification.py (checks + confidence), trust.py (PROVES + trust recompute, backend §6.2),
                           prompts/extract_certificate_v1.md, schemas/certificate_extraction.schema.json
-      repos/              Cypher per area: certificates_repo.py, mentorship_repo.py, ... (CMP-12 users)
+      repos/              Cypher per area: certificates_repo.py, mentorship_repo.py, ... (CMP-12 users);
+                          match_repo.py and ml_repo.py are P1-owned (all Cypher used by `ml/`: concepts, embeddings, trust, duplicate lookups)
     schema/schema.cypher  copy of docs/04-backend/schema.cypher, applied on startup
     scripts/              seed.py, eval_match.py, build_extraction_cache.py
     seed/                 users.json, openings.json, concepts.json, aliases.json, issuers.json,
@@ -247,6 +248,7 @@ If any step fails, the transaction rolls back and nothing is saved (FM-06).
 **Rules:**
 - `api/v1/*` may import `deps`, `schemas` and `services` only.
 - `services` may import `repos`, `ml` and other services listed as dependencies in §2.
+- `ml` may import `repos` (only `ml_repo.py` and `match_repo.py`, both P1-owned) and `core`. `ml` functions that read or write the database take a `tx` and call these repo functions; they contain no Cypher themselves.
 - `repos` import only `core.database`.
 - No Cypher outside `repos/` (and `scripts/seed.py`).
 - Frontend pages call the API only through `src/lib/api.ts`.

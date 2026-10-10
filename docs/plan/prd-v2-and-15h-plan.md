@@ -4,7 +4,7 @@
 **Genesis Hackathon, Campus Problems track. Product requirements and 15-hour build plan.**
 
 Status: draft v2. Owner: team. Supersedes PRD v1 (pasted draft) and merges the two concept docs:
-[gurusetu-pramaan-concept.md](../../../Ideas/gurusetu-pramaan-concept.md) (core loop) and [gurusetu-enterprise-vision.md](../../../Ideas/gurusetu-enterprise-vision.md) (full vision), plus the [codebase audit](../../../Ideas/GENESIS-GuruSetu-Audit-and-Proposal.md).
+`gurusetu-pramaan-concept.md` (core loop) and `gurusetu-enterprise-vision.md` (full vision), plus the codebase audit `GENESIS-GuruSetu-Audit-and-Proposal.md`. (These three files are kept outside this repo, so they are not linked.)
 
 Tags: [VERIFIED] found by search or code reading · [INFERRED] reasoning · [ASSUMED] default to confirm · [UNVERIFIED] check before claiming.
 Tier labels used throughout: **CORE** (must ship, hours 0–10) · **ADD-ON A** (hours 10–12.5) · **ADD-ON B** (only if A is done) · **ROADMAP** (pitch slide only, not built).
@@ -415,11 +415,13 @@ Status history is stored as an append-only list on the node/edge (`history`) for
 
 ## 14. Demo story (5 minutes, one continuous flow; all data synthetic)
 
+> **Numbers:** write the demo script from [index §7](../00-index.md) (exact steps and expected values), not from the numbers below. Where this section and index §7 differ, index §7 wins.
+
 1. **Hook (30 s).** "Every student here has a faculty mentor on paper. Ask a HOD which mentees weren't met this semester, or what was promised in the last meeting. The answer is in a signed register in a cupboard. And skills on a profile? Anyone can type 'PyTorch'."
-2. **Student: Verify + Match (75 s).** Aarav opens Dr. Meera's "Edge AI for Agriculture" opening → **Fit Check 54%**, PyTorch only *claimed*. He uploads 4 certificates: one **duplicate** is caught, one goes to **review**. Two become **Certified**; the fit rises to **82%** with the breakdown. *(ADD-ON A: tap "Why?" and the path lights up.)* He applies.
+2. **Student: Verify + Match (75 s).** Aarav opens Dr. Meera's "Edge AI for Agriculture" opening → **Fit Check "Close", 38–50 (43.4 in the worked example)**, PyTorch only *claimed*. He uploads 4 certificates: one **duplicate** is caught, one goes to **review**. Two become **Certified**; the fit rises to **at least 65, "Ready" (68.5 in the worked example)** with the breakdown. *(ADD-ON A: tap "Why?" and the path lights up.)* He applies.
 3. **Faculty as guide (30 s).** Dr. Meera sees ranked applicants with Certified vs Claimed badges, accepts Aarav. A guide link appears on both profiles.
 4. **Faculty as assigned mentor (75 s).** Dr. Meera's **My mentees** list: 13 mentees, 3 flagged *needs attention* (not met in 45 days, overdue action, open issue). She logs a **group session** for 12 mentees in under 2 minutes, adds two action items and marks an attendance issue resolved. Aarav's phone: confirm attendance, action item appears; he marks one Done. Open **Mentee 360** for a flagged student: skills, academics, timeline on one page.
-5. **HOD (45 s).** Coverage 50/50 allotted; compliance 3 of 4 mentors at ≥2 meetings; issues raised vs resolved by category; one mentor overloaded. *(ADD-ON A: click "11 issues resolved" → the records.)*
+5. **HOD (45 s).** Coverage 48 of 50 allotted; compliance 3 of 4 mentors at 100% (Vikram highlighted below 100%); issues raised vs resolved by category. (No mentor is overloaded in the seed: the most is 13 against a warning at 20.) *(ADD-ON A: click "11 issues resolved" → the records.)*
 6. **IQAC (30 s).** "Generate evidence pack" → a **DRAFT** mentoring summary (ratio, mentor list, mentor-wise meetings and issues) and an achievements list. Show that **no private notes** are in it.
 7. **Close (15 s).** "One verified record, one session log. The student gets the right guide, the mentor knows who needs them, and the college has its evidence all year, without a single extra form." Then the roadmap slide.
 
