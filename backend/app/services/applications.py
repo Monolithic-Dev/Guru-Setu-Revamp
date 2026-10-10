@@ -10,7 +10,7 @@ from app.core.database import run_read, run_write
 from app.core.errors import ApiError
 from app.repos import applications_repo, openings_repo
 from app.schemas.auth import CurrentUser
-from app.services import eligibility
+from app.services import eligibility, project_records
 from app.services.notify import notify, render_title
 from app.services.status_history import history_for, record_status
 
@@ -83,8 +83,9 @@ def apply(user: CurrentUser, opening_id: str) -> dict[str, Any]:
     return run_write(work)
 
 
-def decide(user: CurrentUser, application_id: str, new_status: str) -> dict[str, Any]:
-    """API-018. Only the faculty member who posted the opening may change the status (others get 404)."""
+def decide(user: CurrentUser, application_id: str, new_status: str, completion: Any = None) -> dict[str, Any]:
+    """API-018. Only the faculty member who posted the opening may change the status (others get 404).
+    Marking an application `completed` needs a project record (REQ-040): what was done and the skills vouched for."""
 
     def work(tx):
         row = applications_repo.get_application(tx, application_id)
@@ -93,6 +94,16 @@ def decide(user: CurrentUser, application_id: str, new_status: str) -> dict[str,
         current = row["status"]
         if new_status not in ALLOWED.get(current, set()):
             raise ApiError("INVALID_TRANSITION", 409, f"Cannot move application from {current} to {new_status}.")
+        if new_status == "completed" and completion is None:
+            raise ApiError(
+                "VALIDATION_FAILED", 422, "Describe the completed work.",
+                errors=[{"field": "completion", "message": "Required when marking an application completed"}],
+            )
+        if new_status != "completed" and completion is not None:
+            raise ApiError(
+                "VALIDATION_FAILED", 422, "A project record only goes with completing an application.",
+                errors=[{"field": "completion", "message": "Only used when the status is completed"}],
+            )
         if new_status == "accepted":
             opening = openings_repo.get(tx, row["opening_id"])
             if opening and opening["accepted_count"] >= opening["positions"]:
@@ -115,6 +126,8 @@ def decide(user: CurrentUser, application_id: str, new_status: str) -> dict[str,
             )
             if link_id:
                 record_status(tx, "mentorship", link_id, "active", "ended", user, note="completed")
+            opening = openings_repo.get(tx, row["opening_id"]) or {"required_skills": []}
+            project_records.record(tx, user, row, opening, completion)
         notify(
             tx,
             row["student_id"],

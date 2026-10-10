@@ -88,7 +88,7 @@ export function ReviewCard({ item, busy = false, onApprove, onReject }: ReviewCa
       </header>
 
       <div className="grid gap-5 md:grid-cols-2">
-        <Preview certificateId={c.id} mediaType={c.media_type} title={title} />
+        <Preview certificateId={c.id} mediaType={c.media_type ?? "image/png"} title={title} />
         <div className="space-y-4">
           <ul className="space-y-1" aria-label="Why it needs review">
             {reasonLines(c.reasons).map((line) => (

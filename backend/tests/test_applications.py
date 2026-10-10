@@ -5,6 +5,10 @@ from app.core.clock import today
 from app.core.database import run_read, run_write
 
 OPENING = "op-edge-ai"
+COMPLETION = {  # REQ-040: marking an application completed needs the guide's project record
+    "summary": "Built and field-tested the crop disease classifier with the lab.",
+    "skills": ["pytorch"], "output_type": "prototype",
+}
 
 
 def _cypher(query: str, **params):
@@ -26,6 +30,10 @@ def _clean(fresh_seed):
         WITH s MATCH (s)-[h:HAS_SKILL]->() DELETE h
         """
     )
+    _cypher(
+        "MATCH (o:Opening {id: $oid}) MERGE (c:Concept {name: 'pytorch'}) MERGE (o)-[:REQUIRES]->(c)", oid=OPENING
+    )
+    _cypher("MATCH (e:Evidence {kind: 'project_record'}) DETACH DELETE e")
 
 
 def _apply(client, headers, opening_id=OPENING):
@@ -95,7 +103,8 @@ ALLOWED = {
 def test_transition_table(client, aarav, meera, current, target):
     application_id = _apply(client, aarav).json()["id"]
     _set_status(application_id, current)
-    response = client.patch(f"/api/v1/applications/{application_id}", json={"status": target}, headers=meera)
+    body = {"status": target, **({"completion": COMPLETION} if target == "completed" else {})}
+    response = client.patch(f"/api/v1/applications/{application_id}", json=body, headers=meera)
     if (current, target) in ALLOWED:
         assert response.status_code == 200, (current, target)
         assert response.json()["status"] == target
@@ -130,7 +139,10 @@ def test_accept_creates_guide_link_and_complete_ends_it(client, aarav, meera):
     )
     assert link == [{"status": "active", "opening_id": OPENING, "since": today().isoformat()}]
 
-    client.patch(f"/api/v1/applications/{application_id}", json={"status": "completed"}, headers=meera)
+    done = client.patch(
+        f"/api/v1/applications/{application_id}", json={"status": "completed", "completion": COMPLETION}, headers=meera
+    )
+    assert done.status_code == 200, done.text
     ended = _cypher(
         "MATCH (:Faculty)-[m:MENTORS {type: 'guide'}]->(:Student {user_id: 'u-aarav'}) "
         "RETURN m.status AS status, m.end_reason AS reason, m.until AS until"

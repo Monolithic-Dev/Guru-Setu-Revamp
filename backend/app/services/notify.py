@@ -27,6 +27,7 @@ TITLES: dict[str, str] = {
     "issue_escalated": "Issue escalated by {mentor}",
     "issue_raised_by_mentee": "{student} raised an issue",
     "meeting_request": "{student} requested a meeting",
+    "project_recorded": "{faculty} recorded your work on {opening}",
 }
 
 

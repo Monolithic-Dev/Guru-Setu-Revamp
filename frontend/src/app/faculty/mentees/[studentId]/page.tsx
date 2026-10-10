@@ -311,7 +311,7 @@ export default function MenteeOverviewPage() {
                 {data.certificates.map((c) => (
                   <li key={c.id} className="flex flex-wrap items-center justify-between gap-2 text-sm">
                     <span className="min-w-0">
-                      <span className="block font-bold text-gray-900">{c.title ?? "Untitled certificate"}</span>
+                      <span className="block font-bold text-gray-900">{c.kind === "project_record" ? `Project: ${c.title ?? "Guided work"}` : c.title ?? "Untitled certificate"}</span>
                       <span className="text-xs text-gray-600">{[c.issuer, c.issue_date ? formatDate(c.issue_date) : null].filter(Boolean).join(" · ")}</span>
                     </span>
                     <StatusPill status={c.status} />

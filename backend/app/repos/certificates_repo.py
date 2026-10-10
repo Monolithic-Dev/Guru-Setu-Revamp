@@ -8,7 +8,9 @@ CERT_FIELDS = """
     e.issuer AS issuer, e.issue_date AS issue_date, e.level AS level, e.type AS type,
     coalesce(e.skills, []) AS skills, e.certificate_id AS certificate_id, e.verify_url AS verify_url,
     e.confidence AS confidence, coalesce(e.reasons, []) AS reasons, e.source AS source,
-    e.review_reason AS review_reason, e.created_at AS created_at, e.updated_at AS updated_at
+    e.review_reason AS review_reason, e.created_at AS created_at, e.updated_at AS updated_at,
+    coalesce(e.kind, 'certificate') AS kind, e.summary AS summary, e.output_type AS output_type,
+    e.recorded_by AS recorded_by
 """
 
 
@@ -144,3 +146,8 @@ def stale_processing(tx, cutoff: str) -> list[dict[str, Any]]:
             cutoff=cutoff,
         )
     ]
+
+
+def student_skill_names(tx, student_id: str) -> set[str]:
+    return {r["name"] for r in tx.run(
+        "MATCH (:Student {user_id: $sid})-[:HAS_SKILL]->(c:Concept) RETURN c.name AS name", sid=student_id)}

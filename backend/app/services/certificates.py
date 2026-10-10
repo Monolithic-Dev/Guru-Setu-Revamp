@@ -301,7 +301,7 @@ def file_for(user: CurrentUser, evidence_id: str) -> tuple[Path, str]:
         return certificates_repo.file_path_of(tx, evidence_id)
 
     found = run_read(read)
-    if found is None:
+    if found is None or found[0] is None:  # a project record has no file
         raise ApiError("NOT_FOUND", 404, "The certificate was not found.")
     path = Path(found[0]).resolve()
     if Path(get_settings().upload_dir).resolve() not in path.parents or not path.is_file():
