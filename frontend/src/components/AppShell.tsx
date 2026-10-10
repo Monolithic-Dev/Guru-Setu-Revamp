@@ -7,6 +7,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import {
   Bell,
   Briefcase,
+  Compass,
   ClipboardCheck,
   FileBadge,
   Handshake,
@@ -14,6 +15,7 @@ import {
   LayoutDashboard,
   LogOut,
   UserPlus,
+  UserRound,
   Users,
   WifiOff,
   type LucideIcon,
@@ -37,6 +39,8 @@ const ICONS: Record<NavIcon, LucideIcon> = {
   clipboard: ClipboardCheck,
   dashboard: LayoutDashboard,
   allotment: UserPlus,
+  profile: UserRound,
+  guides: Compass,
 };
 
 function isActive(href: string, pathname: string): boolean {
