@@ -272,7 +272,8 @@ def test_access_log_never_contains_credentials(client, aarav, caplog):
 
 def test_health_reports_database_and_llm_mode(client):
     body = client.get("/api/v1/health").json()
-    assert body["status"] == "ok" and body["neo4j"] == "up" and body["llm_provider"] in ("anthropic", "none")
+    assert body["status"] == "ok" and body["neo4j"] == "up"
+    assert body["llm_provider"] in ("groq", "anthropic", "none")
 
 
 # ---- scope helpers (T1.P2.3): Meera is the mentor of Aarav, Arjun is not -----------------------------------------
