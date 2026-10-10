@@ -991,6 +991,7 @@ export interface components {
                 evidence_id: string;
                 title: string;
             }[];
+            /** @description Display names of the faculty who endorsed this skill (trust level 2) */
             endorsed_by?: string[];
         };
         StudentProfile: {
@@ -1653,6 +1654,7 @@ export interface components {
                 evidence_id: string;
                 title: string;
             }[];
+            /** @description Display names of the faculty who endorsed this skill (trust level 2) */
             endorsed_by?: string[];
         };
         CompletenessItem: {
