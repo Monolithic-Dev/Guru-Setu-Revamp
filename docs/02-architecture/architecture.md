@@ -216,26 +216,29 @@ The tree below is the summary. The deep tree, with an owner and a creating task 
     pyproject.toml        ruff and pytest settings (no packaging)
     app/
       main.py             app factory, CORS, routers, error handlers, startup (schema, stale-job sweep)
-      core/               config.py, database.py (CMP-12), security.py (hash, JWT), errors.py
-      api/deps.py         current_user, require_role, scope assertions (CMP-03)
+      core/               config.py, database.py (CMP-12), security.py (hash, JWT), errors.py, middleware.py (request id, headers,
+                          JSON access log), clock.py (Asia/Kolkata today, UTC timestamps), ratelimit.py (SEC-11)
+      api/deps.py         current_user, require_role; re-exports the scope assertions from services/access.py (CMP-03)
       api/v1/             auto-discovered by main.py (no registration edits): auth.py, students.py, certificates.py,
                           match.py (P1: API-012/013/015/016/020/021), openings_write.py (API-014), applications.py,
                           mentorship.py, tracking.py, dept.py, evidence.py, notifications.py, health.py,
                           endorsements.py (P1: API-041)
-      schemas/            generated.py (datamodel-codegen from openapi.yaml; never hand-edited) + thin per-area wrappers
-      services/           certificates.py, applications.py, mentorship.py, tracking.py, jobs.py (startup hook, JOB-02),
-                          metrics.py, evidence_export.py, notify.py, status_history.py
+      schemas/            generated.py (datamodel-codegen from openapi.yaml; never hand-edited) + thin wrappers (auth.py: CurrentUser)
+      services/           certificates.py, applications.py, students.py (profile), mentorship.py, tracking.py, jobs.py (startup hook,
+                          JOB-02), metrics.py, evidence_export.py, notify.py, status_history.py, auth.py (login), access.py (scope
+                          assertions, one EXISTS query each), visibility.py (private-field shaping, REQ-015)
       ml/                 __init__.py (startup hook), embedding.py (MDL-02), concepts.py, seed_hooks.py, scorer.py, extraction.py (MDL-01 adapter),
                           verification.py (checks + confidence), trust.py (PROVES + trust recompute, backend §6.2),
                           prompts/extract_certificate_v1.md, schemas/certificate_extraction.schema.json
-      repos/              Cypher per area: certificates_repo.py, mentorship_repo.py, ... (CMP-12 users);
+      repos/              Cypher per area: users_repo.py, scope_repo.py, students_repo.py, applications_repo.py,
+                          notifications_repo.py, status_history_repo.py, certificates_repo.py, mentorship_repo.py, ... (CMP-12 users);
                           match_repo.py and ml_repo.py are P1-owned (all Cypher used by `ml/`: concepts, embeddings, trust, duplicate lookups)
     schema/schema.cypher  copy of docs/04-backend/schema.cypher, applied on startup
     scripts/              seed.py, eval_match.py, build_extraction_cache.py
     seed/                 users.json, openings.json, concepts.json, aliases.json, issuers.json,
                           sessions.json, academics.json, certificates/*.png|pdf, labels/match_labels.csv
     extraction_cache/     <sha256>.json for every seed certificate (committed)
-    tests/                pytest: test_security.py, test_certificates.py, test_matching.py,
+    tests/                pytest: conftest.py, test_security.py, test_notifications.py, test_certificates.py, test_matching.py,
                           test_applications.py, test_mentorship.py, test_tracking.py, test_metrics.py
   frontend/
     src/app/              routes per ux-flows §2 (login, student/*, faculty/*, coordinator/*, reviews, notifications)
