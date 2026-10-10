@@ -1384,7 +1384,7 @@ export interface components {
             /** @enum {string} */
             neo4j: "up" | "down";
             /** @enum {string} */
-            llm_provider: "anthropic" | "none";
+            llm_provider: "groq" | "anthropic" | "none";
         };
     };
     responses: {
