@@ -13,6 +13,7 @@ ignore = ["B008"]  # FastAPI Depends() in argument defaults
 "tests/*" = ["S101", "S105", "S106", "E501"]  # asserts, fixture passwords and long literals are fine in tests
 "scripts/*" = ["S101"]
 "scripts/seed_mentoring.py" = ["E501"]  # synthetic fixture data reads better in long rows
+"scripts/seed_profiles.py" = ["E501"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
