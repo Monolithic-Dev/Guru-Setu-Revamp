@@ -357,6 +357,8 @@ Custom components use Tailwind. There is no component library (small custom UI k
 - **Polling:** API-006 every 2 s for up to 30 s (FLOW-02); API-037 unread count every 30 s while the tab is visible.
 - **Downloads:** XLSX is fetched with `responseType: 'blob'` and saved with the filename from `Content-Disposition`.
 - All user-supplied text renders as React text, never with `dangerouslySetInnerHTML` (SEC-19).
+- **Sample-data mode `[MOCK]`:** pages never import fixtures. `useApi` serves the P3 sample payloads (`src/fixtures/p3`, registry by GET path) only when the frontend is built with `NEXT_PUBLIC_USE_FIXTURES=1`. The default build calls the live API, so `grep -rn "fixtures/" frontend/src/app` stays empty (G3). P1 and P4 can pass their own sample payload with `useApi(path, { fixture })`; it is likewise used only in sample-data mode.
+- **End-to-end smoke (TEST-54, optional):** `npm --prefix frontend run e2e` runs `frontend/e2e/primary-flow.spec.ts` (index §7 steps 1, 3, 4, 6, 7, 9, 10 in four browser contexts) against a seeded stack at `E2E_BASE_URL` (default `http://localhost:3000`).
 
 ## Verify
 
