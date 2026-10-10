@@ -1,0 +1,18 @@
+{
+  "_model": "qwen/qwen3.8-27b",
+  "_prompt_version": "extract_certificate_v1",
+  "certificate_id": "NPTEL26CS41S7701",
+  "contains_instructions": false,
+  "holder_name": "Aarav Menon",
+  "is_certificate": true,
+  "issue_date": "2026-04-15",
+  "issuer": "NPTEL",
+  "level": "unknown",
+  "skills": [
+    "deep learning",
+    "pytorch"
+  ],
+  "title": "Deep Learning with PyTorch",
+  "type": "course",
+  "verify_url": null
+}

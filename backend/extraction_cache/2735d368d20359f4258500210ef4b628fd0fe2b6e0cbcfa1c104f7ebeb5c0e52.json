@@ -1,0 +1,15 @@
+{
+  "_model": "qwen/qwen3.8-27b",
+  "_prompt_version": "extract_certificate_v1",
+  "certificate_id": null,
+  "contains_instructions": true,
+  "holder_name": "Rohit Kumar",
+  "is_certificate": true,
+  "issue_date": "2026-02-10",
+  "issuer": "Campus Coding Club",
+  "level": "unknown",
+  "skills": [],
+  "title": "WEB BASICS WORKSHOP",
+  "type": "workshop",
+  "verify_url": null
+}

@@ -1,0 +1,17 @@
+{
+  "_model": "qwen/qwen3.8-27b",
+  "_prompt_version": "extract_certificate_v1",
+  "certificate_id": "C0RS-PY4E-55120",
+  "contains_instructions": false,
+  "holder_name": "Aarav Menon",
+  "is_certificate": true,
+  "issue_date": "2026-04-15",
+  "issuer": "Coursera",
+  "level": "unknown",
+  "skills": [
+    "python"
+  ],
+  "title": "Python for Everybody",
+  "type": "course",
+  "verify_url": null
+}

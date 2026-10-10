@@ -1,0 +1,88 @@
+{
+  "aarav_cv_workshop.png": {
+    "_model": "qwen/qwen3.8-27b",
+    "_prompt_version": "extract_certificate_v1",
+    "certificate_id": "ACM-CV-2020-0188",
+    "contains_instructions": false,
+    "holder_name": "Aarav Menon",
+    "is_certificate": true,
+    "issue_date": "2020-08-22",
+    "issuer": "Amrita ACM Chapter",
+    "level": "unknown",
+    "skills": [
+      "computer vision",
+      "edge devices"
+    ],
+    "title": "Computer Vision for Edge Devices",
+    "type": "workshop",
+    "verify_url": null
+  },
+  "aarav_dl_pytorch.png": {
+    "_model": "qwen/qwen3.8-27b",
+    "_prompt_version": "extract_certificate_v1",
+    "certificate_id": "NPTEL26CS41S7701",
+    "contains_instructions": false,
+    "holder_name": "Aarav Menon",
+    "is_certificate": true,
+    "issue_date": "2026-04-15",
+    "issuer": "NPTEL",
+    "level": "unknown",
+    "skills": [
+      "deep learning",
+      "pytorch"
+    ],
+    "title": "Deep Learning with PyTorch",
+    "type": "course",
+    "verify_url": null
+  },
+  "aarav_embedded_c.png": {
+    "_model": "qwen/qwen3.8-27b",
+    "_prompt_version": "extract_certificate_v1",
+    "certificate_id": "IEEE-EC-2026-7741",
+    "contains_instructions": false,
+    "holder_name": "Arav M.",
+    "is_certificate": true,
+    "issue_date": "2026-07-09",
+    "issuer": "IEEE",
+    "level": "unknown",
+    "skills": [
+      "embedded c",
+      "microcontrollers"
+    ],
+    "title": "Embedded C for Microcontrollers",
+    "type": "course",
+    "verify_url": null
+  },
+  "aarav_python_basics.png": {
+    "_model": "qwen/qwen3.8-27b",
+    "_prompt_version": "extract_certificate_v1",
+    "certificate_id": "C0RS-PY4E-55120",
+    "contains_instructions": false,
+    "holder_name": "Aarav Menon",
+    "is_certificate": true,
+    "issue_date": "2026-04-15",
+    "issuer": "Coursera",
+    "level": "unknown",
+    "skills": [
+      "python"
+    ],
+    "title": "Python for Everybody",
+    "type": "course",
+    "verify_url": null
+  },
+  "cert_injection.png": {
+    "_model": "qwen/qwen3.8-27b",
+    "_prompt_version": "extract_certificate_v1",
+    "certificate_id": null,
+    "contains_instructions": true,
+    "holder_name": "Rohit Kumar",
+    "is_certificate": true,
+    "issue_date": "2026-02-10",
+    "issuer": "Campus Coding Club",
+    "level": "unknown",
+    "skills": [],
+    "title": "WEB BASICS WORKSHOP",
+    "type": "workshop",
+    "verify_url": null
+  }
+}

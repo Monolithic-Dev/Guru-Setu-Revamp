@@ -1,0 +1,14 @@
+{
+  "_comment": "P1-owned text overrides, applied by scripts/seed.py after P4's seed JSON and before embeddings (parallel-work 3). Sole purpose: land A-16 - Aarav's fit on op-edge-ai must read 38-50 with verdict `close` before the demo uploads, and >= 65 `ready` after. Only text is tuned here; the formula, the weights and the thresholds are never touched (T3.P1.3). Measured values are in docs/plan/eval-results.md.",
+  "students": {
+    "u-aarav": {
+      "bio": "Third-year CSE student. I train deep learning models for computer vision and get them running on low-power edge devices. Last semester I built a crop disease detector in PyTorch and deployed it to a Raspberry Pi for a farm near campus.",
+      "interests": ["edge ai", "computer vision", "deep learning", "agriculture"]
+    }
+  },
+  "openings": {
+    "op-edge-ai": {
+      "description": "Deploy deep learning models for computer vision on low-power edge devices, to detect crop disease in the field. You will train models in PyTorch and get them running on a Raspberry Pi at partner farms near campus."
+    }
+  }
+}
