@@ -2,7 +2,6 @@
 // Shapes follow openapi.yaml; values follow the seed personas (backend §10). Pages never import this file,
 // so `grep -rn "fixtures/" src/app` stays empty (G3) and going live is a build flag, not a code change.
 import type { components } from "@/lib/types";
-import api003 from "./API-003.json";
 import api007 from "./API-007.json";
 import api009 from "./API-009.json";
 import api012 from "./API-012.json";
@@ -16,7 +15,6 @@ import api039 from "./API-039.json";
 type S = components["schemas"];
 
 export const fixtures = {
-  studentProfile: api003 as unknown as S["StudentProfile"],
   myCertificates: api007 as unknown as S["Certificate"][],
   reviewQueue: api009 as unknown as S["ReviewItem"][],
   openings: api012 as unknown as S["OpeningSummary"][],
@@ -34,7 +32,6 @@ export const fixtureRoutes: [string, unknown][] = [
   ["/me/mentees", fixtures.mentees],
   ["/me/reminders", fixtures.reminders],
   ["/reviews/certificates", fixtures.reviewQueue],
-  ["/students/[id]", fixtures.studentProfile],
   ["/mentees/[id]/overview", fixtures.menteeOverview],
   ["/openings", fixtures.openings],
   ["/openings/[id]/candidates", fixtures.candidates],
