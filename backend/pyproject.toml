@@ -1,0 +1,20 @@
+# Tooling settings only (no packaging). ruff and pytest run from the repo root: `ruff check backend`,
+# and inside the container from /app: `pytest -q`.
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+extend-exclude = ["app/schemas/generated.py", ".venv"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "S"]
+ignore = ["B008"]  # FastAPI Depends() in argument defaults
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S101", "S105", "S106"]  # asserts and fixture passwords are fine in tests
+"scripts/*" = ["S101"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+pythonpath = ["."]
+# Tests need TODAY_OVERRIDE=2026-10-10 (docs/phases/README.md rule 7); conftest.py sets it for the session.
