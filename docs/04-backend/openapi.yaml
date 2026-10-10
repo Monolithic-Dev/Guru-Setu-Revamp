@@ -471,6 +471,7 @@ paths:
         '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
         '409': {$ref: '#/components/responses/Conflict'}
+        '422': {$ref: '#/components/responses/ValidationFailed'}
 
   /me/applications:
     get:
@@ -1483,14 +1484,25 @@ components:
       enum: [international, national, state, university, college, online, other, unknown]
     CertificateType:
       type: string
-      enum: [hackathon, course, workshop, competition, internship, paper, sports, cultural, other]
+      enum: [hackathon, course, workshop, competition, internship, paper, sports, cultural, project, other]
+    OutputType:
+      type: string
+      description: What the guided work produced. A description of the output, never a grade.
+      enum: [report, prototype, paper, dataset, other]
     Certificate:
       type: object
       required: [id, status, media_type, skills, reasons, created_at, updated_at]
       properties:
         id: {type: string}
         status: {$ref: '#/components/schemas/CertificateStatus'}
-        media_type: {type: string, enum: [image/jpeg, image/png, application/pdf]}
+        media_type: {type: [string, 'null'], enum: [image/jpeg, image/png, application/pdf, null], description: 'Null for a project record, which has no file'}
+        kind: {type: string, enum: [certificate, project_record], description: 'A project record is written by the guide when guided work is completed (REQ-040)'}
+        summary: {type: [string, 'null'], description: 'Project record only: what was done, in the guide''s words'}
+        output_type:
+          oneOf:
+            - {$ref: '#/components/schemas/OutputType'}
+            - {type: 'null'}
+        recorded_by: {type: [string, 'null'], description: 'Project record only: the guide who vouched for it'}
         holder_name: {type: [string, 'null']}
         title: {type: [string, 'null']}
         issuer: {type: [string, 'null']}
@@ -1517,7 +1529,7 @@ components:
             enum: [duplicate_file, duplicate_image, duplicate_certificate_id, not_a_certificate, injection_text,
                    tamper_signal, name_mismatch, unknown_issuer, date_invalid, incomplete, extraction_failed,
                    manual_entry, interrupted]
-        source: {type: [string, 'null'], enum: [llm, cache, manual, null]}
+        source: {type: [string, 'null'], enum: [llm, cache, manual, guide, null]}
         review_reason: {type: [string, 'null']}
         created_at: {type: string, format: date-time}
         updated_at: {type: string, format: date-time}
@@ -1732,6 +1744,22 @@ components:
       required: [status]
       properties:
         status: {type: string, enum: [shortlisted, accepted, rejected, completed]}
+        completion:
+          description: Required when status is completed, rejected for any other status
+          $ref: '#/components/schemas/ProjectCompletion'
+    ProjectCompletion:
+      type: object
+      additionalProperties: false
+      required: [summary, skills, output_type]
+      properties:
+        summary: {type: string, minLength: 20, maxLength: 600}
+        skills:
+          type: array
+          minItems: 1
+          maxItems: 8
+          description: The skills the guide vouches for. Each must be one the opening requires or the student already lists.
+          items: {type: string, minLength: 1, maxLength: 40}
+        output_type: {$ref: '#/components/schemas/OutputType'}
     WhyGraph:
       type: object
       required: [nodes, edges]
@@ -2245,7 +2273,7 @@ components:
         type:
           type: string
           enum: [application_received, application_status, certificate_result, review_needed, allotted, session_logged,
-                 action_assigned, issue_escalated, issue_raised_by_mentee, meeting_request]
+                 action_assigned, issue_escalated, issue_raised_by_mentee, meeting_request, project_recorded]
         title: {type: string, maxLength: 120}
         body: {type: [string, 'null'], maxLength: 200}
         link: {type: string}
