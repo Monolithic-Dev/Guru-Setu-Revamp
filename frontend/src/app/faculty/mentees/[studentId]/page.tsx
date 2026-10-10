@@ -184,7 +184,12 @@ export default function MenteeOverviewPage() {
             <ActionItemList items={data.action_items} canEdit={isMentor} onChanged={() => void reload()} />
           </Section>
           <Section title="Issues">
-            <IssueList issues={data.issues} canEdit={() => isMentor} onChanged={() => void reload()} />
+            <IssueList
+              issues={data.issues}
+              isMentor={isMentor}
+              canEdit={(issue) => isMentor || (role === "hod" && issue.escalated)}
+              onChanged={() => void reload()}
+            />
           </Section>
         </div>
 

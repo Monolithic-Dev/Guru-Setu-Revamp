@@ -16,8 +16,16 @@ export interface IssueListProps {
   issues: Issue[];
   /** Viewer may act: the mentor on their mentee's issues; the HOD on escalated ones. */
   canEdit: (issue: Issue) => boolean;
+  /** Mentor-only controls (escalate, confidential). The HOD may only move an escalated issue's status. */
+  isMentor?: boolean;
   onChanged: () => void;
 }
+
+/** Next lifecycle step offered besides Resolve (REQ-022: raised -> acknowledged -> in_progress -> resolved). */
+const NEXT_STEP: Partial<Record<Issue["status"], { to: "acknowledged" | "in_progress"; label: string }>> = {
+  raised: { to: "acknowledged", label: "Acknowledge" },
+  acknowledged: { to: "in_progress", label: "In progress" },
+};
 
 const CATEGORY: Record<string, string> = {
   academic: "Academic",
@@ -28,12 +36,13 @@ const CATEGORY: Record<string, string> = {
   other: "Other",
 };
 
-export function IssueList({ issues, canEdit, onChanged }: IssueListProps) {
+export function IssueList({ issues, canEdit, isMentor = false, onChanged }: IssueListProps) {
   const toast = useToast();
   const [resolving, setResolving] = useState<Issue | null>(null);
   const [note, setNote] = useState("");
   const [noteError, setNoteError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [escalating, setEscalating] = useState<Issue | null>(null);
 
   async function patch(issue: Issue, body: IssuePatch, success: string): Promise<boolean> {
     setBusy(true);
@@ -108,15 +117,89 @@ export function IssueList({ issues, canEdit, onChanged }: IssueListProps) {
               </p>
             ) : null}
             {canEdit(issue) && issue.status !== "resolved" ? (
-              <div className="mt-2 flex flex-wrap gap-2">
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                {NEXT_STEP[issue.status] ? (
+                  <button
+                    type="button"
+                    className="btn-secondary px-4 py-2 text-xs"
+                    disabled={busy}
+                    onClick={() => {
+                      const step = NEXT_STEP[issue.status];
+                      if (step) void patch(issue, { status: step.to }, step.to === "acknowledged" ? "Issue acknowledged" : "Issue marked in progress");
+                    }}
+                  >
+                    {NEXT_STEP[issue.status]?.label}
+                    <span className="sr-only"> {CATEGORY[issue.category]} issue</span>
+                  </button>
+                ) : null}
                 <button type="button" className="btn-primary px-4 py-2 text-xs" disabled={busy} onClick={() => setResolving(issue)}>
                   Resolve<span className="sr-only"> {CATEGORY[issue.category]} issue</span>
                 </button>
+                {isMentor && !issue.escalated && !issue.confidential ? (
+                  <button
+                    type="button"
+                    className="btn-ghost border border-brand-line px-4 py-2 text-xs text-brand"
+                    disabled={busy}
+                    onClick={() => setEscalating(issue)}
+                  >
+                    Escalate to HOD<span className="sr-only"> {CATEGORY[issue.category]} issue</span>
+                  </button>
+                ) : null}
+                {isMentor && !issue.escalated ? (
+                  <label
+                    className="ml-auto inline-flex min-h-[40px] cursor-pointer items-center gap-2 text-xs font-bold text-gray-700"
+                    title="Confidential issues are counted only as 'confidential' in dashboards and exports, and their text is visible only to you and the student."
+                  >
+                    <input
+                      type="checkbox"
+                      role="switch"
+                      className="h-4 w-4 accent-brand"
+                      checked={issue.confidential}
+                      disabled={busy}
+                      aria-describedby={`conf-help-${issue.id}`}
+                      onChange={(e) =>
+                        void patch(issue, { confidential: e.target.checked }, e.target.checked ? "Marked confidential" : "No longer confidential")
+                      }
+                    />
+                    Confidential
+                    <span id={`conf-help-${issue.id}`} className="sr-only">
+                      Counted only as confidential in dashboards and exports; text visible only to you and the student.
+                    </span>
+                  </label>
+                ) : null}
               </div>
             ) : null}
           </li>
         ))}
       </ul>
+
+      <Dialog
+        open={escalating !== null}
+        onClose={() => setEscalating(null)}
+        size="sm"
+        title="Escalate to HOD?"
+        description="The HOD will be able to read this issue."
+        footer={
+          <>
+            <button type="button" className="btn-ghost" onClick={() => setEscalating(null)}>
+              Cancel
+            </button>
+            <button
+              type="button"
+              className="btn-primary"
+              disabled={busy}
+              onClick={() => {
+                const issue = escalating;
+                if (issue) void patch(issue, { escalated: true }, "Issue escalated to the HOD").then((ok) => ok && setEscalating(null));
+              }}
+            >
+              Escalate
+            </button>
+          </>
+        }
+      >
+        <p className="text-sm text-gray-700">Escalation can&apos;t be undone. Confidential issues can&apos;t be escalated.</p>
+      </Dialog>
 
       <Dialog
         open={resolving !== null}
