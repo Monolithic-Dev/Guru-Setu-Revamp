@@ -3,5 +3,5 @@ export const features = {
   whyGraph: true,
   skillGap: false,
   reminders: true,
-  createOpening: false,
+  createOpening: true,
 };
