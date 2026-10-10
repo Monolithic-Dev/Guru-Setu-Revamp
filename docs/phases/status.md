@@ -79,10 +79,10 @@ Edit this file only in its own small commit on your own feature branch (CONTRIBU
 | T3.P2.3 Metrics + API-033 | P2 | ☑ | TEST-32 on a hand-built graph; P4's check_seed still to compare |
 | T3.P2.4 Exports | P2 | ☑ | TEST-08, 21 (needs `openpyxl` in requirements.txt, P1) |
 | T3.P2.5 Audit pass | P2 | ☑ | every P0/P1 P2-owned route in openapi.yaml exists; notifications and StatusEvents asserted per type in tests |
-| T3.P3.1 SCR-06 | P3 | ☐ | |
-| T3.P3.2 SCR-07 | P3 | ☐ | |
-| T3.P3.3 SCR-09 | P3 | ☐ | |
-| T3.P3.4 SCR-08 live attendees | P3 | ☐ | |
+| T3.P3.1 SCR-06 | P3 | ☑ | 13 assigned, 3 flagged first, guided listed separately (mocked API-024) |
+| T3.P3.2 SCR-07 | P3 | ☑ | notes only when sent; HOD read-only; verify/reopen/drop + resolve (mocked API-025/030/032) |
+| T3.P3.3 SCR-09 | P3 | ☑ | ranked + actions + 409 handling; interim CandidateFit until P1 components/fit lands |
+| T3.P3.4 SCR-08 live attendees | P3 | ☑ | live by default; sample data only with NEXT_PUBLIC_USE_FIXTURES=1; G3 grep clean |
 | T3.P4.1 SCR-11 | P4 | ☐ | |
 | T3.P4.2 SCR-02 | P4 | ☐ | |
 | T3.P4.3 SCR-14 + SCR-15 | P4 | ☐ | |
