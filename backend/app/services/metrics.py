@@ -10,7 +10,7 @@ from typing import Any
 from app.core.clock import today
 from app.core.config import get_settings
 from app.core.database import run_read
-from app.repos import metrics_repo
+from app.repos import metrics_repo, tracking_repo
 from app.schemas.auth import CurrentUser
 from app.services import terms, tracking
 
@@ -123,6 +123,7 @@ def department_metrics(tx, dept: str) -> dict[str, Any]:
             key=lambda x: (x["type"], str(x["level"])),
         ),
         "confirmed_share": _pct(confirmed, present),  # MET-12
+        "learner_levels": tracking_repo.learner_levels(tx, dept),  # MET-11 (P2)
     }
 
 

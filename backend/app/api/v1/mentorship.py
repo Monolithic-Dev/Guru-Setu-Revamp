@@ -14,10 +14,13 @@ from app.schemas.generated import (
     ActionItemPatch,
     AllotmentRequest,
     AllotmentView,
+    Feedback,
     Issue,
     IssueCreate,
     IssuePatch,
     MeetingRequest,
+    MenteeOverview,
+    MenteePatch,
     SessionCreate,
     SessionDetail,
 )
@@ -109,3 +112,23 @@ def patch_issue(
 def request_meeting(body: MeetingRequest, user: CurrentUser = Depends(require_role("student"))) -> Response:
     mentorship.request_meeting(user, body.message.strip())
     return Response(status_code=201)
+
+
+@router.post("/sessions/{session_id}/feedback", operation_id="sessionFeedback")
+def session_feedback(
+    session_id: str, body: Feedback, user: CurrentUser = Depends(require_role("student"))
+) -> Response:
+    mentorship.submit_feedback(user, session_id, body.feedback.value, body.comment)
+    return Response(status_code=200)
+
+
+@router.patch(
+    "/mentees/{student_id}",
+    response_model=MenteeOverview,
+    response_model_exclude_unset=True,
+    operation_id="patchMentee",
+)
+def patch_mentee(
+    student_id: str, body: MenteePatch, user: CurrentUser = Depends(require_role("faculty"))
+) -> dict:
+    return mentorship.patch_mentee(user, student_id, body)

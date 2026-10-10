@@ -26,7 +26,8 @@ def active_links(tx, mentor_ids: list[str]) -> list[dict[str, Any]]:
             """
             MATCH (f:Faculty)-[m:MENTORS {status: 'active'}]->(s:Student) WHERE f.user_id IN $mentors
             RETURN f.user_id AS mentor_id, f.name AS mentor_name, m.id AS link_id, m.type AS type, m.since AS since,
-                   m.opening_id AS opening_id, s.user_id AS student_id, s.name AS name, s.roll_no AS roll_no
+                   m.opening_id AS opening_id, s.user_id AS student_id, s.name AS name, s.roll_no AS roll_no,
+                   coalesce(s.marked_at_risk, false) AS marked_at_risk
             ORDER BY s.name
             """,
             mentors=mentor_ids,
@@ -142,3 +143,60 @@ def action_items_of_student(tx, student_id: str) -> list[dict[str, Any]]:
 
 def issues_of_student(tx, student_id: str) -> list[dict[str, Any]]:
     return issues_about(tx, [student_id])
+
+
+def student_flags(tx, student_id: str) -> dict[str, Any]:
+    """Mentor-set fields (REQ-029, REQ-033). Callers decide who may see which."""
+    record = tx.run(
+        """
+        MATCH (s:Student {user_id: $sid})
+        RETURN s.learner_level AS learner_level, s.learner_note AS learner_note,
+               coalesce(s.marked_at_risk, false) AS marked_at_risk
+        """,
+        sid=student_id,
+    ).single()
+    return record.data() if record else {}
+
+
+def learner_levels(tx, dept_code: str) -> dict[str, int]:
+    """MET-11: assigned mentees per learner level."""
+    return {
+        r["level"]: r["n"]
+        for r in tx.run(
+            """
+            MATCH (:Faculty)-[:MENTORS {type: 'assigned', status: 'active'}]->(s:Student {dept_code: $d})
+            WHERE s.learner_level IS NOT NULL
+            RETURN s.learner_level AS level, count(s) AS n
+            """,
+            d=dept_code,
+        )
+    }
+
+
+def track_record(tx, faculty_id: str) -> dict[str, Any] | None:
+    """Facts about a faculty member (REQ-035): counts and the decision times of applications to their openings."""
+    head = tx.run(
+        """
+        MATCH (f:Faculty {user_id: $fid})
+        RETURN f.user_id AS faculty_id, f.name AS name,
+               COUNT { (f)-[:POSTED]->(:Opening) } AS openings_posted,
+               COUNT { (f)-[:MENTORS {type: 'guide'}]->(:Student) } AS guide_links_accepted,
+               COUNT { (f)-[:MENTORS {type: 'guide', end_reason: 'completed'}]->(:Student) } AS guide_links_completed
+        """,
+        fid=faculty_id,
+    ).single()
+    if head is None:
+        return None
+    out = head.data()
+    out["decisions"] = _rows(
+        tx.run(
+            """
+            MATCH (:Faculty {user_id: $fid})-[:POSTED]->(:Opening)<-[a:APPLIED_TO]-(:Student)
+            MATCH (e:StatusEvent {entity_type: 'application', entity_id: a.id, from_status: 'pending'})
+            WITH a, min(e.at) AS decided
+            RETURN a.applied_at AS applied_at, decided
+            """,
+            fid=faculty_id,
+        )
+    )
+    return out

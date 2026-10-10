@@ -18,6 +18,18 @@ def _midpoint(term: dict[str, Any]) -> str:
     return (start + (end - start) / 2).isoformat()
 
 
+def _suggested_at_risk(current: dict[str, Any] | None, previous: dict[str, Any] | None) -> str | None:
+    """REQ-029: attendance below the threshold, or a CGPA drop of at least the threshold, against the previous term."""
+    if current is None:
+        return None
+    cfg = get_settings()
+    if current["attendance_pct"] < cfg.at_risk_attendance_pct:
+        return f"attendance {current['attendance_pct']:g}%"
+    if previous is not None and previous["cgpa"] - current["cgpa"] >= cfg.at_risk_cgpa_drop:
+        return f"CGPA {previous['cgpa']:g} to {current['cgpa']:g}"
+    return None
+
+
 def link_rows(tx, mentor_ids: list[str]) -> list[dict[str, Any]]:
     """One row per active MENTORS link of the given mentors: MenteeRow fields plus `mentor_id`, `mentor_name`."""
     links = tracking_repo.active_links(tx, mentor_ids)
@@ -29,7 +41,7 @@ def link_rows(tx, mentor_ids: list[str]) -> list[dict[str, Any]]:
     no_session_cut = (now - timedelta(days=cfg.attention_no_session_days)).isoformat()
     stale_cut = (now - timedelta(days=cfg.issue_stale_days)).isoformat()
     confirm_cut = (now - timedelta(days=cfg.session_confirm_days)).isoformat()
-    term = terms.resolve(tx)[0]
+    term, previous = terms.resolve(tx)
 
     student_ids = sorted({link["student_id"] for link in links})
     sessions: dict[tuple, list] = defaultdict(list)
@@ -38,6 +50,9 @@ def link_rows(tx, mentor_ids: list[str]) -> list[dict[str, Any]]:
     items: dict[tuple, list] = defaultdict(list)
     for row in tracking_repo.action_items_of_mentors(tx, mentor_ids, student_ids):
         items[(row["mentor_id"], row["student_id"])].append(row)
+    records: dict[tuple, dict] = {}
+    for row in tracking_repo.academics(tx, student_ids):
+        records[(row["student_id"], row["term_id"])] = row
     issues: dict[str, list] = defaultdict(list)
     for row in tracking_repo.issues_about(tx, student_ids):
         issues[row["student_id"]].append(row)
@@ -74,6 +89,18 @@ def link_rows(tx, mentor_ids: list[str]) -> list[dict[str, Any]]:
         if any(i["raised_at"][:10] < stale_cut for i in unresolved):
             reasons.append("stale_issue")
 
+        details: dict[str, str] = {}
+        if assigned and link["marked_at_risk"]:
+            reasons.append("marked_at_risk")
+        if assigned and term:
+            why = _suggested_at_risk(
+                records.get((link["student_id"], term["id"])),
+                records.get((link["student_id"], previous["id"])) if previous else None,
+            )
+            if why:
+                reasons.append("suggested_at_risk")
+                details["suggested_at_risk"] = why
+
         out.append({
             "mentor_id": link["mentor_id"],
             "mentor_name": link["mentor_name"],
@@ -90,6 +117,7 @@ def link_rows(tx, mentor_ids: list[str]) -> list[dict[str, Any]]:
             "unconfirmed_sessions": sum(1 for s in present if s["confirmed_at"] is None and s["date"] < confirm_cut),
             "needs_attention": bool(reasons),
             "attention_reasons": reasons,
+            "attention_details": details or None,
         })
     out.sort(key=lambda r: (not r["needs_attention"], -len(r["attention_reasons"]), r["name"]))
     return out

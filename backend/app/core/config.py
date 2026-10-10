@@ -70,6 +70,8 @@ class Settings(BaseSettings):
     attention_no_session_days: int = 45
     issue_stale_days: int = 14
     session_confirm_days: int = 7
+    at_risk_attendance_pct: float = 75.0
+    at_risk_cgpa_drop: float = 1.0
     mentor_load_warn: int = 20
     reminder_term_end_days: int = 30
     current_term_id: str = ""

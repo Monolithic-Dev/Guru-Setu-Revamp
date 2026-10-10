@@ -80,6 +80,8 @@ def reset_graph() -> None:
     cypher("MATCH (f:Faculty {user_id: 'u-arjun'}), (s:Student {user_id: 'u-diya'}) "
            "CREATE (f)-[:MENTORS {id: 'mt-arjun-diya', type: 'assigned', status: 'active', since: '2026-05-01'}]->(s)")
     cypher("MATCH (n:Evidence) DETACH DELETE n")
+    cypher("MATCH ()-[a:APPLIED_TO]->() DELETE a")
+    cypher("MATCH (o:Opening) WHERE o.id <> 'op-edge-ai' DETACH DELETE o")
 
 
 @pytest.fixture(autouse=True)
@@ -150,7 +152,10 @@ def test_43_mentee_360_scope_and_notes(client, meera, arjun, suresh, aarav, kavy
     assert issues["i-fresh"]["text"] == ISSUE_TEXT
     assert "text" not in issues["i-conf"] and issues["i-conf"]["confidential"] is True
     assert body["attention_reasons"] == []
-    assert body["term_summary"] is None
+    assert body["term_summary"] == {  # REQ-032: this term only, hand-counted from the fixture
+        "sessions_attended": 2, "actions_done": 1, "actions_total": 1, "issues_raised": 2, "issues_resolved": 0,
+        "certificates_certified": 0,
+    }
 
     # HOD: same student, never any notes
     hod = client.get("/api/v1/mentees/u-t-ok/overview", headers=suresh)

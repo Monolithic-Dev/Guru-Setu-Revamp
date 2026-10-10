@@ -235,7 +235,8 @@ def get_session(tx, session_id: str) -> dict[str, Any] | None:
         tx.run(
             """
             MATCH (:Session {id: $sid})-[r:ATTENDED_BY]->(st:Student)
-            RETURN st.user_id AS student_id, st.name AS name, r.present AS present, r.confirmed_at AS confirmed_at
+            RETURN st.user_id AS student_id, st.name AS name, r.present AS present, r.confirmed_at AS confirmed_at,
+                   r.feedback AS feedback, r.feedback_comment AS feedback_comment
             ORDER BY st.name
             """,
             sid=session_id,
@@ -279,6 +280,17 @@ def confirm_attendance(tx, session_id: str, student_id: str, now: str) -> None:
         sid=session_id,
         stid=student_id,
         now=now,
+    ).consume()
+
+
+def set_feedback(tx, session_id: str, student_id: str, feedback: str, comment: str | None) -> None:
+    """A second submission replaces the first (AC-034.1)."""
+    tx.run(
+        """
+        MATCH (:Session {id: $sid})-[r:ATTENDED_BY]->(:Student {user_id: $stid})
+        SET r.feedback = $feedback, r.feedback_comment = $comment
+        """,
+        sid=session_id, stid=student_id, feedback=feedback, comment=comment,
     ).consume()
 
 

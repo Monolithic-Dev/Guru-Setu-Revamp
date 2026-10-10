@@ -66,6 +66,14 @@ def shape_action_item(item: dict[str, Any], history: list[dict[str, Any]] | None
     return out
 
 
+def _attendee(a: dict[str, Any], is_author: bool) -> dict[str, Any]:
+    row = {"student_id": a["student_id"], "name": a["name"], "present": bool(a["present"]),
+           "confirmed_at": a.get("confirmed_at")}
+    if is_author:  # REQ-034: session feedback is for the mentor who logged the session, nobody else
+        row["feedback"], row["feedback_comment"] = a.get("feedback"), a.get("feedback_comment")
+    return row
+
+
 def shape_session(viewer: CurrentUser, session: dict[str, Any]) -> dict[str, Any]:
     """SessionDetail for the author (everything) or an attendee (own rows only, never the notes)."""
     is_author = viewer.role == "faculty" and session["author_id"] == viewer.user_id
@@ -84,11 +92,7 @@ def shape_session(viewer: CurrentUser, session: dict[str, Any]) -> dict[str, Any
         "confidential": bool(session.get("confidential")),
         "next_followup": session.get("next_followup"),
         "logged_by": {"user_id": session["author_id"], "name": session["author_name"]},
-        "attendees": [
-            {"student_id": a["student_id"], "name": a["name"], "present": bool(a["present"]),
-             "confirmed_at": a.get("confirmed_at")}
-            for a in attendees
-        ],
+        "attendees": [_attendee(a, is_author) for a in attendees],
         "action_items": [
             {**shape_action_item({**i, "session_id": session["id"]})} for i in items
         ],

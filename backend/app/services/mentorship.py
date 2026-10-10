@@ -14,10 +14,10 @@ from app.core.clock import today, utc_now, utc_now_iso
 from app.core.config import get_settings
 from app.core.database import run_read, run_write
 from app.core.errors import ApiError
-from app.repos import mentorship_repo
+from app.repos import mentorship_repo, students_repo
 from app.schemas.auth import CurrentUser
-from app.schemas.generated import IssueCreate, IssuePatch, SessionCreate
-from app.services import terms
+from app.schemas.generated import IssueCreate, IssuePatch, MenteePatch, SessionCreate
+from app.services import overview, terms
 from app.services.access import assert_mentor_of
 from app.services.notify import notify, render_title
 from app.services.status_history import history_for, record_status
@@ -463,3 +463,48 @@ def request_meeting(user: CurrentUser, message: str) -> None:
         )
 
     run_write(work)
+
+
+# ============================== session feedback (API-042, REQ-034) ==============================
+
+
+def submit_feedback(user: CurrentUser, session_id: str, feedback: str, comment: str | None) -> None:
+    """A present attendee rates the session; a second call replaces the first. Only the author ever reads it."""
+
+    def work(tx):
+        session = mentorship_repo.get_session(tx, session_id)
+        mine = next((a for a in (session or {}).get("attendees", []) if a["student_id"] == user.user_id), None)
+        if mine is None:
+            raise ApiError("NOT_FOUND", 404, "The session was not found.")
+        if not mine["present"]:
+            raise ApiError("NOT_PRESENT", 409, "You were marked absent for this session.")
+        mentorship_repo.set_feedback(tx, session_id, user.user_id, feedback, (comment or "").strip() or None)
+
+    run_write(work)
+
+
+# ============================== learner level, at-risk mark (API-043, REQ-029, REQ-033) ==============
+
+
+def patch_mentee(user: CurrentUser, student_id: str, patch: MenteePatch) -> dict[str, Any]:
+    """Only the ASSIGNED mentor may set the level, the intervention note and the at-risk mark."""
+    provided = patch.model_fields_set
+    if not provided:
+        raise ApiError(
+            "VALIDATION_FAILED", 422, "Nothing to update.",
+            errors=[{"field": "learner_level", "message": "Send learner_level, learner_note or marked_at_risk."}],
+        )
+
+    def work(tx):
+        assert_mentor_of(tx, user.user_id, student_id, "assigned")
+        props: dict[str, Any] = {}
+        if "learner_level" in provided:
+            props["learner_level"] = patch.learner_level.value if patch.learner_level else None
+        if "learner_note" in provided:
+            props["learner_note"] = (patch.learner_note or "").strip() or None
+        if "marked_at_risk" in provided and patch.marked_at_risk is not None:
+            props["marked_at_risk"] = patch.marked_at_risk
+        students_repo.set_profile_fields(tx, student_id, props)
+
+    run_write(work)
+    return overview.mentee_overview(user, student_id)

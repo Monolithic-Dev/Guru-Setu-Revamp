@@ -493,6 +493,8 @@ All variables are listed in [env.example](../10-devops/env.example).
 | ISSUE_STALE_DAYS | int | 14 | no | A-12 |
 | SESSION_CONFIRM_DAYS | int | 7 | no | A-12 |
 | MENTOR_LOAD_WARN | int | 20 | no | |
+| AT_RISK_ATTENDANCE_PCT | float | 75 | no | `suggested_at_risk` when current-term attendance is below this (§6.4) |
+| AT_RISK_CGPA_DROP | float | 1.0 | no | `suggested_at_risk` when CGPA fell by at least this against the previous term |
 | REMINDER_TERM_END_DAYS | int | 30 | no | |
 | CURRENT_TERM_ID | string | empty | no | Empty means chosen by date |
 | TODAY_OVERRIDE | date | empty | no | Tests and rehearsal only; logged as a warning at startup when set |
