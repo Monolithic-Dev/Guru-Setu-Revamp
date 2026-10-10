@@ -4,7 +4,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { SessionForm } from "@/components/mentor/SessionForm";
 import { ErrorState, LoadingRegion, PageHeader, Skeleton, useToast } from "@/components/ui";
-import { fixtures } from "@/fixtures/p3";
 import { useApi } from "@/hooks/useApi";
 import { getSession } from "@/lib/session";
 import type { components } from "@/lib/types";
@@ -22,8 +21,8 @@ function NewSession() {
   const [me, setMe] = useState<string | null>(null);
   useEffect(() => setMe(getSession()?.userId ?? null), []);
 
-  const mentees = useApi<MenteeRow[]>("/me/mentees", { fixture: fixtures.mentees });
-  const openings = useApi<OpeningSummary[]>("/openings", { fixture: fixtures.openings });
+  const mentees = useApi<MenteeRow[]>("/me/mentees");
+  const openings = useApi<OpeningSummary[]>("/openings");
   const ownOpenings = useMemo(() => (openings.data ?? []).filter((o) => o.faculty.user_id === me), [openings.data, me]);
 
   return (

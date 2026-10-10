@@ -4,7 +4,6 @@ import { useState } from "react";
 import { ClipboardCheck } from "lucide-react";
 import { ReviewCard } from "@/components/mentor/ReviewCard";
 import { Dialog, EmptyState, ErrorState, LoadingRegion, PageHeader, Skeleton, useToast } from "@/components/ui";
-import { fixtures } from "@/fixtures/p3";
 import { useApi } from "@/hooks/useApi";
 import { api } from "@/lib/api";
 import { isApiError } from "@/lib/problem";
@@ -15,7 +14,7 @@ type ReviewDecision = components["schemas"]["ReviewDecision"];
 
 export default function ReviewsPage() {
   const toast = useToast();
-  const { data, error, loading, reload, setData } = useApi<ReviewItem[]>("/reviews/certificates", { fixture: fixtures.reviewQueue });
+  const { data, error, loading, reload, setData } = useApi<ReviewItem[]>("/reviews/certificates");
   const [busyId, setBusyId] = useState<string | null>(null);
   const [rejecting, setRejecting] = useState<ReviewItem | null>(null);
   const [reason, setReason] = useState("");
