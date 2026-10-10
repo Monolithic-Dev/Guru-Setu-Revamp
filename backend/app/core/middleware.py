@@ -58,6 +58,10 @@ def configure_logging(level: str = "INFO") -> None:
     root.setLevel(level)
     # uvicorn's own access log would duplicate ours (and prints the full path with query string).
     logging.getLogger("uvicorn.access").disabled = True
+    # The Neo4j driver logs a server notification for every query that touches a property no node has yet, and the
+    # HTTP test client logs every request. Neither belongs in the application log.
+    logging.getLogger("neo4j.notifications").setLevel(logging.ERROR)
+    logging.getLogger("httpx").setLevel(logging.WARNING)
 
 
 def _level_for(status: int, route_matched: bool) -> int:
