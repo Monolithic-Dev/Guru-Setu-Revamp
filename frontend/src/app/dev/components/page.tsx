@@ -1,6 +1,8 @@
 "use client";
 // Component gallery for T1.P3.4 "Done when". Removed in Phase 6 (T6.P3.3).
 import { useState } from "react";
+import RemindersPanel from "@/components/mentor/RemindersPanel";
+import WhyGraph from "@/components/why/WhyGraph";
 import {
   AttentionBadge,
   Avatar,
@@ -126,6 +128,11 @@ export default function ComponentGallery() {
         <ErrorState error={{ status: 404, code: "NOT_FOUND", errors: [] }} />
         <ErrorState error={{ status: 403, code: "FORBIDDEN", errors: [] }} />
         <ErrorState inline error={{ status: 503, code: "DB_UNAVAILABLE", errors: [] }} onRetry={() => undefined} />
+      </Block>
+
+      <Block title="Add-on panels (A2 Why graph, A3 reminders)">
+        <WhyGraph openingId="op-edge-ai" />
+        <RemindersPanel />
       </Block>
 
       <Block title="Toasts and dialog">
