@@ -7,6 +7,9 @@ import type { components } from "@/lib/types";
 
 type Eligibility = components["schemas"]["Eligibility"];
 
+// Availability rules always block an application; suitability rules block only a strict opening.
+const AVAILABILITY = ["open", "deadline", "capacity", "guide_capacity"];
+
 const ICON = {
   ok: { Icon: CircleCheck, cls: "text-green-700", word: "Met" },
   failed: { Icon: CircleAlert, cls: "text-red-700", word: "Not met" },
@@ -16,11 +19,9 @@ const ICON = {
 export function EligibilityChecklist({ openingId }: { openingId: string }) {
   const { data } = useApi<Eligibility>(`/openings/${openingId}/eligibility`);
   if (!data) return null;
-  const heading = data.eligible
-    ? "You meet the requirements"
-    : data.mode === "strict"
-      ? "You can't apply yet"
-      : "You can still apply, but note:";
+  const failed = data.checks.filter((c) => c.status === "failed");
+  const blocked = failed.some((c) => AVAILABILITY.includes(c.rule)) || (failed.length > 0 && data.mode === "strict");
+  const heading = failed.length === 0 ? "You meet the requirements" : blocked ? "You can't apply yet" : "You can still apply, but note:";
   return (
     <section aria-labelledby="elig-title" className="card space-y-2">
       <h2 id="elig-title" className="section-title">Can I apply?</h2>

@@ -21,6 +21,7 @@ const VERDICT: Record<string, { label: string; cls: string }> = {
   close: { label: "Close", cls: "border-amber-200 bg-amber-50 text-amber-900" },
   not_yet: { label: "Not yet", cls: "border-gray-200 bg-gray-100 text-gray-700" },
 };
+const AVAILABILITY = ["open", "deadline", "capacity", "guide_capacity"];
 const MODE: Record<string, string> = { on_campus: "On campus", remote: "Remote", hybrid: "Hybrid" };
 
 function MentorshipSummary() {
@@ -56,6 +57,9 @@ function OpeningCard({ opening }: { opening: Recommended }) {
   const verdict = VERDICT[opening.my_fit.verdict];
   const problems = opening.eligibility.checks.filter((c) => c.status === "failed");
   const unknown = opening.eligibility.checks.filter((c) => c.status === "unknown");
+  // Availability rules (closed, deadline, full, faculty at capacity) always block; the suitability rules only block a
+  // strict opening. The wording has to follow what the server will actually do.
+  const blocked = problems.some((c) => AVAILABILITY.includes(c.rule)) || (problems.length > 0 && opening.eligibility.mode === "strict");
   return (
     <li className="card space-y-3">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -103,7 +107,7 @@ function OpeningCard({ opening }: { opening: Recommended }) {
         <div role="note" className="flex gap-2 rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
           <TriangleAlert aria-hidden size={18} className="mt-0.5 shrink-0" />
           <div>
-            <p className="font-black">{opening.eligibility.mode === "strict" ? "You can't apply yet" : "Heads up, you can still apply"}</p>
+            <p className="font-black">{blocked ? "You can't apply yet" : "Heads up, you can still apply"}</p>
             <ul className="list-inside list-disc">
               {problems.map((c) => (
                 <li key={c.rule}>{c.detail}</li>
