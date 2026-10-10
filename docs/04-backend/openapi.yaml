@@ -1597,6 +1597,10 @@ components:
         attention_reasons:
           type: array
           items: {$ref: '#/components/schemas/AttentionReason'}
+        attention_details:
+          type: object
+          description: Same as MenteeRow.attention_details, for the caller's own mentee row (P2 REQ-029)
+          additionalProperties: {type: string}
         term_summary:
           description: P2 REQ-032
           oneOf:
