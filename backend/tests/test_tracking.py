@@ -71,8 +71,20 @@ def issue(iid: str, student_id: str, raised_by: str, raised_at: str, confidentia
     )
 
 
+def reset_graph() -> None:
+    """Back to the base graph (personas, Meera->Aarav, Arjun->Diya) so other modules' data cannot leak in."""
+    cypher("MATCH (s:Student) WHERE NOT s.user_id IN ['u-aarav', 'u-diya'] DETACH DELETE s")
+    cypher("MATCH ()-[m:MENTORS]->() DELETE m")
+    cypher("MATCH (f:Faculty {user_id: 'u-meera'}), (s:Student {user_id: 'u-aarav'}) "
+           "CREATE (f)-[:MENTORS {id: 'mt-meera-aarav', type: 'assigned', status: 'active', since: '2026-05-01'}]->(s)")
+    cypher("MATCH (f:Faculty {user_id: 'u-arjun'}), (s:Student {user_id: 'u-diya'}) "
+           "CREATE (f)-[:MENTORS {id: 'mt-arjun-diya', type: 'assigned', status: 'active', since: '2026-05-01'}]->(s)")
+    cypher("MATCH (n:Evidence) DETACH DELETE n")
+
+
 @pytest.fixture(autouse=True)
 def world(fresh_seed):
+    reset_graph()
     for label in ("Session", "ActionItem", "Issue", "StatusEvent", "Notification", "Term", "AcademicRecord"):
         cypher(f"MATCH (n:{label}) DETACH DELETE n")
     cypher(
