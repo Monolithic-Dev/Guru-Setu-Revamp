@@ -5,7 +5,7 @@ a private key entirely, so it never appears in the JSON (REQ-015, security secti
 """
 import uuid
 
-from fastapi import APIRouter, Depends, Header
+from fastapi import APIRouter, Depends, Header, Response
 
 from app.api.deps import CurrentUser, require_role
 from app.core.errors import ApiError
@@ -17,6 +17,7 @@ from app.schemas.generated import (
     Issue,
     IssueCreate,
     IssuePatch,
+    MeetingRequest,
     SessionCreate,
     SessionDetail,
 )
@@ -102,3 +103,9 @@ def patch_issue(
     issue_id: str, body: IssuePatch, user: CurrentUser = Depends(require_role("faculty", "hod"))
 ) -> dict:
     return mentorship.patch_issue(user, issue_id, body)
+
+
+@router.post("/me/meeting-requests", status_code=201, operation_id="requestMeeting")
+def request_meeting(body: MeetingRequest, user: CurrentUser = Depends(require_role("student"))) -> Response:
+    mentorship.request_meeting(user, body.message.strip())
+    return Response(status_code=201)
