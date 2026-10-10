@@ -1,8 +1,10 @@
+> **Requirements authority moved.** Requirements, IDs and numbers now live in the spec pack: start at [docs/00-index.md](../00-index.md). This file is kept for the team's **15-hour build plan (§13), demo story (§14), disclosure (§17), judging map (§18) and roadmap slide (§19)**. Where it disagrees with the spec pack, the spec pack wins. FR-n here = REQ-0nn in [prd.md](../01-product/prd.md) (FR-22 and FR-28 were split; see the PRD's traceability note).
+
 # PRD v2: GuruSetu Verified Mentorship Graph
 **Genesis Hackathon, Campus Problems track. Product requirements and 15-hour build plan.**
 
 Status: draft v2. Owner: team. Supersedes PRD v1 (pasted draft) and merges the two concept docs:
-[gurusetu-pramaan-concept.md](../../Ideas/gurusetu-pramaan-concept.md) (core loop) and [gurusetu-enterprise-vision.md](../../Ideas/gurusetu-enterprise-vision.md) (full vision), plus the [codebase audit](../../Ideas/GENESIS-GuruSetu-Audit-and-Proposal.md).
+[gurusetu-pramaan-concept.md](../../../Ideas/gurusetu-pramaan-concept.md) (core loop) and [gurusetu-enterprise-vision.md](../../../Ideas/gurusetu-enterprise-vision.md) (full vision), plus the [codebase audit](../../../Ideas/GENESIS-GuruSetu-Audit-and-Proposal.md).
 
 Tags: [VERIFIED] found by search or code reading · [INFERRED] reasoning · [ASSUMED] default to confirm · [UNVERIFIED] check before claiming.
 Tier labels used throughout: **CORE** (must ship, hours 0–10) · **ADD-ON A** (hours 10–12.5) · **ADD-ON B** (only if A is done) · **ROADMAP** (pitch slide only, not built).

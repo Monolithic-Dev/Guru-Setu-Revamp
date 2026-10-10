@@ -1,0 +1,1889 @@
+openapi: 3.1.0
+info:
+  title: GuruSetu API
+  version: 1.0.0
+  description: >
+    Contract for CMP-02. Behaviour, rules and IDs are in docs/04-backend/backend.md.
+    Each operation carries x-id (API-nnn), x-req and x-tier. Errors are application/problem+json (backend.md §3.1).
+servers:
+  - url: http://localhost:8000/api/v1
+security:
+  - bearer: []
+tags:
+  - name: auth
+  - name: students
+  - name: certificates
+  - name: openings
+  - name: applications
+  - name: mentorship
+  - name: tracking
+  - name: department
+  - name: notifications
+  - name: ops
+
+paths:
+  /auth/login:
+    post:
+      tags: [auth]
+      operationId: login
+      x-id: API-001
+      x-req: [REQ-031]
+      x-tier: P0
+      summary: Exchange email and password for a JWT
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/LoginRequest'}
+            example: {email: aarav@demo.gurusetu, password: Demo@123}
+      responses:
+        '200':
+          description: Logged in
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/TokenResponse'}
+        '401': {$ref: '#/components/responses/Unauthenticated'}
+        '422': {$ref: '#/components/responses/ValidationFailed'}
+        '429': {$ref: '#/components/responses/RateLimited'}
+
+  /me:
+    get:
+      tags: [auth]
+      operationId: getMe
+      x-id: API-002
+      x-req: [REQ-031]
+      x-tier: P0
+      summary: Current user
+      responses:
+        '200':
+          description: Current user
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Me'}
+        '401': {$ref: '#/components/responses/Unauthenticated'}
+
+  /students/{student_id}:
+    get:
+      tags: [students]
+      operationId: getStudent
+      x-id: API-003
+      x-req: [REQ-003, REQ-005]
+      x-tier: P0
+      summary: Student profile with trust-marked skills (scope per security §4)
+      parameters: [{$ref: '#/components/parameters/StudentId'}]
+      responses:
+        '200':
+          description: Profile
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/StudentProfile'}
+        '401': {$ref: '#/components/responses/Unauthenticated'}
+        '404': {$ref: '#/components/responses/NotFound'}
+
+  /me/profile:
+    patch:
+      tags: [students]
+      operationId: patchMyProfile
+      x-id: API-004
+      x-req: [REQ-004]
+      x-tier: P0
+      summary: Partial update of own student profile (omitted fields untouched)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ProfilePatch'}
+      responses:
+        '200':
+          description: Updated profile
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/StudentProfile'}
+        '401': {$ref: '#/components/responses/Unauthenticated'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '422': {$ref: '#/components/responses/ValidationFailed'}
+
+  /certificates:
+    post:
+      tags: [certificates]
+      operationId: uploadCertificate
+      x-id: API-005
+      x-req: [REQ-001]
+      x-tier: P0
+      summary: Upload a certificate; processing continues in JOB-01
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: JPEG, PNG or PDF (magic bytes), at most MAX_UPLOAD_MB
+      responses:
+        '202':
+          description: Accepted; poll API-006
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Certificate'}
+        '401': {$ref: '#/components/responses/Unauthenticated'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '413': {$ref: '#/components/responses/Problem'}
+        '415': {$ref: '#/components/responses/Problem'}
+        '429': {$ref: '#/components/responses/RateLimited'}
+
+  /certificates/{id}:
+    get:
+      tags: [certificates]
+      operationId: getCertificate
+      x-id: API-006
+      x-req: [REQ-001]
+      x-tier: P0
+      summary: Poll one certificate
+      parameters: [{$ref: '#/components/parameters/Id'}]
+      responses:
+        '200':
+          description: Certificate
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Certificate'}
+        '401': {$ref: '#/components/responses/Unauthenticated'}
+        '404': {$ref: '#/components/responses/NotFound'}
+
+  /me/certificates:
+    get:
+      tags: [certificates]
+      operationId: listMyCertificates
+      x-id: API-007
+      x-req: [REQ-001]
+      x-tier: P0
+      summary: Own certificates, newest first (max 100)
+      responses:
+        '200':
+          description: Certificates
+          content:
+            application/json:
+              schema:
+                type: array
+                maxItems: 100
+                items: {$ref: '#/components/schemas/Certificate'}
+        '401': {$ref: '#/components/responses/Unauthenticated'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+
+  /certificates/{id}/manual:
+    put:
+      tags: [certificates]
+      operationId: putManualCertificate
+      x-id: API-008
+      x-req: [REQ-037]
+      x-tier: P0
+      summary: Manual fields for a failed certificate; moves it to needs_review
+      parameters: [{$ref: '#/components/parameters/Id'}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ManualCertificate'}
+      responses:
+        '200':
+          description: Certificate in needs_review
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Certificate'}
+        '401': {$ref: '#/components/responses/Unauthenticated'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/Conflict'}
+        '422': {$ref: '#/components/responses/ValidationFailed'}
+
+  /reviews/certificates:
+    get:
+      tags: [certificates]
+      operationId: listReviewQueue
+      x-id: API-009
+      x-req: [REQ-002]
+      x-tier: P0
+      summary: needs_review certificates in the caller's scope (max 100)
+      responses:
+        '200':
+          description: Queue, oldest first
+          content:
+            application/json:
+              schema:
+                type: array
+                maxItems: 100
+                items: {$ref: '#/components/schemas/ReviewItem'}
+        '401': {$ref: '#/components/responses/Unauthenticated'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+
+  /certificates/{id}/review:
+    post:
+      tags: [certificates]
+      operationId: reviewCertificate
+      x-id: API-010
+      x-req: [REQ-002]
+      x-tier: P0
+      summary: Approve or reject a needs_review certificate
+      parameters: [{$ref: '#/components/parameters/Id'}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ReviewDecision'}
+            example: {decision: reject, reason: Name on certificate differs from profile}
+      responses:
+        '200':
+          description: Reviewed certificate
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Certificate'}
+        '401': {$ref: '#/components/responses/Unauthenticated'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/Conflict'}
+        '422': {$ref: '#/components/responses/ValidationFailed'}
+
+  /certificates/{id}/file:
+    get:
+      tags: [certificates]
+      operationId: getCertificateFile
+      x-id: API-011
+      x-req: [REQ-002]
+      x-tier: P0
+      summary: Original file (Content-Disposition inline, X-Content-Type-Options nosniff)
+      parameters: [{$ref: '#/components/parameters/Id'}]
+      responses:
+        '200':
+          description: File bytes
+          content:
+            image/jpeg: {schema: {type: string, format: binary}}
+            image/png: {schema: {type: string, format: binary}}
+            application/pdf: {schema: {type: string, format: binary}}
+        '401': {$ref: '#/components/responses/Unauthenticated'}
+        '404': {$ref: '#/components/responses/NotFound'}
+
+  /openings:
+    get:
+      tags: [openings]
+      operationId: listOpenings
+      x-id: API-012
+      x-req: [REQ-004]
+      x-tier: P0
+      summary: Open openings; for students includes my_fit and my application status (max 50)
+      responses:
+        '200':
+          description: Openings
+          content:
+            application/json:
+              schema:
+                type: array
+                maxItems: 50
+                items: {$ref: '#/components/schemas/OpeningSummary'}
+        '401': {$ref: '#/components/responses/Unauthenticated'}
+    post:
+      tags: [openings]
+      operationId: createOpening
+      x-id: API-014
+      x-req: [REQ-030]
+      x-tier: P1
+      summary: Create an opening (faculty)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/OpeningCreate'}
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Opening'}
+        '401': {$ref: '#/components/responses/Unauthenticated'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '422': {$ref: '#/components/responses/ValidationFailed'}
+
+  /openings/{id}:
+    get:
+      tags: [openings]
+      operationId: getOpening
+      x-id: API-013
+      x-req: [REQ-004]
+      x-tier: P0
+      summary: Opening detail
+      parameters: [{$ref: '#/components/parameters/Id'}]
+      responses:
+        '200':
+          description: Opening
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Opening'}
+        '401': {$ref: '#/components/responses/Unauthenticated'}
+        '404': {$ref: '#/components/responses/NotFound'}
+
+  /openings/{id}/fit:
+    get:
+      tags: [openings]
+      operationId: getFit
+      x-id: API-015
+      x-req: [REQ-004]
+      x-tier: P0
+      summary: Fit Check (ai-system §4); student_id only for the owning faculty viewing an applicant
+      parameters:
+        - {$ref: '#/components/parameters/Id'}
+        - name: student_id
+          in: query
+          required: false
+          schema: {type: string}
+      responses:
+        '200':
+          description: Fit
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Fit'}
+        '401': {$ref: '#/components/responses/Unauthenticated'}
+        '404': {$ref: '#/components/responses/NotFound'}
+
+  /openings/{id}/candidates:
+    get:
+      tags: [openings]
+      operationId: listCandidates
+      x-id: API-016
+      x-req: [REQ-005]
+      x-tier: P0
+      summary: Applicants ranked by fit (owner only)
+      parameters: [{$ref: '#/components/parameters/Id'}]
+      responses:
+        '200':
+          description: Ranked applicants
+          content:
+            application/json:
+              schema:
+                type: array
+                maxItems: 100
+                items: {$ref: '#/components/schemas/Candidate'}
+        '401': {$ref: '#/components/responses/Unauthenticated'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+
+  /openings/{id}/applications:
+    post:
+      tags: [applications]
+      operationId: apply
+      x-id: API-017
+      x-req: [REQ-006]
+      x-tier: P0
+      summary: Apply to an open opening (student)
+      parameters: [{$ref: '#/components/parameters/Id'}]
+      responses:
+        '201':
+          description: Application created (pending)
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Application'}
+        '401': {$ref: '#/components/responses/Unauthenticated'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/Conflict'}
+
+  /openings/{id}/why:
+    get:
+      tags: [openings]
+      operationId: getWhy
+      x-id: API-020
+      x-req: [REQ-020]
+      x-tier: P1
+      summary: Why-paths graph for the calling student
+      parameters: [{$ref: '#/components/parameters/Id'}]
+      responses:
+        '200':
+          description: Graph
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/WhyGraph'}
+        '401': {$ref: '#/components/responses/Unauthenticated'}
+        '404': {$ref: '#/components/responses/NotFound'}
+
+  /applications/{id}:
+    patch:
+      tags: [applications]
+      operationId: patchApplication
+      x-id: API-018
+      x-req: [REQ-006]
+      x-tier: P0
+      summary: Move an application along the state machine (backend §6.3)
+      parameters: [{$ref: '#/components/parameters/Id'}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ApplicationPatch'}
+            example: {status: shortlisted}
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Application'}
+        '401': {$ref: '#/components/responses/Unauthenticated'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/Conflict'}
+
+  /me/applications:
+    get:
+      tags: [applications]
+      operationId: listMyApplications
+      x-id: API-019
+      x-req: [REQ-006, REQ-014]
+      x-tier: P0
+      summary: Own applications with history (student)
+      responses:
+        '200':
+          description: Applications
+          content:
+            application/json:
+              schema:
+                type: array
+                maxItems: 100
+                items: {$ref: '#/components/schemas/Application'}
+        '401': {$ref: '#/components/responses/Unauthenticated'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+
+  /me/skill-gaps:
+    get:
+      tags: [openings]
+      operationId: listSkillGaps
+      x-id: API-021
+      x-req: [REQ-021]
+      x-tier: P1
+      summary: Top 5 skills that unlock the most openings
+      responses:
+        '200':
+          description: Gaps
+          content:
+            application/json:
+              schema:
+                type: array
+                maxItems: 5
+                items: {$ref: '#/components/schemas/SkillGap'}
+        '401': {$ref: '#/components/responses/Unauthenticated'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+
+  /dept/allotment:
+    get:
+      tags: [mentorship]
+      operationId: getAllotment
+      x-id: API-022
+      x-req: [REQ-007]
+      x-tier: P0
+      summary: Mentor loads and unallotted students (HOD)
+      responses:
+        '200':
+          description: Allotment view
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/AllotmentView'}
+        '401': {$ref: '#/components/responses/Unauthenticated'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+
+  /allotments:
+    post:
+      tags: [mentorship]
+      operationId: allot
+      x-id: API-023
+      x-req: [REQ-007, REQ-028]
+      x-tier: P0
+      summary: Assign students to a mentor; previous assigned links end with reason handover
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/AllotmentRequest'}
+      responses:
+        '200':
+          description: Updated allotment view
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/AllotmentView'}
+        '401': {$ref: '#/components/responses/Unauthenticated'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '422': {$ref: '#/components/responses/ValidationFailed'}
+
+  /me/mentees:
+    get:
+      tags: [tracking]
+      operationId: listMyMentees
+      x-id: API-024
+      x-req: [REQ-012, REQ-029]
+      x-tier: P0
+      summary: Mentor home rows with flags (backend §6.4)
+      responses:
+        '200':
+          description: Rows, flagged first
+          content:
+            application/json:
+              schema:
+                type: array
+                maxItems: 60
+                items: {$ref: '#/components/schemas/MenteeRow'}
+        '401': {$ref: '#/components/responses/Unauthenticated'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+
+  /mentees/{student_id}/overview:
+    get:
+      tags: [tracking]
+      operationId: getMenteeOverview
+      x-id: API-025
+      x-req: [REQ-013, REQ-032]
+      x-tier: P0
+      summary: Mentee 360
+      parameters: [{$ref: '#/components/parameters/StudentId'}]
+      responses:
+        '200':
+          description: Overview
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/MenteeOverview'}
+        '401': {$ref: '#/components/responses/Unauthenticated'}
+        '404': {$ref: '#/components/responses/NotFound'}
+
+  /mentees/{student_id}:
+    patch:
+      tags: [mentorship]
+      operationId: patchMentee
+      x-id: API-043
+      x-req: [REQ-029, REQ-033]
+      x-tier: P2
+      summary: Learner level, intervention note, at-risk mark (assigned mentor)
+      parameters: [{$ref: '#/components/parameters/StudentId'}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/MenteePatch'}
+      responses:
+        '200':
+          description: Updated overview
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/MenteeOverview'}
+        '401': {$ref: '#/components/responses/Unauthenticated'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '422': {$ref: '#/components/responses/ValidationFailed'}
+
+  /sessions:
+    post:
+      tags: [mentorship]
+      operationId: createSession
+      x-id: API-026
+      x-req: [REQ-008, REQ-010, REQ-011]
+      x-tier: P0
+      summary: Log a session with attendance, action items and issues in one transaction
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: false
+          schema: {type: string, format: uuid}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/SessionCreate'}
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/SessionDetail'}
+        '401': {$ref: '#/components/responses/Unauthenticated'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '422': {$ref: '#/components/responses/ValidationFailed'}
+
+  /sessions/{id}:
+    get:
+      tags: [mentorship]
+      operationId: getSession
+      x-id: API-027
+      x-req: [REQ-008, REQ-015]
+      x-tier: P0
+      summary: Session detail; notes only for the author; students see only their own attendee row
+      parameters: [{$ref: '#/components/parameters/Id'}]
+      responses:
+        '200':
+          description: Session
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/SessionDetail'}
+        '401': {$ref: '#/components/responses/Unauthenticated'}
+        '404': {$ref: '#/components/responses/NotFound'}
+
+  /sessions/{id}/confirm:
+    post:
+      tags: [mentorship]
+      operationId: confirmSession
+      x-id: API-028
+      x-req: [REQ-009]
+      x-tier: P0
+      summary: Present attendee confirms attendance (idempotent)
+      parameters: [{$ref: '#/components/parameters/Id'}]
+      responses:
+        '200':
+          description: Confirmed
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/SessionDetail'}
+        '401': {$ref: '#/components/responses/Unauthenticated'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/Conflict'}
+
+  /sessions/{id}/feedback:
+    post:
+      tags: [mentorship]
+      operationId: sessionFeedback
+      x-id: API-042
+      x-req: [REQ-034]
+      x-tier: P2
+      summary: Present attendee rates the session (replaces earlier feedback)
+      parameters: [{$ref: '#/components/parameters/Id'}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/Feedback'}
+      responses:
+        '200': {description: Saved}
+        '401': {$ref: '#/components/responses/Unauthenticated'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/Conflict'}
+
+  /me/mentorship:
+    get:
+      tags: [tracking]
+      operationId: getMyMentorship
+      x-id: API-029
+      x-req: [REQ-014]
+      x-tier: P0
+      summary: Student mentorship page
+      responses:
+        '200':
+          description: Mentorship data
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/MyMentorship'}
+        '401': {$ref: '#/components/responses/Unauthenticated'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+
+  /action-items/{id}:
+    patch:
+      tags: [tracking]
+      operationId: patchActionItem
+      x-id: API-030
+      x-req: [REQ-010]
+      x-tier: P0
+      summary: Change action item status (backend §6.6)
+      parameters: [{$ref: '#/components/parameters/Id'}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ActionItemPatch'}
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ActionItem'}
+        '401': {$ref: '#/components/responses/Unauthenticated'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/Conflict'}
+
+  /issues:
+    post:
+      tags: [tracking]
+      operationId: createIssue
+      x-id: API-031
+      x-req: [REQ-011, REQ-024]
+      x-tier: P0
+      summary: Raise an issue (mentor for a mentee; student for self in P1)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/IssueCreate'}
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Issue'}
+        '401': {$ref: '#/components/responses/Unauthenticated'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '422': {$ref: '#/components/responses/ValidationFailed'}
+
+  /issues/{id}:
+    patch:
+      tags: [tracking]
+      operationId: patchIssue
+      x-id: API-032
+      x-req: [REQ-011, REQ-022, REQ-036]
+      x-tier: P0
+      summary: Change issue status, resolution, escalation or confidentiality
+      parameters: [{$ref: '#/components/parameters/Id'}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/IssuePatch'}
+            example: {status: resolved, resolution: Met parents; attendance plan agreed}
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Issue'}
+        '401': {$ref: '#/components/responses/Unauthenticated'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/Conflict'}
+        '422': {$ref: '#/components/responses/ValidationFailed'}
+
+  /dept/dashboard:
+    get:
+      tags: [department]
+      operationId: getDashboard
+      x-id: API-033
+      x-req: [REQ-016]
+      x-tier: P0
+      summary: Department dashboard for the current term (IQAC gets no needs_attention_list)
+      responses:
+        '200':
+          description: Dashboard
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Dashboard'}
+        '401': {$ref: '#/components/responses/Unauthenticated'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+
+  /dept/metrics/{metric}/records:
+    get:
+      tags: [department]
+      operationId: getMetricRecords
+      x-id: API-034
+      x-req: [REQ-019]
+      x-tier: P1
+      summary: Records behind a dashboard metric (IQAC sees pseudonyms)
+      parameters:
+        - name: metric
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [compliance, issues_raised, issues_resolved, overdue_actions, achievements, needs_attention, pending_reviews]
+        - {$ref: '#/components/parameters/Limit'}
+        - {$ref: '#/components/parameters/Cursor'}
+      responses:
+        '200':
+          description: Records
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/MetricRecords'}
+        '401': {$ref: '#/components/responses/Unauthenticated'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+
+  /evidence/mentoring.xlsx:
+    get:
+      tags: [department]
+      operationId: exportMentoring
+      x-id: API-035
+      x-req: [REQ-017]
+      x-tier: P0
+      summary: Draft mentoring pack (aggregates and lists; no notes, issue text or action text)
+      responses:
+        '200':
+          description: XLSX
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema: {type: string, format: binary}
+        '401': {$ref: '#/components/responses/Unauthenticated'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+
+  /evidence/achievements.xlsx:
+    get:
+      tags: [department]
+      operationId: exportAchievements
+      x-id: API-036
+      x-req: [REQ-017]
+      x-tier: P0
+      summary: Draft achievements list
+      responses:
+        '200':
+          description: XLSX
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema: {type: string, format: binary}
+        '401': {$ref: '#/components/responses/Unauthenticated'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+
+  /me/notifications:
+    get:
+      tags: [notifications]
+      operationId: listNotifications
+      x-id: API-037
+      x-req: [REQ-038]
+      x-tier: P0
+      summary: Own notifications, newest first
+      parameters:
+        - {$ref: '#/components/parameters/Limit'}
+        - {$ref: '#/components/parameters/Cursor'}
+      responses:
+        '200':
+          description: Page
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/NotificationPage'}
+        '401': {$ref: '#/components/responses/Unauthenticated'}
+
+  /me/notifications/{id}/read:
+    post:
+      tags: [notifications]
+      operationId: markNotificationRead
+      x-id: API-038
+      x-req: [REQ-038]
+      x-tier: P0
+      summary: Mark one notification read
+      parameters: [{$ref: '#/components/parameters/Id'}]
+      responses:
+        '204': {description: Marked read}
+        '401': {$ref: '#/components/responses/Unauthenticated'}
+        '404': {$ref: '#/components/responses/NotFound'}
+
+  /me/reminders:
+    get:
+      tags: [notifications]
+      operationId: listReminders
+      x-id: API-039
+      x-req: [REQ-023]
+      x-tier: P1
+      summary: Reminders computed on read (backend §6.10)
+      responses:
+        '200':
+          description: Reminders
+          content:
+            application/json:
+              schema:
+                type: array
+                maxItems: 200
+                items: {$ref: '#/components/schemas/Reminder'}
+        '401': {$ref: '#/components/responses/Unauthenticated'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+
+  /me/meeting-requests:
+    post:
+      tags: [mentorship]
+      operationId: requestMeeting
+      x-id: API-045
+      x-req: [REQ-024]
+      x-tier: P1
+      summary: Ask the assigned mentor for a meeting
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/MeetingRequest'}
+      responses:
+        '201': {description: Mentor notified}
+        '401': {$ref: '#/components/responses/Unauthenticated'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '422': {$ref: '#/components/responses/ValidationFailed'}
+
+  /students/{student_id}/endorsements:
+    post:
+      tags: [students]
+      operationId: endorseSkill
+      x-id: API-041
+      x-req: [REQ-027]
+      x-tier: P2
+      summary: Faculty endorses one of the student's skills (trust level 2)
+      parameters: [{$ref: '#/components/parameters/StudentId'}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/Endorsement'}
+      responses:
+        '201':
+          description: Endorsed
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/StudentProfile'}
+        '401': {$ref: '#/components/responses/Unauthenticated'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '422': {$ref: '#/components/responses/ValidationFailed'}
+
+  /faculty/{faculty_id}/track-record:
+    get:
+      tags: [students]
+      operationId: getTrackRecord
+      x-id: API-044
+      x-req: [REQ-035]
+      x-tier: P2
+      summary: Faculty facts (no ratings)
+      parameters:
+        - name: faculty_id
+          in: path
+          required: true
+          schema: {type: string}
+      responses:
+        '200':
+          description: Track record
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/TrackRecord'}
+        '401': {$ref: '#/components/responses/Unauthenticated'}
+        '404': {$ref: '#/components/responses/NotFound'}
+
+  /health:
+    get:
+      tags: [ops]
+      operationId: health
+      x-id: API-040
+      x-tier: P0
+      summary: Liveness, database and LLM mode
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Health'}
+        '503': {$ref: '#/components/responses/Problem'}
+
+components:
+  securitySchemes:
+    bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema: {type: string}
+    StudentId:
+      name: student_id
+      in: path
+      required: true
+      schema: {type: string}
+    Limit:
+      name: limit
+      in: query
+      required: false
+      schema: {type: integer, minimum: 1, maximum: 100, default: 20}
+    Cursor:
+      name: cursor
+      in: query
+      required: false
+      schema: {type: string}
+
+  responses:
+    Problem:
+      description: Error (see code)
+      content:
+        application/problem+json:
+          schema: {$ref: '#/components/schemas/Problem'}
+    Unauthenticated:
+      description: UNAUTHENTICATED, TOKEN_EXPIRED or INVALID_CREDENTIALS
+      content:
+        application/problem+json:
+          schema: {$ref: '#/components/schemas/Problem'}
+    Forbidden:
+      description: FORBIDDEN (role not allowed)
+      content:
+        application/problem+json:
+          schema: {$ref: '#/components/schemas/Problem'}
+    NotFound:
+      description: NOT_FOUND (missing or out of scope)
+      content:
+        application/problem+json:
+          schema: {$ref: '#/components/schemas/Problem'}
+    Conflict:
+      description: ALREADY_APPLIED, INVALID_TRANSITION, NOT_PRESENT, OPENING_CLOSED or ALREADY_REVIEWED
+      content:
+        application/problem+json:
+          schema: {$ref: '#/components/schemas/Problem'}
+    ValidationFailed:
+      description: VALIDATION_FAILED or NOT_YOUR_MENTEE
+      content:
+        application/problem+json:
+          schema: {$ref: '#/components/schemas/Problem'}
+    RateLimited:
+      description: RATE_LIMITED (Retry-After header set)
+      headers:
+        Retry-After:
+          schema: {type: integer}
+      content:
+        application/problem+json:
+          schema: {$ref: '#/components/schemas/Problem'}
+
+  schemas:
+    Problem:
+      type: object
+      required: [type, title, status, code]
+      properties:
+        type: {type: string}
+        title: {type: string}
+        status: {type: integer}
+        detail: {type: string}
+        instance: {type: string}
+        code:
+          type: string
+          enum: [UNAUTHENTICATED, TOKEN_EXPIRED, INVALID_CREDENTIALS, FORBIDDEN, NOT_FOUND, VALIDATION_FAILED,
+                 NOT_YOUR_MENTEE, ALREADY_APPLIED, INVALID_TRANSITION, NOT_PRESENT, OPENING_CLOSED, ALREADY_REVIEWED,
+                 FILE_TOO_LARGE, UNSUPPORTED_FILE_TYPE, RATE_LIMITED, DB_UNAVAILABLE, INTERNAL]
+        request_id: {type: string}
+        errors:
+          type: array
+          items:
+            type: object
+            required: [field, message]
+            properties:
+              field: {type: string}
+              message: {type: string}
+
+    Role:
+      type: string
+      enum: [student, faculty, hod, iqac]
+    TopicCategory:
+      type: string
+      enum: [academic, attendance, career, research, personal, other]
+    UserRef:
+      type: object
+      required: [user_id, name]
+      properties:
+        user_id: {type: string}
+        name: {type: string}
+    StatusEvent:
+      type: object
+      required: [to_status, actor_name, at]
+      properties:
+        from_status: {type: [string, 'null']}
+        to_status: {type: string}
+        actor_name: {type: string}
+        note: {type: [string, 'null']}
+        at: {type: string, format: date-time}
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email: {type: string, format: email, maxLength: 120}
+        password: {type: string, minLength: 1, maxLength: 128}
+    TokenResponse:
+      type: object
+      required: [access_token, token_type, role, user_id, expires_at]
+      properties:
+        access_token: {type: string}
+        token_type: {type: string, const: bearer}
+        role: {$ref: '#/components/schemas/Role'}
+        user_id: {type: string}
+        expires_at: {type: string, format: date-time}
+    Me:
+      type: object
+      required: [user_id, name, email, role, dept_code]
+      properties:
+        user_id: {type: string}
+        name: {type: string}
+        email: {type: string}
+        role: {$ref: '#/components/schemas/Role'}
+        dept_code: {type: string}
+
+    SkillView:
+      type: object
+      required: [concept, trust_level, claimed, sources]
+      properties:
+        concept: {type: string}
+        trust_level: {type: integer, enum: [0, 1, 2]}
+        claimed: {type: boolean}
+        sources:
+          type: array
+          items:
+            type: object
+            required: [evidence_id, title]
+            properties:
+              evidence_id: {type: string}
+              title: {type: string}
+        endorsed_by:
+          type: array
+          items: {type: string}
+    StudentProfile:
+      type: object
+      required: [user_id, name, roll_no, year, dept_code, interests, skills]
+      properties:
+        user_id: {type: string}
+        name: {type: string}
+        roll_no: {type: string}
+        year: {type: integer, minimum: 1, maximum: 5}
+        dept_code: {type: string}
+        bio: {type: [string, 'null'], maxLength: 500}
+        interests:
+          type: array
+          maxItems: 10
+          items: {type: string, maxLength: 40}
+        skills:
+          type: array
+          items: {$ref: '#/components/schemas/SkillView'}
+    ProfilePatch:
+      type: object
+      additionalProperties: false
+      properties:
+        bio: {type: [string, 'null'], maxLength: 500}
+        interests:
+          type: array
+          maxItems: 10
+          items: {type: string, maxLength: 40}
+        claimed_skills:
+          type: array
+          maxItems: 30
+          description: Full list of claimed skill names; certified/endorsed skills are unaffected
+          items: {type: string, minLength: 1, maxLength: 40}
+
+    CertificateStatus:
+      type: string
+      enum: [processing, certified, needs_review, rejected, duplicate, failed]
+    CertificateLevel:
+      type: string
+      enum: [international, national, state, university, college, online, other, unknown]
+    CertificateType:
+      type: string
+      enum: [hackathon, course, workshop, competition, internship, paper, sports, cultural, other]
+    Certificate:
+      type: object
+      required: [id, status, media_type, skills, reasons, created_at, updated_at]
+      properties:
+        id: {type: string}
+        status: {$ref: '#/components/schemas/CertificateStatus'}
+        media_type: {type: string, enum: [image/jpeg, image/png, application/pdf]}
+        holder_name: {type: [string, 'null']}
+        title: {type: [string, 'null']}
+        issuer: {type: [string, 'null']}
+        issue_date: {type: [string, 'null'], format: date}
+        level:
+          oneOf:
+            - {$ref: '#/components/schemas/CertificateLevel'}
+            - {type: 'null'}
+        type:
+          oneOf:
+            - {$ref: '#/components/schemas/CertificateType'}
+            - {type: 'null'}
+        skills:
+          type: array
+          maxItems: 8
+          items: {type: string}
+        certificate_id: {type: [string, 'null']}
+        verify_url: {type: [string, 'null']}
+        confidence: {type: [number, 'null'], minimum: 0, maximum: 1}
+        reasons:
+          type: array
+          items:
+            type: string
+            enum: [duplicate_file, duplicate_image, duplicate_certificate_id, not_a_certificate, injection_text,
+                   tamper_signal, name_mismatch, unknown_issuer, date_invalid, incomplete, extraction_failed,
+                   manual_entry, interrupted]
+        source: {type: [string, 'null'], enum: [llm, cache, manual, null]}
+        review_reason: {type: [string, 'null']}
+        created_at: {type: string, format: date-time}
+        updated_at: {type: string, format: date-time}
+    ManualCertificate:
+      type: object
+      additionalProperties: false
+      required: [holder_name, title, issuer, issue_date, level, type, skills]
+      properties:
+        holder_name: {type: string, minLength: 1, maxLength: 200}
+        title: {type: string, minLength: 1, maxLength: 200}
+        issuer: {type: string, minLength: 1, maxLength: 200}
+        issue_date: {type: string, format: date}
+        level: {$ref: '#/components/schemas/CertificateLevel'}
+        type: {$ref: '#/components/schemas/CertificateType'}
+        skills:
+          type: array
+          minItems: 1
+          maxItems: 8
+          items: {type: string, minLength: 1, maxLength: 40}
+    ReviewItem:
+      type: object
+      required: [certificate, student]
+      properties:
+        certificate: {$ref: '#/components/schemas/Certificate'}
+        student:
+          type: object
+          required: [user_id, name, roll_no]
+          properties:
+            user_id: {type: string}
+            name: {type: string}
+            roll_no: {type: string}
+        duplicate_of: {type: [string, 'null'], description: Reviewer-only id of the matching certificate}
+    ReviewDecision:
+      type: object
+      additionalProperties: false
+      required: [decision]
+      properties:
+        decision: {type: string, enum: [approve, reject]}
+        reason: {type: string, minLength: 3, maxLength: 300, description: Required when decision is reject}
+
+    OpeningSummary:
+      type: object
+      required: [id, title, faculty, required_skills, status]
+      properties:
+        id: {type: string}
+        title: {type: string}
+        faculty: {$ref: '#/components/schemas/UserRef'}
+        required_skills:
+          type: array
+          items: {type: string}
+        status: {type: string, enum: [open, closed]}
+        my_fit:
+          oneOf:
+            - type: object
+              required: [score, verdict]
+              properties:
+                score: {type: number}
+                verdict: {type: string, enum: [ready, close, not_yet]}
+            - {type: 'null'}
+        my_application_status: {type: [string, 'null'], enum: [pending, shortlisted, accepted, rejected, completed, null]}
+    Opening:
+      type: object
+      required: [id, title, description, faculty, required_skills, status, created_at]
+      properties:
+        id: {type: string}
+        title: {type: string}
+        description: {type: string}
+        faculty: {$ref: '#/components/schemas/UserRef'}
+        required_skills:
+          type: array
+          items: {type: string}
+        status: {type: string, enum: [open, closed]}
+        created_at: {type: string, format: date-time}
+        applicant_count: {type: [integer, 'null'], description: Owner only}
+    OpeningCreate:
+      type: object
+      additionalProperties: false
+      required: [title, description, required_skills]
+      properties:
+        title: {type: string, minLength: 5, maxLength: 120}
+        description: {type: string, maxLength: 2000}
+        required_skills:
+          type: array
+          minItems: 1
+          maxItems: 10
+          items: {type: string, minLength: 1, maxLength: 40}
+    FitChip:
+      type: object
+      required: [concept, kind, trust_level]
+      properties:
+        concept: {type: string}
+        kind: {type: string, enum: [matched, claimed_only, near, missing]}
+        trust_level: {type: [integer, 'null'], enum: [0, 1, 2, null]}
+        via: {type: [string, 'null']}
+        similarity: {type: [number, 'null']}
+        source:
+          oneOf:
+            - type: object
+              required: [evidence_id, title]
+              properties:
+                evidence_id: {type: string}
+                title: {type: string}
+            - {type: 'null'}
+    Fit:
+      type: object
+      required: [opening_id, student_id, score, components, weights, verdict, verdict_text, chips, gains]
+      properties:
+        opening_id: {type: string}
+        student_id: {type: string}
+        score: {type: number, minimum: 0, maximum: 100}
+        components:
+          type: object
+          required: [semantic, skill, concept]
+          properties:
+            semantic: {type: number}
+            skill: {type: number}
+            concept: {type: number}
+        weights:
+          type: object
+          required: [semantic, skill, concept]
+          properties:
+            semantic: {type: number}
+            skill: {type: number}
+            concept: {type: number}
+        verdict: {type: string, enum: [ready, close, not_yet]}
+        verdict_text: {type: string}
+        chips:
+          type: array
+          items: {$ref: '#/components/schemas/FitChip'}
+        gains:
+          type: array
+          items:
+            type: object
+            required: [concept, score_if_certified]
+            properties:
+              concept: {type: string}
+              score_if_certified: {type: number}
+        note: {type: [string, 'null']}
+    Candidate:
+      type: object
+      required: [application, student, fit]
+      properties:
+        application: {$ref: '#/components/schemas/Application'}
+        student:
+          type: object
+          required: [user_id, name, roll_no, year]
+          properties:
+            user_id: {type: string}
+            name: {type: string}
+            roll_no: {type: string}
+            year: {type: integer}
+        fit: {$ref: '#/components/schemas/Fit'}
+    ApplicationStatus:
+      type: string
+      enum: [pending, shortlisted, accepted, rejected, completed]
+    Application:
+      type: object
+      required: [id, opening_id, opening_title, student_id, status, applied_at, updated_at, history]
+      properties:
+        id: {type: string}
+        opening_id: {type: string}
+        opening_title: {type: string}
+        student_id: {type: string}
+        status: {$ref: '#/components/schemas/ApplicationStatus'}
+        applied_at: {type: string, format: date-time}
+        updated_at: {type: string, format: date-time}
+        history:
+          type: array
+          items: {$ref: '#/components/schemas/StatusEvent'}
+    ApplicationPatch:
+      type: object
+      additionalProperties: false
+      required: [status]
+      properties:
+        status: {type: string, enum: [shortlisted, accepted, rejected, completed]}
+    WhyGraph:
+      type: object
+      required: [nodes, edges]
+      properties:
+        nodes:
+          type: array
+          items:
+            type: object
+            required: [id, label, kind]
+            properties:
+              id: {type: string}
+              label: {type: string}
+              kind: {type: string, enum: [student, concept, opening]}
+        edges:
+          type: array
+          items:
+            type: object
+            required: [source, target, kind]
+            properties:
+              source: {type: string}
+              target: {type: string}
+              kind: {type: string, enum: [HAS_SKILL, SIMILAR_TO, REQUIRES]}
+              score: {type: [number, 'null']}
+    SkillGap:
+      type: object
+      required: [concept, openings_unlocked, total_gain]
+      properties:
+        concept: {type: string}
+        openings_unlocked: {type: integer}
+        total_gain: {type: number}
+
+    AllotmentView:
+      type: object
+      required: [mentors, unallotted]
+      properties:
+        mentors:
+          type: array
+          items:
+            type: object
+            required: [mentor_id, name, mentee_count, overloaded]
+            properties:
+              mentor_id: {type: string}
+              name: {type: string}
+              mentee_count: {type: integer}
+              overloaded: {type: boolean}
+        unallotted:
+          type: array
+          items:
+            type: object
+            required: [user_id, name, roll_no, year]
+            properties:
+              user_id: {type: string}
+              name: {type: string}
+              roll_no: {type: string}
+              year: {type: integer}
+    AllotmentRequest:
+      type: object
+      additionalProperties: false
+      required: [mentor_id, student_ids]
+      properties:
+        mentor_id: {type: string}
+        student_ids:
+          type: array
+          minItems: 1
+          maxItems: 30
+          items: {type: string}
+
+    AttentionReason:
+      type: string
+      enum: [no_recent_session, no_meeting_this_term, overdue_action, stale_issue, marked_at_risk, suggested_at_risk]
+    MenteeRow:
+      type: object
+      required: [student_id, name, roll_no, mentorship_type, meetings_this_term, meetings_required, open_actions,
+                 overdue_actions, open_issues, unconfirmed_sessions, needs_attention, attention_reasons]
+      properties:
+        student_id: {type: string}
+        name: {type: string}
+        roll_no: {type: string}
+        mentorship_type: {type: string, enum: [assigned, guide]}
+        meetings_this_term: {type: integer}
+        meetings_required: {type: integer}
+        last_session_date: {type: [string, 'null'], format: date}
+        open_actions: {type: integer}
+        overdue_actions: {type: integer}
+        open_issues: {type: integer}
+        unconfirmed_sessions: {type: integer}
+        needs_attention: {type: boolean}
+        attention_reasons:
+          type: array
+          items: {$ref: '#/components/schemas/AttentionReason'}
+    AcademicRecord:
+      type: object
+      required: [term_id, cgpa, attendance_pct, backlogs]
+      description: '[MOCK] seeded academic snapshot'
+      properties:
+        term_id: {type: string}
+        cgpa: {type: number, minimum: 0, maximum: 10}
+        attendance_pct: {type: number, minimum: 0, maximum: 100}
+        backlogs: {type: integer, minimum: 0}
+    Mentorship:
+      type: object
+      required: [id, type, status, since, mentor]
+      properties:
+        id: {type: string}
+        type: {type: string, enum: [assigned, guide]}
+        status: {type: string, enum: [active, ended]}
+        since: {type: string, format: date}
+        until: {type: [string, 'null'], format: date}
+        end_reason: {type: [string, 'null'], enum: [handover, graduated, completed, null]}
+        mentor: {$ref: '#/components/schemas/UserRef'}
+        opening_id: {type: [string, 'null']}
+        opening_title: {type: [string, 'null']}
+    SessionSummary:
+      type: object
+      required: [id, date, mode, kind, context, topics, logged_by]
+      properties:
+        id: {type: string}
+        date: {type: string, format: date}
+        mode: {type: string, enum: [in_person, online]}
+        kind: {type: string, enum: [individual, group]}
+        context: {type: string, enum: [assigned, guide]}
+        topics:
+          type: array
+          items: {$ref: '#/components/schemas/TopicCategory'}
+        logged_by: {$ref: '#/components/schemas/UserRef'}
+        present: {type: [boolean, 'null'], description: For the student in context}
+        confirmed_at: {type: [string, 'null'], format: date-time}
+        notes: {type: [string, 'null'], description: Present only when the caller is the author}
+        confidential: {type: boolean}
+    ActionItem:
+      type: object
+      required: [id, student_id, text, owner, due_date, status, overdue, session_id, created_at, updated_at]
+      properties:
+        id: {type: string}
+        student_id: {type: string}
+        text: {type: string, maxLength: 300}
+        owner: {type: string, enum: [mentee, mentor]}
+        due_date: {type: string, format: date}
+        status: {type: string, enum: [open, done, verified, dropped]}
+        overdue: {type: boolean}
+        session_id: {type: string}
+        created_at: {type: string, format: date-time}
+        updated_at: {type: string, format: date-time}
+        history:
+          type: array
+          items: {$ref: '#/components/schemas/StatusEvent'}
+    ActionItemPatch:
+      type: object
+      additionalProperties: false
+      required: [status]
+      properties:
+        status: {type: string, enum: [open, done, verified, dropped]}
+    Issue:
+      type: object
+      required: [id, student_id, category, status, escalated, confidential, raised_by_role, raised_at]
+      properties:
+        id: {type: string}
+        student_id: {type: string}
+        category: {$ref: '#/components/schemas/TopicCategory'}
+        text: {type: [string, 'null'], description: Omitted when the caller may not read it (security §4)}
+        status: {type: string, enum: [raised, acknowledged, in_progress, resolved]}
+        escalated: {type: boolean}
+        confidential: {type: boolean}
+        raised_by_role: {type: string, enum: [faculty, student]}
+        raised_at: {type: string, format: date-time}
+        resolved_at: {type: [string, 'null'], format: date-time}
+        resolution: {type: [string, 'null']}
+        history:
+          type: array
+          items: {$ref: '#/components/schemas/StatusEvent'}
+    IssueCreate:
+      type: object
+      additionalProperties: false
+      required: [student_id, category, text]
+      properties:
+        student_id: {type: string}
+        category: {$ref: '#/components/schemas/TopicCategory'}
+        text: {type: string, minLength: 1, maxLength: 1000}
+        session_id: {type: [string, 'null']}
+        confidential: {type: boolean, default: false}
+    IssuePatch:
+      type: object
+      additionalProperties: false
+      properties:
+        status: {type: string, enum: [acknowledged, in_progress, resolved]}
+        resolution: {type: string, minLength: 1, maxLength: 1000}
+        escalated: {type: boolean, const: true}
+        confidential: {type: boolean}
+    MenteeOverview:
+      type: object
+      required: [student, mentorships, academics, sessions, action_items, issues, applications, certificates]
+      properties:
+        student: {$ref: '#/components/schemas/StudentProfile'}
+        mentorships:
+          type: array
+          items: {$ref: '#/components/schemas/Mentorship'}
+        academics:
+          type: array
+          items: {$ref: '#/components/schemas/AcademicRecord'}
+        sessions:
+          type: array
+          items: {$ref: '#/components/schemas/SessionSummary'}
+        action_items:
+          type: array
+          items: {$ref: '#/components/schemas/ActionItem'}
+        issues:
+          type: array
+          items: {$ref: '#/components/schemas/Issue'}
+        applications:
+          type: array
+          items: {$ref: '#/components/schemas/Application'}
+        certificates:
+          type: array
+          items: {$ref: '#/components/schemas/Certificate'}
+        attention_reasons:
+          type: array
+          items: {$ref: '#/components/schemas/AttentionReason'}
+        term_summary:
+          description: P2 REQ-032
+          oneOf:
+            - type: object
+              required: [sessions_attended, actions_done, actions_total, issues_raised, issues_resolved, certificates_certified]
+              properties:
+                sessions_attended: {type: integer}
+                actions_done: {type: integer}
+                actions_total: {type: integer}
+                issues_raised: {type: integer}
+                issues_resolved: {type: integer}
+                certificates_certified: {type: integer}
+            - {type: 'null'}
+        learner_level: {type: [string, 'null'], enum: [slow, average, advanced, null]}
+        learner_note: {type: [string, 'null']}
+        marked_at_risk: {type: [boolean, 'null']}
+    MenteePatch:
+      type: object
+      additionalProperties: false
+      properties:
+        learner_level: {type: [string, 'null'], enum: [slow, average, advanced, null]}
+        learner_note: {type: [string, 'null'], maxLength: 500}
+        marked_at_risk: {type: boolean}
+
+    SessionCreate:
+      type: object
+      additionalProperties: false
+      required: [date, mode, kind, context, attendees, topics]
+      properties:
+        date: {type: string, format: date}
+        mode: {type: string, enum: [in_person, online]}
+        kind: {type: string, enum: [individual, group]}
+        context: {type: string, enum: [assigned, guide]}
+        opening_id: {type: [string, 'null']}
+        attendees:
+          type: array
+          minItems: 1
+          maxItems: 40
+          items:
+            type: object
+            additionalProperties: false
+            required: [student_id, present]
+            properties:
+              student_id: {type: string}
+              present: {type: boolean}
+        topics:
+          type: array
+          minItems: 1
+          maxItems: 6
+          uniqueItems: true
+          items: {$ref: '#/components/schemas/TopicCategory'}
+        notes: {type: [string, 'null'], maxLength: 4000}
+        confidential: {type: boolean, default: false}
+        next_followup: {type: [string, 'null'], format: date}
+        action_items:
+          type: array
+          maxItems: 10
+          items:
+            type: object
+            additionalProperties: false
+            required: [student_id, text, owner, due_date]
+            properties:
+              student_id: {type: string}
+              text: {type: string, minLength: 1, maxLength: 300}
+              owner: {type: string, enum: [mentee, mentor]}
+              due_date: {type: string, format: date}
+        issues:
+          type: array
+          maxItems: 10
+          items:
+            type: object
+            additionalProperties: false
+            required: [student_id, category, text]
+            properties:
+              student_id: {type: string}
+              category: {$ref: '#/components/schemas/TopicCategory'}
+              text: {type: string, minLength: 1, maxLength: 1000}
+              confidential: {type: boolean, default: false}
+    SessionDetail:
+      type: object
+      required: [id, date, mode, kind, context, topics, confidential, logged_by, attendees, action_items, issues, created_at]
+      properties:
+        id: {type: string}
+        date: {type: string, format: date}
+        mode: {type: string, enum: [in_person, online]}
+        kind: {type: string, enum: [individual, group]}
+        context: {type: string, enum: [assigned, guide]}
+        opening_id: {type: [string, 'null']}
+        topics:
+          type: array
+          items: {$ref: '#/components/schemas/TopicCategory'}
+        notes: {type: [string, 'null'], description: Only present for the author (REQ-015)}
+        confidential: {type: boolean}
+        next_followup: {type: [string, 'null'], format: date}
+        logged_by: {$ref: '#/components/schemas/UserRef'}
+        attendees:
+          type: array
+          description: Students receive only their own row
+          items:
+            type: object
+            required: [student_id, name, present]
+            properties:
+              student_id: {type: string}
+              name: {type: string}
+              present: {type: boolean}
+              confirmed_at: {type: [string, 'null'], format: date-time}
+        action_items:
+          type: array
+          items: {$ref: '#/components/schemas/ActionItem'}
+        issues:
+          type: array
+          items: {$ref: '#/components/schemas/Issue'}
+        created_at: {type: string, format: date-time}
+    MyMentorship:
+      type: object
+      required: [assigned_mentor, guides, sessions_to_confirm, recent_sessions, action_items, issues, applications]
+      properties:
+        assigned_mentor:
+          oneOf:
+            - type: object
+              required: [user_id, name, designation, email]
+              properties:
+                user_id: {type: string}
+                name: {type: string}
+                designation: {type: string}
+                email: {type: string}
+            - {type: 'null'}
+        guides:
+          type: array
+          items: {$ref: '#/components/schemas/Mentorship'}
+        next_followup: {type: [string, 'null'], format: date}
+        sessions_to_confirm:
+          type: array
+          items: {$ref: '#/components/schemas/SessionSummary'}
+        recent_sessions:
+          type: array
+          maxItems: 20
+          items: {$ref: '#/components/schemas/SessionSummary'}
+        action_items:
+          type: array
+          items: {$ref: '#/components/schemas/ActionItem'}
+        issues:
+          type: array
+          items: {$ref: '#/components/schemas/Issue'}
+        applications:
+          type: array
+          items: {$ref: '#/components/schemas/Application'}
+    Feedback:
+      type: object
+      additionalProperties: false
+      required: [feedback]
+      properties:
+        feedback: {type: string, enum: [helpful, not_helpful]}
+        comment: {type: [string, 'null'], maxLength: 300}
+    MeetingRequest:
+      type: object
+      additionalProperties: false
+      required: [message]
+      properties:
+        message: {type: string, minLength: 1, maxLength: 300}
+    Endorsement:
+      type: object
+      additionalProperties: false
+      required: [concept]
+      properties:
+        concept: {type: string, minLength: 1, maxLength: 40}
+    TrackRecord:
+      type: object
+      required: [faculty_id, name, openings_posted, guide_links_accepted, guide_links_completed]
+      properties:
+        faculty_id: {type: string}
+        name: {type: string}
+        openings_posted: {type: integer}
+        guide_links_accepted: {type: integer}
+        guide_links_completed: {type: integer}
+        median_days_to_first_decision: {type: [number, 'null']}
+
+    Dashboard:
+      type: object
+      required: [term, students_total, students_allotted, unallotted, ratio, compliance_pct, overdue_actions,
+                 pending_reviews, mentors, issues_by_category, achievements_by_type]
+      properties:
+        term:
+          type: object
+          required: [id, name]
+          properties:
+            id: {type: string}
+            name: {type: string}
+        students_total: {type: integer}
+        students_allotted: {type: integer}
+        unallotted: {type: integer}
+        ratio: {type: string, examples: ['1:12']}
+        compliance_pct: {type: number}
+        overdue_actions: {type: integer}
+        pending_reviews: {type: integer}
+        needs_attention_count: {type: integer}
+        mentors:
+          type: array
+          items:
+            type: object
+            required: [mentor_id, name, mentee_count, overloaded, meetings_held, mentees_compliant, compliance_pct,
+                       issues_raised, issues_resolved, overdue_actions]
+            properties:
+              mentor_id: {type: string}
+              name: {type: string}
+              mentee_count: {type: integer}
+              overloaded: {type: boolean}
+              meetings_held: {type: integer}
+              mentees_compliant: {type: integer}
+              compliance_pct: {type: number}
+              issues_raised: {type: integer}
+              issues_resolved: {type: integer}
+              overdue_actions: {type: integer}
+        issues_by_category:
+          type: array
+          items:
+            type: object
+            required: [category, raised, resolved]
+            properties:
+              category: {type: string, description: TopicCategory value or "confidential"}
+              raised: {type: integer}
+              resolved: {type: integer}
+        achievements_by_type:
+          type: array
+          items:
+            type: object
+            required: [type, count]
+            properties:
+              type: {type: string}
+              count: {type: integer}
+        needs_attention_list:
+          description: HOD only
+          type: array
+          items:
+            type: object
+            required: [student_id, name, mentor_name, reasons]
+            properties:
+              student_id: {type: string}
+              name: {type: string}
+              mentor_name: {type: string}
+              reasons:
+                type: array
+                items: {$ref: '#/components/schemas/AttentionReason'}
+    MetricRecords:
+      type: object
+      required: [items, next_cursor, total]
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+            description: Metric-specific row (backend §7); student labels are pseudonyms for IQAC
+        next_cursor: {type: [string, 'null']}
+        total: {type: integer, description: Equals the dashboard number}
+
+    Notification:
+      type: object
+      required: [id, type, title, link, read, created_at]
+      properties:
+        id: {type: string}
+        type:
+          type: string
+          enum: [application_received, application_status, certificate_result, review_needed, allotted, session_logged,
+                 action_assigned, issue_escalated, issue_raised_by_mentee, meeting_request]
+        title: {type: string, maxLength: 120}
+        body: {type: [string, 'null'], maxLength: 200}
+        link: {type: string}
+        read: {type: boolean}
+        created_at: {type: string, format: date-time}
+    NotificationPage:
+      type: object
+      required: [items, next_cursor, unread]
+      properties:
+        items:
+          type: array
+          items: {$ref: '#/components/schemas/Notification'}
+        next_cursor: {type: [string, 'null']}
+        unread: {type: integer}
+    Reminder:
+      type: object
+      required: [kind, ref_id, message]
+      properties:
+        kind: {type: string, enum: [meetings_due, action_overdue, issue_stale, session_unconfirmed]}
+        student_id: {type: [string, 'null']}
+        student_name: {type: [string, 'null']}
+        ref_id: {type: string}
+        due_date: {type: [string, 'null'], format: date}
+        message: {type: string}
+    Health:
+      type: object
+      required: [status, neo4j, llm_provider]
+      properties:
+        status: {type: string, enum: [ok]}
+        neo4j: {type: string, enum: [up, down]}
+        llm_provider: {type: string, enum: [anthropic, none]}

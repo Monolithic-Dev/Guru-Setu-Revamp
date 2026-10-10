@@ -1,0 +1,73 @@
+# ── Secrets (SEC-10) ─────────────────────────────────────────
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# ── Real or uploaded user data (SEC-14, NG-03) ───────────────
+# Old GuruSetu committed photos here; never commit uploads again.
+uploads/
+backend/uploads/
+/data/
+
+# NOTE: these ARE committed on purpose; do not ignore them:
+#   backend/extraction_cache/   cached MDL-01 results for offline demo (NFR-04)
+#   backend/seed/               synthetic seed data, demo uploads, eval labels
+
+# ── Python ───────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+pip-wheel-metadata/
+
+# ── ML model caches (baked into the image, not the repo) ─────
+/models/
+.cache/
+huggingface/
+
+# ── Node / Next.js ───────────────────────────────────────────
+node_modules/
+frontend/.next/
+frontend/out/
+frontend/build/
+frontend/next-env.d.ts
+*.tsbuildinfo
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ── Playwright (TEST-54) ─────────────────────────────────────
+frontend/test-results/
+frontend/playwright-report/
+frontend/playwright/.cache/
+
+# ── Exports generated while testing (REQ-017) ────────────────
+*.xlsx
+!backend/seed/**/*.xlsx
+
+# ── Docker / local runtime ───────────────────────────────────
+neo4j_data/
+logs/
+*.log
+
+# ── Tooling output ───────────────────────────────────────────
+graphify-out/
+
+# ── Editors / OS ─────────────────────────────────────────────
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+desktop.ini
