@@ -11,7 +11,9 @@ export type NavIcon =
   | "briefcase"
   | "clipboard"
   | "dashboard"
-  | "allotment";
+  | "allotment"
+  | "profile"
+  | "guides";
 
 export interface NavItem {
   label: string;
@@ -38,13 +40,16 @@ export const NAV: Record<Role, NavItem[]> = {
   student: [
     { label: "Home", href: "/student", icon: "home" },
     { label: "Certificates", href: "/student/certificates", icon: "certificate" },
+    { label: "Find a guide", href: "/student/guides", icon: "guides" },
     { label: "My mentorship", href: "/student/mentorship", icon: "mentorship" },
+    { label: "Profile", href: "/student/profile", icon: "profile" },
     { label: "Notifications", href: "/notifications", icon: "bell" },
   ],
   faculty: [
     { label: "My mentees", href: "/faculty", icon: "users" },
     { label: "My openings", href: "/faculty/openings", icon: "briefcase" },
     { label: "Reviews", href: "/reviews", icon: "clipboard" },
+    { label: "Profile", href: "/faculty/profile", icon: "profile" },
     { label: "Notifications", href: "/notifications", icon: "bell" },
   ],
   hod: [
@@ -69,6 +74,8 @@ export const ROUTES: { pattern: string; screen: string; roles: Role[]; addon?: b
   { pattern: "/student/openings/[id]", screen: "SCR-03", roles: ["student"] },
   { pattern: "/student/certificates", screen: "SCR-04", roles: ["student"] },
   { pattern: "/student/mentorship", screen: "SCR-05", roles: ["student"] },
+  { pattern: "/student/profile", screen: "SCR-17", roles: ["student"] },
+  { pattern: "/student/guides", screen: "SCR-19", roles: ["student"], addon: true },
   { pattern: "/faculty", screen: "SCR-06", roles: ["faculty"] },
   { pattern: "/faculty/mentees/[studentId]", screen: "SCR-07", roles: ["faculty", "hod"] },
   { pattern: "/faculty/sessions/new", screen: "SCR-08", roles: ["faculty"] },
@@ -78,9 +85,10 @@ export const ROUTES: { pattern: string; screen: string; roles: Role[]; addon?: b
   { pattern: "/coordinator/allotment", screen: "SCR-12", roles: ["hod"] },
   { pattern: "/coordinator/metrics/[metric]", screen: "SCR-13", roles: ["hod", "iqac"], addon: true },
   { pattern: "/notifications", screen: "SCR-14", roles: ["student", "faculty", "hod", "iqac"] },
+  { pattern: "/faculty/profile", screen: "SCR-18", roles: ["faculty"] },
   { pattern: "/faculty/openings", screen: "SCR-15", roles: ["faculty"] },
   { pattern: "/faculty/openings/new", screen: "SCR-15", roles: ["faculty"], addon: true },
-  { pattern: "/faculty-profile/[id]", screen: "SCR-16", roles: ["student"], addon: true },
+  { pattern: "/faculty-profile/[id]", screen: "SCR-16", roles: ["student", "faculty", "hod"], addon: true },
   { pattern: "/dev/components", screen: "DEV", roles: ["student", "faculty", "hod", "iqac"] },
 ];
 
