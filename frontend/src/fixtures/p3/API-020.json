@@ -1,0 +1,84 @@
+{
+  "nodes": [
+    {
+      "id": "student:u-aarav",
+      "label": "Aarav Menon",
+      "kind": "student"
+    },
+    {
+      "id": "concept:python",
+      "label": "python",
+      "kind": "concept"
+    },
+    {
+      "id": "concept:pytorch",
+      "label": "pytorch",
+      "kind": "concept"
+    },
+    {
+      "id": "concept:deep learning",
+      "label": "deep learning",
+      "kind": "concept"
+    },
+    {
+      "id": "concept:computer vision",
+      "label": "computer vision",
+      "kind": "concept"
+    },
+    {
+      "id": "opening:op-edge-ai",
+      "label": "Edge AI for Agriculture",
+      "kind": "opening"
+    }
+  ],
+  "edges": [
+    {
+      "source": "student:u-aarav",
+      "target": "concept:python",
+      "kind": "HAS_SKILL",
+      "score": null
+    },
+    {
+      "source": "student:u-aarav",
+      "target": "concept:pytorch",
+      "kind": "HAS_SKILL",
+      "score": null
+    },
+    {
+      "source": "student:u-aarav",
+      "target": "concept:deep learning",
+      "kind": "HAS_SKILL",
+      "score": null
+    },
+    {
+      "source": "concept:deep learning",
+      "target": "concept:computer vision",
+      "kind": "SIMILAR_TO",
+      "score": 0.7
+    },
+    {
+      "source": "opening:op-edge-ai",
+      "target": "concept:python",
+      "kind": "REQUIRES",
+      "score": null
+    },
+    {
+      "source": "opening:op-edge-ai",
+      "target": "concept:pytorch",
+      "kind": "REQUIRES",
+      "score": null
+    },
+    {
+      "source": "opening:op-edge-ai",
+      "target": "concept:deep learning",
+      "kind": "REQUIRES",
+      "score": null
+    },
+    {
+      "source": "opening:op-edge-ai",
+      "target": "concept:computer vision",
+      "kind": "REQUIRES",
+      "score": null
+    }
+  ]
+}

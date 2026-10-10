@@ -1,0 +1,26 @@
+[
+  {
+    "kind": "action_overdue",
+    "student_id": "u-karthik",
+    "student_name": "Karthik S",
+    "ref_id": "a-k-1",
+    "due_date": "2026-10-07",
+    "message": "Karthik S has an action overdue since 7 Oct"
+  },
+  {
+    "kind": "action_overdue",
+    "student_id": "u-rahul",
+    "student_name": "Rahul Prakash",
+    "ref_id": "a-r-1",
+    "due_date": "2026-10-09",
+    "message": "Rahul Prakash has an action overdue since 9 Oct"
+  },
+  {
+    "kind": "issue_stale",
+    "student_id": "u-diya",
+    "student_name": "Diya Ramesh",
+    "ref_id": "i-d-1",
+    "due_date": null,
+    "message": "Diya Ramesh has an issue open for 16 days"
+  }
+]

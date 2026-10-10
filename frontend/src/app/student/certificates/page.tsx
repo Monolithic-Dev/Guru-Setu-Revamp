@@ -6,7 +6,6 @@ import { CertificateCard } from "@/components/certificates/CertificateCard";
 import { CertificateUploader } from "@/components/certificates/CertificateUploader";
 import { ManualCertificateForm } from "@/components/certificates/ManualCertificateForm";
 import { EmptyState, ErrorState, LoadingRegion, PageHeader, Skeleton, TrustBadge, useToast } from "@/components/ui";
-import { fixtures } from "@/fixtures/p3";
 import { useApi } from "@/hooks/useApi";
 import { api } from "@/lib/api";
 import { getSession } from "@/lib/session";
@@ -30,8 +29,8 @@ export default function CertificatesPage() {
   const [userId, setUserId] = useState<string | null>(null);
   useEffect(() => setUserId(getSession()?.userId ?? null), []);
 
-  const certs = useApi<Certificate[]>("/me/certificates", { fixture: fixtures.myCertificates });
-  const profile = useApi<StudentProfile>(userId ? `/students/${userId}` : null, { fixture: fixtures.studentProfile });
+  const certs = useApi<Certificate[]>("/me/certificates");
+  const profile = useApi<StudentProfile>(userId ? `/students/${userId}` : null);
 
   const [stillWorking, setStillWorking] = useState<Set<string>>(new Set());
   const [manual, setManual] = useState<Certificate | null>(null);
